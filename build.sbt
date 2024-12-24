@@ -3,25 +3,38 @@ import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
 ThisBuild / scalaVersion := "3.4.2"
 ThisBuild / logLevel := Level.Debug
 
-lazy val proof = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+lazy val nativeCommonSettings = Seq(
+    nativeConfig ~= {
+        _.withGC(GC.default) // garbage collector
+          .withLTO(LTO.none) // link-time optimization
+          .withMode(Mode.debug) // build mode
+          .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to the native linker
+          .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
+    },
+)
+
+lazy val jsCommonSettings = Seq(
+    scalaJSUseMainModuleInitializer := true,
+)
+
+lazy val dap = crossProject(JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
-  .in(file("."))
+  .in(file("dap"))
   .settings(
-    name := "proof-of-concept",
+    name := "dap",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % "3.2.19"
     )
   )
-  .jsSettings(
-    scalaJSUseMainModuleInitializer := true
-  )
-  .nativeSettings(
-    nativeConfig ~= {
-      _.withLinkingOptions(Seq("-shared"))
-        .withLTO(LTO.none)
-        .withMode(Mode.debug)
-        .withBuildTarget(BuildTarget.libraryDynamic)
-    },
-  )
+  .nativeSettings(nativeCommonSettings *)
 
-lazy val root = (project in file(".")) aggregate (proof.js, proof.jvm, proof.native)
+lazy val experiments = crossProject(JVMPlatform, NativePlatform)
+  .crossType(CrossType.Full)
+  .in(file("experiments"))
+  .settings(
+    name := "experiments",
+    libraryDependencies ++= Seq(
+      "org.scalatest" %%% "scalatest" % "3.2.19"
+    )
+  )
+  .nativeSettings(nativeCommonSettings *)

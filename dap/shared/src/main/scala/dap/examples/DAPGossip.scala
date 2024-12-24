@@ -25,13 +25,3 @@ object DAPGossip:
   val net = Grids.createRectangularGrid(5, 5)
   // an `a` initial on top LEFT
   val state = State[ID, Place](MSet(Token((0, 0), A)), MSet(), net)
-
-@main def mainDAPGossip =
-  import DAPGossip.*
-  gossipCTMC
-    .newSimulationTrace(state, new Random)
-    .take(250)
-    .toList
-    .foreach: step =>
-      println(step._1) // print time
-      println(DAPGrid.simpleGridStateToString[Place](step._2, A)) // print state, i.e., A's
