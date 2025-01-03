@@ -12,6 +12,8 @@ object CTMC:
 
   case class Transition[S](state: S, action: Action[S])
 
+  // Factory methods
+
   def ofTransitions[S](rel: Transition[S]*): CTMC[S] = ofRelation(rel.toSet)
 
   def ofRelation[S](rel: Set[Transition[S]]): CTMC[S] =

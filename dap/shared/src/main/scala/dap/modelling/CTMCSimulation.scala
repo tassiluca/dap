@@ -1,6 +1,7 @@
 package dap.modelling
 
 import java.util.Random
+
 import dap.utils.Stochastics
 
 object CTMCSimulation:

@@ -17,7 +17,7 @@ object DAP:
   /** State of the network at a given time, with neighboring as a map. */
   case class State[ID, P](tokens: MSet[Token[ID, P]], messages: MSet[Token[ID, P]], neighbours: Map[ID, Set[ID]])
 
-  /** Local facility to extract the marking of a node. */
+  // Local facility to extract the marking of a node.
   def localTokens[ID, P](tokens: MSet[Token[ID, P]], id: ID): MSet[P] =
     tokens.collect:
       case Token(`id`, t) => t
