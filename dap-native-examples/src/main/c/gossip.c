@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ctmc.h"
 #include "dap.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))

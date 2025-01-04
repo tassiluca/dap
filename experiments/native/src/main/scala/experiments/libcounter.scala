@@ -1,6 +1,6 @@
 package experiments
 
-import scala.scalanative.unsafe.{CQuote, CString, exportAccessors, exported}
+import scala.scalanative.unsafe.*
 
 object libcounter:
   @exportAccessors("libcounter_current_count", "libcounter_set_counter")

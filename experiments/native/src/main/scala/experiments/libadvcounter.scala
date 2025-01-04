@@ -1,7 +1,7 @@
 package experiments
 
 import scala.scalanative.libc.{ stdio, stdlib }
-import scala.scalanative.unsafe.{ exported, sizeOf, CInt, CQuote, Ptr }
+import scala.scalanative.unsafe.*
 
 case class SimpleCounter(private var counter: Int = 0):
   def inc(value: Int = 1): SimpleCounter = SimpleCounter(counter + value)

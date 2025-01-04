@@ -1,21 +1,26 @@
 ROOT_SCALA_PROJECT=../../../../
 PROJECT=dap
-CFLAGS=-ansi -Wpedantic -Wall
-TARGET=dap
+CFLAGS=-Wpedantic -Wall -g
 
 all: 	main
 
-main: 	gossip.o libdap
-	  	gcc ${CFLAGS} -o ${TARGET} gossip.o -L. -ldap
+main: 	ctmc.o gossip.o libdap
+	gcc ${CFLAGS} -o dap gossip.o -L. -ldap && gcc ${CFLAGS} -o ctmc ctmc.o -L. -ldap
 
-gossip.o: gossip.c dap.h
-	  	gcc ${CFLAGS} -c gossip.c
+ctmc.o: ctmc.c ctmc.h
+	gcc ${CFLAGS} -c ctmc.c
+
+gossip.o: gossip.c dap.h ctmc.h
+	gcc ${CFLAGS} -c gossip.c
 
 .PHONY: clean libdap
 
 libdap:
-	  	cd ${ROOT_SCALA_PROJECT} && sbt ${PROJECT}Native/nativeLink && \
-  			cp ${PROJECT}/native/target/scala-3.4.2/libdap.dylib dap-native-examples/src/main/c/libdap.dylib
+	@if [ ! -f "libdap.dylib" ]; then \
+  		echo "Building libdap.dylib"; \
+  		cd ${ROOT_SCALA_PROJECT} && sbt ${PROJECT}Native/nativeLink && \
+        		cp ${PROJECT}/native/target/scala-3.4.2/libdap.dylib dap-native-examples/src/main/c/libdap.dylib; \
+	fi
 
 clean:
-	  	-rm -f ${TARGET} *.o *.dylib *.so
+	-rm -f dap ctmc *.o *.dylib *.so

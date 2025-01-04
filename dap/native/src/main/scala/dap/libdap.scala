@@ -1,13 +1,12 @@
 package dap
 
 import scala.reflect.ClassTag
-import scala.scalanative.libc.{ stdio, stdlib }
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsafe.Size.intToSize
+
+import dap.CUtils.*
 import dap.modelling.DAP.*
 import dap.utils.MSet
-
-import scala.scalanative.runtime.struct
 
 object libdap:
 
@@ -49,14 +48,3 @@ object libdap:
         multiSetPtr
 
 end libdap
-
-object libctmc:
-
-  type State = Ptr[Byte]
-  type Action = CStruct2[CDouble, State]
-  type Transition = CStruct2[State, Action]
-
-@SuppressWarnings(Array("scalafix:DisableSyntax.null", "scalafix:DisableSyntax.asInstanceOf"))
-private def freshPointer[T](factor: Int = 1)(using ClassTag[T]): Ptr[T] =
-  val ptr = stdlib.malloc(sizeOf[T] * factor).asInstanceOf[Ptr[T]]
-  if ptr == null then throw new OutOfMemoryError("Failed to allocate memory") else ptr
