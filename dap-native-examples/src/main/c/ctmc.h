@@ -1,25 +1,23 @@
 #ifndef LIBCTMC_H
 #define LIBCTMC_H
 
-typedef struct State State;
+int ScalaNativeInit(void);
+
+typedef struct State* State;
 
 typedef struct {
     double rate;
-    const State* state;
+    State state;
 } Action;
 
 typedef struct {
-    const State* state;
+    State state;
     Action action;
 } Transition;
 
-typedef struct CTMC CTMC;
-
-CTMC* create_ctmc_from_transitions(const Transition* rel, size_t rel_size);
-
 typedef struct {
     double time;
-    const State* state;
+    State state;
 } Event;
 
 typedef struct {
@@ -27,7 +25,11 @@ typedef struct {
     size_t len;
 } Trace;
 
-Trace* simulate(const CTMC* ctmc, const State* s0, size_t steps);
+typedef struct CTMC CTMC;
+
+CTMC* create_ctmc_from_transitions(const Transition* rel, size_t rel_size);
+
+Trace* simulate(const CTMC* ctmc, State s0, int steps);
 
 //typedef struct {
 //    Transition* transitions;

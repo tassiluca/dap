@@ -5,12 +5,13 @@
  *      in scala code thanks to scala native adapter interoperable layer.
  * CONS: The state is untyped and, therefore, unsafe (no type checking can prevent
  * |     the user from using a state that is not part of the CTMC set of states).
- * |---> Solution (to be implemented): use macros to generate what is the definition
+ * |---> Solution: use macros to generate what is the definition
  *       of the state type and the set of states
  *       (see https://itnext.io/tutorial-generics-in-c-b3362b3376a3).
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <string.h>
 #include "ctmc.h"
 
@@ -21,7 +22,7 @@ struct State {
 };
 
 #define DEFINE_STATE(name) \
-    static const State name##_state = {#name}; \
+    static struct State name##_state = {#name}; \
     const State* name = &name##_state;
 
 DEFINE_STATE(IDLE)
@@ -29,11 +30,12 @@ DEFINE_STATE(SEND)
 DEFINE_STATE(DONE)
 DEFINE_STATE(FAIL)
 
-const char* toString(const State* s) {
+const char* toString(const State s) {
     return s ? s->name : "UNKNOWN";
 }
 
 int main(void) {
+    assert(ScalaNativeInit() == 0);
     printf("Simulation of a simple Continuous-Time Markov Chain (CTMC)\n");
     Transition transitions[6];
     /* 1) Transition(IDLE, 1.0 --> SEND) */
@@ -62,8 +64,7 @@ int main(void) {
     transitions[5].action.state = DONE;
     /* Actual semantics */
     CTMC* ctmc = create_ctmc_from_transitions(transitions, ARRAY_LEN(transitions));
-    Trace* trace = malloc(sizeof(Trace));
-    trace = simulate(
+    Trace* trace = simulate(
         ctmc,
         IDLE,   /* initial state */
         20      /* number of steps */

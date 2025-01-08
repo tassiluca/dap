@@ -1,6 +1,6 @@
 ROOT_SCALA_PROJECT=../../../../../../
 PROJECT=experiments
-CFLAGS=-ansi -Wpedantic -Wall
+CFLAGS=-ansi -Wpedantic -Wall -fsanitize=address,undefined
 TARGET=main
 
 all: 	main

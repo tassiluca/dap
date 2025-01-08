@@ -1,6 +1,6 @@
 ROOT_SCALA_PROJECT=../../../../
 PROJECT=dap
-CFLAGS=-Wpedantic -Wall -g -fsanitize=address # -Werror
+CFLAGS=-Wpedantic -Wall -g -fsanitize=address,undefined # -Werror
 
 all: 	main
 
