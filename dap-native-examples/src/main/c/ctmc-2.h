@@ -1,15 +1,15 @@
 #ifndef LIBCTMC_H
 #define LIBCTMC_H
 
-typedef struct State State;
+typedef void* State;
 
 typedef struct {
     double rate;
-    const State* state;
+    State state;
 } Action;
 
 typedef struct {
-    const State* state;
+    State state;
     Action action;
 } Transition;
 
@@ -19,15 +19,15 @@ CTMC* create_ctmc_from_transitions(const Transition* rel, size_t rel_size);
 
 typedef struct {
     double time;
-    const State* state;
+    State state;
 } Event;
 
 typedef struct {
-    const Event* events;
+    Event* events;
     size_t len;
 } Trace;
 
-Trace* simulate(const CTMC* ctmc, const State* s0, size_t steps);
+Trace* simulate(CTMC* ctmc, State s0, size_t steps);
 
 //typedef struct {
 //    Transition* transitions;

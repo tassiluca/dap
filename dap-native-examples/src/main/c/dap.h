@@ -1,13 +1,61 @@
 #ifndef LIBDAP_H
 #define LIBDAP_H
 
+typedef struct State State;
+
+#define DEFINE_MSET(Type)          \
+    typedef struct {               \
+        const Type** elements;     \
+        size_t size;               \
+    } MSet_##Type;
+
+typedef struct Place Place;
+typedef struct Id Id;
+
+DEFINE_MSET(Place)
+DEFINE_MSET(Id)
+
 typedef struct {
-    const char* const* elements;
+    Id* point;
+    MSet_Id* neighbors;
+} Neighbors;
+
+typedef struct {
+    const Id* id;
+    const Place* place;
+} Token;
+
+DEFINE_MSET(Token)
+
+struct State {
+    const MSet_Token* tokens;
+    const MSet_Token* messages;
+};
+
+typedef struct {
+    const MSet_Place* preconditions;
+    double (*rate)(const MSet_Place*);
+    const MSet_Place* effects;
+    const MSet_Place* messages;
+} Rule;
+
+typedef struct DAP DAP;
+typedef struct CTMC CTMC;
+
+DAP* create_dap_from_rules(const Rule* rules, size_t rules_size);
+
+CTMC* dap_to_ctmc(const DAP* dap);
+
+typedef struct {
+    double time;
+    const State* state;
+} Event;
+
+typedef struct {
+    const Event* events;
     size_t len;
-} MultiSet;
+} Trace;
 
-typedef struct Rule Rule;
-
-Rule* stringed_rule(MultiSet *preconditions, double (*rate)(MultiSet*), MultiSet *effects, MultiSet *messages);
+Trace* simulate_dap(const CTMC* ctmc, const State* s0, const Neighbors* neighbors, size_t neighbors_size, size_t steps);
 
 #endif

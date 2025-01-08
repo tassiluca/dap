@@ -1,9 +1,6 @@
 package dap
 
-import java.util.Random
-
 import scala.scalanative.unsafe.*
-
 import dap.CUtils.*
 
 object libctmc:
@@ -12,7 +9,7 @@ object libctmc:
   import CTMC.*
   import dap.modelling.CTMCSimulation.*
 
-  private type State = Ptr[Byte]
+  private type State = Ptr[Unit] // void*
   private type Action = CStruct2[CDouble, State]
   private type Transition = CStruct2[State, Action]
   private type Event = CStruct2[CDouble, State]
@@ -31,14 +28,14 @@ object libctmc:
     val ctmc = !requireNonNull(ctmcPtr)
     val trace = freshPointer[Trace]()
     val events = freshPointer[Event](steps.toInt)
-    val simulationResults = ctmc
-      .newSimulationTrace(s0, new Random)
+    ctmc
+      .newSimulationTrace(s0, new java.util.Random)
       .take(steps.toInt)
-      .toList
-    simulationResults.zipWithIndex.foreach: (e, i) =>
-      val current = events(i)
-      current._1 = e.time
-      current._2 = e.state
+      .zipWithIndex
+      .foreach: (e, i) =>
+        val current = events(i)
+        current._1 = e.time
+        current._2 = e.state
     trace._1 = events
     trace._2 = steps
     trace

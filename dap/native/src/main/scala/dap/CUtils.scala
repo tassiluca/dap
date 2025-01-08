@@ -8,7 +8,7 @@ import scala.scalanative.unsafe.{ sizeOf, Ptr }
 object CUtils:
 
   def freshPointer[T](factor: Int = 1)(using ClassTag[T]): Ptr[T] =
-    val ptr = stdlib.malloc(sizeOf[T] * factor).asInstanceOf[Ptr[T]]
+    val ptr = stdlib.malloc((sizeOf[T] * factor).toLong).asInstanceOf[Ptr[T]]
     if ptr == null then throw new OutOfMemoryError("Failed to allocate memory") else ptr
 
   def requireNonNull[T](obj: T): T =

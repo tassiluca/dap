@@ -46,6 +46,8 @@ object DAP:
 
   def apply[P](rules: Rule[P]*): DAP[P] = rules.toSet
 
+  def apply[P](rules: Set[Rule[P]]): DAP[P] = rules
+
 end DAP
 
 object DAPGrid:

@@ -16,63 +16,61 @@
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-typedef enum {
-    IDLE,
-    SEND,
-    FAIL,
-    DONE
-} MyState;
+struct State {
+    const char* name;
+};
 
-MyState idle = IDLE;
-MyState send = SEND;
-MyState fail = FAIL;
-MyState done = DONE;
+#define DEFINE_STATE(name) \
+    static const State name##_state = {#name}; \
+    const State* name = &name##_state;
 
-const char* toString(MyState s) {
-    switch (s) {
-        case IDLE: return "IDLE";
-        case SEND: return "SEND";
-        case FAIL: return "FAIL";
-        case DONE: return "DONE";
-        default: return "UNKNOWN";
-    }
+DEFINE_STATE(IDLE)
+DEFINE_STATE(SEND)
+DEFINE_STATE(DONE)
+DEFINE_STATE(FAIL)
+
+const char* toString(const State* s) {
+    return s ? s->name : "UNKNOWN";
 }
 
-int main(int argc, char *argv[]) {
+int main(void) {
+    printf("Simulation of a simple Continuous-Time Markov Chain (CTMC)\n");
     Transition transitions[6];
     /* 1) Transition(IDLE, 1.0 --> SEND) */
-    transitions[0].state = (State) idle;
+    transitions[0].state = IDLE;
     transitions[0].action.rate = 1.0;
-    transitions[0].action.state = (State) send;
+    transitions[0].action.state = SEND;
     /* 2) Transition(SEND, 100_000.0 --> SEND) */
-    transitions[1].state = (State) send;
+    transitions[1].state = SEND;
     transitions[1].action.rate = 100000.0;
-    transitions[1].action.state = (State) send;
+    transitions[1].action.state = SEND;
     /* 3) Transition(SEND, 200_000.0 --> DONE) */
-    transitions[2].state = (State) send;
+    transitions[2].state = SEND;
     transitions[2].action.rate = 200000.0;
-    transitions[2].action.state = (State) done;
+    transitions[2].action.state = DONE;
     /* 4) Transition(SEND, 100_000.0 --> FAIL) */
-    transitions[3].state = (State) send;
+    transitions[3].state = SEND;
     transitions[3].action.rate = 100000.0;
-    transitions[3].action.state = (State) fail;
+    transitions[3].action.state = FAIL;
     /* 5) Transition(FAIL, 100_000.0 --> IDLE) */
-    transitions[4].state = (State) fail;
+    transitions[4].state = FAIL;
     transitions[4].action.rate = 100000.0;
-    transitions[4].action.state = (State) idle;
+    transitions[4].action.state = IDLE;
     /* 6) Transition(DONE, 1.0 --> DONE) */
-    transitions[5].state = (State) done;
+    transitions[5].state = DONE;
     transitions[5].action.rate = 1.0;
-    transitions[5].action.state = (State) done;
+    transitions[5].action.state = DONE;
     /* Actual semantics */
-    CTMC* ctmc = create_ctmc_from_transitions(transitions, 6);
-    Trace* trace = simulate(
+    CTMC* ctmc = create_ctmc_from_transitions(transitions, ARRAY_LEN(transitions));
+    Trace* trace = malloc(sizeof(Trace));
+    trace = simulate(
         ctmc,
-        (State) idle, /* initial state */
-        20            /* number of steps */
+        IDLE,   /* initial state */
+        20      /* number of steps */
     );
     for (size_t i = 0; i < trace->len; i++) {
-        printf("Event %zu: time=%f, state=%s\n", i, trace->events[i].time, toString((MyState) trace->events[i].state));
+        printf("Event %zu: time=%f, state=%s\n", i, trace->events[i].time, toString(trace->events[i].state));
     }
+    printf("Simulation completed successfully!\n");
     return 0;
 }
