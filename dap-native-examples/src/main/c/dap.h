@@ -56,6 +56,6 @@ typedef struct {
     size_t len;
 } Trace;
 
-Trace* simulate_dap(const CTMC* ctmc, const State* s0, const Neighbors* neighbors, size_t neighbors_size, size_t steps);
+Trace* simulate_dap(const CTMC* ctmc, const State* s0, const Neighbors* neighbors, int neighbors_size, int steps);
 
 #endif

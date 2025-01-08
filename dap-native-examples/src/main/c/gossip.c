@@ -6,24 +6,18 @@
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
 double fixed_rate_1000(const MSet_Place *set) {
-    if (set == NULL) {
-        return 0.0;
-    }
-    return 1000.0;
+    return set == NULL ? 0.0 : 1000.0;
 }
 
 double fixed_rate_1(const MSet_Place *set) {
-    if (set == NULL) {
-        return 0.0;
-    }
-    return 1.0;
+    return set == NULL ? 0.0 : 1.0;
 }
 
 struct Place {
     char p;
 };
 
-static const Place a = { 'a' };
+static struct Place a = { 'a' };
 
 struct Id {
     int x;
@@ -143,7 +137,7 @@ int main(void) {
         &initialState,
         all_neighbors,
         4,
-        1
+        10
     );
 
     if (trace == NULL) {

@@ -3,12 +3,12 @@ package dap
 import scala.reflect.ClassTag
 import scala.scalanative.unsafe.*
 import dap.CUtils.*
-import dap.modelling.{ CTMC, DAP }
+import dap.modelling.{CTMC, DAP}
 import dap.modelling.DAP.*
-import dap.utils.{ Grids, MSet }
+import dap.utils.{Grids, MSet}
 import dap.modelling.CTMCSimulation.*
 
-import scala.scalanative.libc.stdio
+import scala.scalanative.libc.{stdio, stdlib}
 import scala.scalanative.unsafe.Size.intToSize
 
 object libdap:
@@ -49,20 +49,20 @@ object libdap:
       ctmcPtr: Ptr[CTMC[State[Id, Place]]],
       s0: Ptr[CState],
       neighbors: Ptr[Neighbors],
-      neighborsSize: CSize,
-      steps: CSize,
+      neighborsSize: CInt,
+      steps: CInt,
   ): Ptr[Trace] =
     val ctmc = !requireNonNull(ctmcPtr)
-    val trace = freshPointer[Trace]()
-    val events = freshPointer[Event](steps.toInt)
-    val net = (0 until neighborsSize.toInt)
+    val trace = stdlib.malloc(sizeOf[Trace]).asInstanceOf[Ptr[Trace]]
+    val events = stdlib.malloc(sizeOf[Event] * steps).asInstanceOf[Ptr[Event]]
+    val net = (0 until neighborsSize)
       .map(i => neighbors(i).toNeighborsMap)
       .toMap
     val initialState = (!s0).toState(net)
     if ctmc.transitions(initialState).isEmpty then Zone(stdio.printf(c"Initial state has no transitions\n"))
     ctmc
       .newSimulationTrace(initialState, new java.util.Random)
-      .take(steps.toInt)
+      .take(steps)
       .zipWithIndex
       .foreach: (e, i) =>
         Zone(stdio.printf(c"\t Event %d @ time: %f -> %s\n", i, e.time, toCString(e.state.toString)))
@@ -72,7 +72,7 @@ object libdap:
           current._2 = e.state.toCState
         catch case e => Zone(stdio.printf(c"Error: %s\n", toCString(e.toString)))
     trace._1 = events
-    trace._2 = steps
+    trace._2 = steps.toCSize
     Zone:
       stdio.printf(c"Trace @ %p\n", trace)
       stdio.printf(c"Trace size: %d\n", sizeOf[Trace])
@@ -93,10 +93,10 @@ object libdap:
   extension (m: MSet[Token[Id, Place]])
 
     def toCMSetToken: Ptr[CMSetToken] =
-      val cm = freshPointer[CMSetToken]()
-      val arrayOfPtrs = freshPointer[Ptr[CToken]](m.size)
+      val cm = stdlib.malloc(sizeOf[CMSetToken]).asInstanceOf[Ptr[CMSetToken]]
+      val arrayOfPtrs = stdlib.malloc(sizeof[Ptr[CToken]] * m.size.toCSize).asInstanceOf[Ptr[Ptr[CToken]]]
       m.asList.zipWithIndex.foreach: (t, i) =>
-        val ctoken = freshPointer[CToken]()
+        val ctoken = stdlib.malloc(sizeOf[CToken]).asInstanceOf[Ptr[CToken]]
         ctoken._1 = t.id
         ctoken._2 = t.p
         arrayOfPtrs(i) = ctoken
@@ -131,7 +131,7 @@ object libdap:
   extension (s: State[Id, Place])
 
     def toCState: Ptr[CState] =
-      val cs = freshPointer[CState]()
+      val cs = stdlib.malloc(sizeOf[CState]).asInstanceOf[Ptr[CState]]
       cs._1 = s.tokens.toCMSetToken
       cs._2 = s.messages.toCMSetToken
       cs
