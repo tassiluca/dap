@@ -1,31 +1,41 @@
 #ifndef LIBDAP_H
 #define LIBDAP_H
 
-typedef struct State State;
+typedef struct State* State;
 
-#define DEFINE_MSET(Type)          \
-    typedef struct {               \
-        const Type** elements;     \
-        size_t size;               \
+#define DEFINE_MSET(Type)      \
+    typedef struct {           \
+        const Type* elements; \
+        size_t size;           \
     } MSet_##Type;
 
-typedef struct Place Place;
-typedef struct Id Id;
+typedef struct Place* Place;
+typedef struct Id* Id;
 
 DEFINE_MSET(Place)
 DEFINE_MSET(Id)
 
 typedef struct {
-    Id* point;
-    MSet_Id* neighbors;
+    Id point;
+    const MSet_Id* neighbors;
 } Neighbors;
 
 typedef struct {
-    const Id* id;
-    const Place* place;
+    Id id;
+    Place place;
 } Token;
 
 DEFINE_MSET(Token)
+
+typedef struct {
+    double time;
+    State state;
+} Event;
+
+typedef struct {
+    const Event* events;
+    size_t len;
+} Trace;
 
 struct State {
     const MSet_Token* tokens;
@@ -46,16 +56,6 @@ DAP* create_dap_from_rules(const Rule* rules, size_t rules_size);
 
 CTMC* dap_to_ctmc(const DAP* dap);
 
-typedef struct {
-    double time;
-    const State* state;
-} Event;
-
-typedef struct {
-    const Event* events;
-    size_t len;
-} Trace;
-
-Trace* simulate_dap(const CTMC* ctmc, const State* s0, const Neighbors* neighbors, int neighbors_size, int steps);
+Trace* simulate_dap(const CTMC* ctmc, const State s0, const Neighbors* neighbors, int neighbors_size, int steps);
 
 #endif

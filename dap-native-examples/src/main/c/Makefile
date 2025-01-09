@@ -12,7 +12,7 @@ CFLAGS += -g                	# Include debug symbols
 all:	mains
 
 mains: 	libdap ctmc.o gossip.o
-	gcc ${CFLAGS} -o ctmc ctmc.o -L. -ldap && \
+	gcc ${CFLAGS} -o ctmc ctmc.o -L. -ldap
 	gcc ${CFLAGS} -o gossip gossip.o -L. -ldap
 
 ctmc.o: ctmc.c ctmc.h
