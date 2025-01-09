@@ -33,7 +33,7 @@ gossip.o: gossip.c dap.h ctmc.h
 libdap:
 	@if [ ! -f "bin/libdap.dylib" ]; then \
   		mkdir -p bin; \
-  		echo "Building libdap.dylib"; \
+  		echo "Building libdap library"; \
   		cd ${ROOT_SCALA_PROJECT} && \
   			sbt ${PROJECT}Native/nativeLink && \
   			cp ${PROJECT}/native/target/scala-3.4.2/libdap.dylib dap-native-examples/src/main/c/bin/libdap.dylib; \

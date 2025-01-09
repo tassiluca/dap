@@ -35,7 +35,7 @@ object libdap:
 
   @exported("create_dap_from_rules")
   def createDAP(rules: Ptr[CRule], size: CSize): Ptr[DAP[Place]] =
-    val dapPtr = freshPointer[DAP[Place]](size.toInt)
+    val dapPtr = stdlib.malloc(sizeOf[Byte]).asInstanceOf[Ptr[DAP[Place]]]
     val allrules: List[Rule[Place]] = (0 until size.toInt)
       .map(i => rules(i).toRule)
       .toList
@@ -46,7 +46,7 @@ object libdap:
 
   @exported("dap_to_ctmc")
   def dapToCTMC(dap: Ptr[DAP[Place]]): Ptr[CTMC[State[Id, Place]]] =
-    val ctmcPtr = freshPointer[CTMC[State[Id, Place]]]()
+    val ctmcPtr = stdlib.malloc(sizeOf[Byte]).asInstanceOf[Ptr[CTMC[State[Id, Place]]]]
     !ctmcPtr = DAP.toCTMC(!dap)
     ctmcPtr
 

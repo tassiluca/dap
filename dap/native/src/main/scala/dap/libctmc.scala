@@ -19,7 +19,7 @@ object libctmc:
 
   @exported("create_ctmc_from_transitions")
   def ofTransitions(transitionsPtr: Ptr[Transition], size: CSize): Ptr[CTMC[State]] =
-    val ptr = freshPointer[CTMC[State]]()
+    val ptr = stdlib.malloc(sizeOf[Byte]).asInstanceOf[Ptr[CTMC[State]]]
     val transitions = (0 until size.toInt).map: t =>
       Transition(transitionsPtr(t)._1, Action(transitionsPtr(t)._2._1, transitionsPtr(t)._2._2))
     !ptr = CTMC.ofTransitions(transitions*)
