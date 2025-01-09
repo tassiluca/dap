@@ -12,8 +12,15 @@ CFLAGS += -g                	# Include debug symbols
 all:	mains
 
 mains: 	libdap ctmc.o gossip.o
-	gcc ${CFLAGS} -o ctmc ctmc.o -L. -ldap
-	gcc ${CFLAGS} -o gossip gossip.o -L. -ldap
+	mkdir -p bin
+	gcc ${CFLAGS} -o bin/ctmc ctmc.o \
+		-L/Users/lucatassi/Projects/master-thesis/proof-of-concept/dap-native-examples/src/main/c/bin \
+		-Wl,-rpath,/Users/lucatassi/Projects/master-thesis/proof-of-concept/dap-native-examples/src/main/c/bin \
+		-ldap
+	gcc ${CFLAGS} -o bin/gossip gossip.o \
+		-L/Users/lucatassi/Projects/master-thesis/proof-of-concept/dap-native-examples/src/main/c/bin \
+		-Wl,-rpath,/Users/lucatassi/Projects/master-thesis/proof-of-concept/dap-native-examples/src/main/c/bin \
+		-ldap
 
 ctmc.o: ctmc.c ctmc.h
 	gcc ${CFLAGS} -c ctmc.c
@@ -24,12 +31,13 @@ gossip.o: gossip.c dap.h ctmc.h
 .PHONY: clean libdap
 
 libdap:
-	@if [ ! -f "libdap.dylib" ]; then \
+	@if [ ! -f "bin/libdap.dylib" ]; then \
+  		mkdir -p bin; \
   		echo "Building libdap.dylib"; \
   		cd ${ROOT_SCALA_PROJECT} && \
   			sbt ${PROJECT}Native/nativeLink && \
-  			cp ${PROJECT}/native/target/scala-3.4.2/libdap.dylib dap-native-examples/src/main/c/libdap.dylib; \
+  			cp ${PROJECT}/native/target/scala-3.4.2/libdap.dylib dap-native-examples/src/main/c/bin/libdap.dylib; \
 	fi
 
 clean:
-	-rm -f gossip ctmc *.o *.dylib *.so
+	-rm -f bin/* *.o *.dylib *.so
