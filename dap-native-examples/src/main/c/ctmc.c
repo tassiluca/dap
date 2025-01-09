@@ -1,13 +1,8 @@
 /*
  * A simple program simulating a continuous-time Markov chain (CTMC) created
  * extensionally from a set of transitions.
- * PRO: The actual semantics is programmed in a declarative and functional way
- *      in scala code thanks to scala native adapter interoperable layer.
- * CONS: The state is untyped and, therefore, unsafe (no type checking can prevent
- * |     the user from using a state that is not part of the CTMC set of states).
- * |---> Solution: use macros to generate what is the definition
- *       of the state type and the set of states
- *       (see https://itnext.io/tutorial-generics-in-c-b3362b3376a3).
+ * The actual semantics is programmed in a declarative and functional way
+ * in scala code thanks to scala native adapter interoperable layer.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +18,7 @@ struct State {
 
 #define DEFINE_STATE(name) \
     static struct State name##_state = {#name}; \
-    const State* name = &name##_state;
+    State name = &name##_state;
 
 DEFINE_STATE(IDLE)
 DEFINE_STATE(SEND)
