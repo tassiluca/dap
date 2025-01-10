@@ -18,12 +18,10 @@ object libctmc:
   type Trace = CStruct2[Ptr[Event], CSize]
 
   @exported("create_ctmc_from_transitions")
-  def ofTransitions(transitionsPtr: Ptr[Transition], size: CSize): Ptr[CTMC[State]] =
-    val ptr = stdlib.malloc(sizeOf[Byte]).asInstanceOf[Ptr[CTMC[State]]]
+  def ofTransitions(transitionsPtr: Ptr[Transition], size: CSize): CTMC[State] =
     val transitions = (0 until size.toInt).map: t =>
       Transition(transitionsPtr(t)._1, Action(transitionsPtr(t)._2._1, transitionsPtr(t)._2._2))
-    !ptr = CTMC.ofTransitions(transitions*)
-    ptr
+    CTMC.ofTransitions(transitions*)
 
   @exported
   def simulate(ctmcPtr: Ptr[CTMC[State]], s0: State, steps: CInt): Ptr[Trace] =
@@ -41,6 +39,5 @@ object libctmc:
     trace._1 = events
     trace._2 = steps.toCSize
     trace
-  end simulate
 
 end libctmc

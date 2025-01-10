@@ -58,9 +58,9 @@ int main(void) {
     transitions[5].action.rate = 1.0;
     transitions[5].action.state = DONE;
     /* Actual semantics */
-    CTMC* ctmc = create_ctmc_from_transitions(transitions, ARRAY_LEN(transitions));
+    CTMC ctmc = create_ctmc_from_transitions(transitions, ARRAY_LEN(transitions));
     Trace* trace = simulate(
-        ctmc,
+        &ctmc,
         IDLE,   /* initial state */
         20      /* number of steps */
     );
@@ -68,5 +68,7 @@ int main(void) {
         printf("Event %zu: time=%f, state=%s\n", i, trace->events[i].time, toString(trace->events[i].state));
     }
     printf("Simulation completed successfully!\n");
+    free((void*)trace->events);
+    free(trace);
     return 0;
 }
