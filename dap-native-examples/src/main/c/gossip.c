@@ -157,7 +157,12 @@ int main(void) {
     Place out_places1_ptrs[] = { &a };
     MSet_Place effects1 = { out_places1_ptrs, 1 };
     MSet_Place messages1 = { NULL, 0 };
-    Rule rule = { &preconditions1, &fixed_rate_1000, &effects1, &messages1 };
+    Rule rule = {
+        .preconditions = &preconditions1,
+        .rate = &fixed_rate_1000,
+        .effects = &effects1,
+        .messages = &messages1
+    };
     // a --1--> a|^a
     Place in_places2_ptrs[] = { &a };
     MSet_Place preconditions2 = { in_places2_ptrs, 1 };
@@ -169,8 +174,9 @@ int main(void) {
 
     Rule rules[] = { rule, rule2 };
 
-    DAP* dap = create_dap_from_rules(rules, 2);
-    CTMC* ctmc = dap_to_ctmc(dap);
+    DAP dap = create_dap_from_rules(rules, 2);
+    printf("DAP created successfully!\n");
+    CTMC ctmc = dap_to_ctmc(&dap);
     printf("DAP and CTMC created successfully!\n");
 
     Token initialToken = { &leftUpperCorner, &a };
@@ -182,7 +188,7 @@ int main(void) {
     printf("Simulating...\n");
 
     Trace* trace = simulate_dap(
-        ctmc,
+        &ctmc,
         &initialState,
         all_neighbors,
         4,

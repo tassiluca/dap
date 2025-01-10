@@ -34,21 +34,14 @@ object libdap:
   type Neighbors = CStruct2[Id, Ptr[CMSetId]]
 
   @exported("create_dap_from_rules")
-  def createDAP(rules: Ptr[CRule], size: CSize): Ptr[DAP[Place]] =
-    val dapPtr = stdlib.malloc(sizeOf[Byte]).asInstanceOf[Ptr[DAP[Place]]]
+  def createDAP(rules: Ptr[CRule], size: CSize): DAP[Place] =
     val allrules: List[Rule[Place]] = (0 until size.toInt)
-      .map(i => rules(i).toRule)
+      .map(rules(_).toRule)
       .toList
-    Zone:
-      allrules.foreach(r => stdio.printf(c"%s\n", toCString(r.toString)))
-    !dapPtr = DAP[Place](allrules*)
-    dapPtr
+    DAP[Place](allrules*)
 
   @exported("dap_to_ctmc")
-  def dapToCTMC(dap: Ptr[DAP[Place]]): Ptr[CTMC[State[Id, Place]]] =
-    val ctmcPtr = stdlib.malloc(sizeOf[Byte]).asInstanceOf[Ptr[CTMC[State[Id, Place]]]]
-    !ctmcPtr = DAP.toCTMC(!dap)
-    ctmcPtr
+  def dapToCTMC(dap: Ptr[DAP[Place]]): CTMC[State[Id, Place]] = DAP.toCTMC(!dap)
 
   @exported("simulate_dap")
   def simulateDAP(
@@ -78,10 +71,6 @@ object libdap:
         catch case e => Zone(stdio.printf(c"Error: %s\n", toCString(e.toString)))
     trace._1 = events
     trace._2 = steps.toCSize
-    Zone:
-      stdio.printf(c"Trace @ %p\n", trace)
-      stdio.printf(c"Trace size: %d\n", sizeOf[Trace])
-      stdio.printf(c"Len of trace %d\n", trace._2)
     trace
 
   end simulateDAP
