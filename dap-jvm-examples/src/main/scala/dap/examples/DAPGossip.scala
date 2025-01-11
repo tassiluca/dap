@@ -17,7 +17,7 @@ object DAPGossip:
   export dap.modelling.DAP.*
   export dap.modelling.CTMCSimulation.*
 
-  private val net = Grids.createRectangularGrid(2, 2)
+  private val net = Grids.createRectangularGrid(5, 5)
 
   private val gossipRules = DAP[Place](
     Rule(MSet(A, A), _ => 1_000, MSet(A), MSet()), // a|a --1000--> a
@@ -36,7 +36,7 @@ end DAPGossip
   import dap.modelling.DAPGrid
   gossipCTMC
     .newSimulationTrace(state, new Random)
-    .take(10)
+    .take(250)
     .toList
     .foreach: step =>
       println(step._1) // print time

@@ -34,15 +34,14 @@ void printPlace(const Place place) {
 }
 
 void printGridState(const State state, int grid_rows, int grid_cols) {
-    // Create 2D arrays to hold the token places and messages
     char*** grid = malloc(grid_rows * sizeof(char**));
     char*** messageGrid = malloc(grid_rows * sizeof(char**));
     for (int i = 0; i < grid_rows; i++) {
         grid[i] = malloc(grid_cols * sizeof(char*));
         messageGrid[i] = malloc(grid_cols * sizeof(char*));
         for (int j = 0; j < grid_cols; j++) {
-            grid[i][j] = NULL;        // Initialize token grid to NULL
-            messageGrid[i][j] = NULL; // Initialize message grid to NULL
+            grid[i][j] = NULL;
+            messageGrid[i][j] = NULL;
         }
     }
     // Process tokens
@@ -109,7 +108,6 @@ void printGridState(const State state, int grid_rows, int grid_cols) {
         }
         printf("\n");
     }
-    // Free memory
     for (int i = 0; i < grid_rows; i++) {
         for (int j = 0; j < grid_cols; j++) {
             free(grid[i][j]);
@@ -122,35 +120,54 @@ void printGridState(const State state, int grid_rows, int grid_cols) {
     free(messageGrid);
 }
 
+Id create_id(int x, int y) {
+    Id id = malloc(sizeof(Id));
+    id->x = x;
+    id->y = y;
+    return id;
+}
+
+MSet_Id *create_grid_of_ids(int rows, int cols) {
+    MSet_Id *ids = malloc(sizeof(MSet_Id));
+    ids->elements = malloc(rows * cols * sizeof(Id));
+    ids->size = rows * cols;
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            ids->elements[i * cols + j] = create_id(i, j);
+        }
+    }
+    return ids;
+}
+
+Neighbors *grid_neighbors(MSet_Id* ids, int rows, int cols) {
+    int max_neighbors = 4;
+    int dx[] = { -1, 1, 0, 0 };
+    int dy[] = { 0, 0, -1, 1 };
+    Neighbors *all_neighbors = malloc(rows * cols * sizeof(Neighbors));
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            all_neighbors[i * cols + j].point = ids->elements[i * cols + j];
+            all_neighbors[i * cols + j].neighbors = malloc(sizeof(MSet_Id));
+            // the number of neighbors of each id depends on their position (in the corners, it will be 2)
+            all_neighbors[i * cols + j].neighbors->elements = malloc(max_neighbors * sizeof(Id));
+            all_neighbors[i * cols + j].neighbors->size = 0;
+            for (int k = 0; k < max_neighbors; ++k) {
+                int nx = i + dx[k];
+                int ny = j + dy[k];
+                if (nx >= 0 && nx < rows && ny >= 0 && ny < cols) {
+                    all_neighbors[i * cols + j].neighbors->elements[all_neighbors[i * cols + j].neighbors->size++] = ids->elements[nx * cols + ny];
+                }
+            }
+        }
+    }
+    return all_neighbors;
+}
+
 int main(void) {
-    /************ DEVICES AND THEIR (hardcoded, at least for the moment) NEIGHBORS ************/
-    struct Id leftUpperCorner = { 0, 0 };
-    struct Id rightUpperCorner = { 0, 1 };
-    struct Id leftLowerCorner = { 1, 0 };
-    struct Id rightLowerCorner = { 1, 1 };
+    int rows = 5, cols = 5;
+    MSet_Id* ids = create_grid_of_ids(rows, cols);
+    Neighbors *all_neighbors = grid_neighbors(ids, rows, cols);
 
-    printf("Left upper corner"); printId(&leftUpperCorner);
-    printf("Right upper corner"); printId(&rightUpperCorner);
-    printf("Left lower corner"); printId(&leftLowerCorner);
-    printf("Right lower corner"); printId(&rightLowerCorner);
-
-    Id neighborsLeftUpperCorner[] = { &rightUpperCorner, &leftLowerCorner };
-    Id neighborsRightUpperCorner[] = { &leftUpperCorner, &rightLowerCorner };
-    Id neighborsLeftLowerCorner[] = { &rightLowerCorner, &leftUpperCorner };
-    Id neighborsRightLowerCorner[] = { &leftLowerCorner, &rightUpperCorner };
-
-    MSet_Id neighborsLeftUpperCornerSet = { neighborsLeftUpperCorner, 2 };
-    MSet_Id neighborsRightUpperCornerSet = { neighborsRightUpperCorner, 2 };
-    MSet_Id neighborsLeftLowerCornerSet = { neighborsLeftLowerCorner, 2 };
-    MSet_Id neighborsRightLowerCornerSet = { neighborsRightLowerCorner, 2 };
-
-    Neighbors leftUpperCornerNeighbors = { &leftUpperCorner, &neighborsLeftUpperCornerSet };
-    Neighbors rightUpperCornerNeighbors = { &rightUpperCorner, &neighborsRightUpperCornerSet };
-    Neighbors leftLowerCornerNeighbors = { &leftLowerCorner, &neighborsLeftLowerCornerSet };
-    Neighbors rightLowerCornerNeighbors = { &rightLowerCorner, &neighborsRightLowerCornerSet };
-    Neighbors all_neighbors[] = { leftUpperCornerNeighbors, rightUpperCornerNeighbors, leftLowerCornerNeighbors, rightLowerCornerNeighbors };
-
-    /*************************************** SIMULATION ***************************************/
     // a|a --1_000--> a
     Place in_places1_ptrs[] = { &a, &a };
     MSet_Place preconditions1 = { in_places1_ptrs, 2 };
@@ -175,24 +192,25 @@ int main(void) {
     Rule rules[] = { rule, rule2 };
 
     DAP dap = create_dap_from_rules(rules, 2);
-    printf("DAP created successfully!\n");
     CTMC ctmc = dap_to_ctmc(&dap);
-    printf("DAP and CTMC created successfully!\n");
+    printf("DAP and CTMC created successfully!\n\n");
 
-    Token initialToken = { &leftUpperCorner, &a };
+    Id leftUpperCorner = all_neighbors[0].point;
+    Token initialToken = { leftUpperCorner, &a };
     MSet_Token initial_set = { &initialToken, 1 };
     MSet_Token initial_msgs = { NULL, 0 };
     struct State initialState = { &initial_set, &initial_msgs };
-    printGridState(&initialState, 2, 2);
+
+    printf("Initial state ");
+    printGridState(&initialState, rows, cols);
 
     printf("Simulating...\n");
-
     Trace* trace = simulate_dap(
         &ctmc,
         &initialState,
         all_neighbors,
-        4,
-        10
+        rows * cols,
+        30
     );
 
     if (trace == NULL) {
@@ -204,7 +222,7 @@ int main(void) {
     for (size_t i = 0; i < trace->len; i++) {
         printf("Event %zu", i);
         printf("  time=%f, ", trace->events[i].time);
-        printGridState(trace->events[i].state, 2, 2);
+        printGridState(trace->events[i].state, rows, cols);
         printf("\n\n");
     }
 

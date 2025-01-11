@@ -15,7 +15,7 @@
  */
 #define DEFINE_MSET(Type)      \
     typedef struct {           \
-        const Type* elements;  \
+        Type* elements;        \
         size_t size;           \
     } MSet_##Type;
 
@@ -29,7 +29,7 @@ DEFINE_MSET(Id)
 /* The data structure keeping track of the neighbors of a place in a DAP model. */
 typedef struct {
     Id point;
-    const MSet_Id* neighbors;
+    MSet_Id* neighbors;
 } Neighbors;
 
 /* The data structure representing a token in a DAP model. */
