@@ -210,7 +210,7 @@ int main(void) {
         &initialState,
         all_neighbors,
         rows * cols,
-        30
+        250
     );
 
     if (trace == NULL) {

@@ -54,32 +54,22 @@ object libdap:
     val ctmc = !requireNonNull(ctmcPtr)
     val trace = stdlib.malloc(sizeOf[Trace]).asInstanceOf[Ptr[Trace]]
     val events = stdlib.malloc(sizeOf[Event] * steps).asInstanceOf[Ptr[Event]]
-    Zone(stdio.printf(c"Neighbors size: %d\n", neighborsSize))
-    try
-      val net = (0 until neighborsSize)
-        .map(i => neighbors(i).toNeighborsMap)
-        .toMap
-      val initialState = (!s0).toState(net)
-      Zone(stdio.printf(c"Start simulating...\n"))
-      ctmc
-        .newSimulationTrace(initialState, new java.util.Random)
-        .take(steps)
-        .zipWithIndex
-        .foreach: (e, i) =>
-          Zone:
-            stdio.printf(c"-------------------------")
-            stdio.printf(c"Event %d: %f\n", i, e.time)
-          val current = events(i)
-          current._1 = e.time
-          current._2 = e.state.toCState
-          Zone:
-            stdio.printf(c"Concluded event %d\n", i)
-    catch case e => Zone(stdio.printf(c"Error: %s\n", toCString(e.toString)))
-    end try
+    val net = (0 until neighborsSize)
+      .map(i => neighbors(i).toNeighborsMap)
+      .toMap
+    val initialState = (!s0).toState(net)
+    Zone(stdio.printf(c"Start simulating...\n"))
+    ctmc
+      .newSimulationTrace(initialState, new java.util.Random)
+      .take(steps)
+      .zipWithIndex
+      .foreach: (e, i) =>
+        val current = events(i)
+        current._1 = e.time
+        current._2 = e.state.toCState
     trace._1 = events
     trace._2 = steps.toCSize
     trace
-
   end simulateDAP
 
   extension (m: CMSetToken)

@@ -62,7 +62,7 @@ int main(void) {
     Trace* trace = simulate(
         &ctmc,
         IDLE,   /* initial state */
-        20      /* number of steps */
+        500      /* number of steps */
     );
     for (size_t i = 0; i < trace->len; i++) {
         printf("Event %zu: time=%f, state=%s\n", i, trace->events[i].time, toString(trace->events[i].state));
