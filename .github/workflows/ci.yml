@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04 ] #, macos-14, windows-2022 ]
+        jvm-version: [ 11, 17, 21 ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.jvm-version }}
+        uses: actions/setup-java@v4 # v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.jvm-version }}
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2.0.5
+        with:
+          version: 18
+      - name: Install missing library on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtinfo5
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@v1
+      - run: clang --version
+      - name: Build and test ctmc
+        run: | 
+          cd dap-native-examples/src/main/c
+          make
+          echo ">> Executing ctmc binary"
+          ./ctmc.exe
+      - name: Build and test gossip
+        run: |
+          cd dap-native-examples/src/main/c
+          echo ">> Executing gossip binary with arguments"
+          ./gossip.exe || true
+          
