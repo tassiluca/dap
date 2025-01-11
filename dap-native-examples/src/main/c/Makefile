@@ -1,6 +1,6 @@
 CC := clang
 CURRENT_DIR := $(shell pwd)
-BINARIES_DIR := ${CURRENT_DIR}/bin
+BINARIES_DIR := ${CURRENT_DIR}
 ROOT_SCALA_PROJECT := ${CURRENT_DIR}/../../../../
 LIBRARY := dap
 # C compiler flags: https://clang.llvm.org/docs/DiagnosticsReference.html
@@ -15,9 +15,8 @@ CFLAGS += -g                	# Include debug symbols
 all:	mains
 
 mains: 	libdap ctmc.o gossip.o
-	mkdir -p bin
-	${CC} ${CFLAGS} -o bin/ctmc 	ctmc.o 		-L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
-	${CC} ${CFLAGS} -o bin/gossip 	gossip.o 	-L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
+	${CC} ${CFLAGS} -o ${BINARIES_DIR}/ctmc.exe   ctmc.o   -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
+	${CC} ${CFLAGS} -o ${BINARIES_DIR}/gossip.exe gossip.o -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
 
 ctmc.o: ctmc.c ctmc.h
 	${CC} ${CFLAGS} -c ctmc.c
@@ -28,13 +27,14 @@ gossip.o: gossip.c dap.h ctmc.h
 .PHONY: clean libdap
 
 libdap:
-	@if [ ! -e bin/libdap* ]; then \
-  		mkdir -p bin; \
+	@if [ ! -e ${BINARIES_DIR}/libdap* ]; then \
+  		mkdir -p ${BINARIES_DIR}; \
   		echo "Building DAP library..."; \
   		cd ${ROOT_SCALA_PROJECT} && \
   			sbt ${LIBRARY}Native/nativeLink && \
-  			cp ${LIBRARY}/native/target/scala-3.*/libdap.* dap-native-examples/src/main/c/bin/; \
+  			cp ${LIBRARY}/native/target/scala-3.*/libdap.* ${BINARIES_DIR}; \
 	fi
 
 clean:
-	-rm -f ${BINARIES_DIR}/* *.o *.dylib *.so *.exe
+	-rm -f ${BINARIES_DIR}/*.o ${BINARIES_DIR}*.dylib ${BINARIES_DIR}/*.dylib \
+		${BINARIES_DIR}/*.so ${BINARIES_DIR}/*.exe *.o *.dylib *.so *.exe
