@@ -36,15 +36,11 @@ jobs:
       - name: Setup sbt launcher
         uses: sbt/setup-sbt@v1
       - run: clang --version
-      - name: Build and test ctmc
+      - name: Build and test
         run: | 
           cd dap-native-examples/src/main/c
           make
           echo ">> Executing ctmc binary"
           ./ctmc.exe
-      - name: Build and test gossip
-        run: |
-          cd dap-native-examples/src/main/c
-          echo ">> Executing gossip binary with arguments"
-          ./gossip.exe || true
-          
+          echo ">> Executing gossip binary"
+          ./gossip.exe

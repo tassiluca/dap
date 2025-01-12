@@ -8,8 +8,8 @@ CFLAGS += -Wpedantic        	# Enforce strict ISO compliance
 CFLAGS += -Wall             	# Enable all common warnings
 CFLAGS += -Wextra           	# Enable extra warnings
 CFLAGS += -Werror           	# Treat warnings as errors
-#CFLAGS += -fsanitize=address,undefined,null  # Enable address/undefined/null sanitizers
-#CFLAGS += -fsanitize=leak   	# Enable leak sanitizer (not supported on macOS arm chips)
+CFLAGS += -fsanitize=address,undefined,null  # Enable address/undefined/null sanitizers
+CFLAGS += -fsanitize=leak   	# Enable leak sanitizer (not supported on macOS arm chips)
 CFLAGS += -g                	# Include debug symbols
 
 all:	mains
