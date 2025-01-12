@@ -57,7 +57,7 @@ int main(void) {
     MSet_Token initial_msgs = { NULL, 0 };
     struct State initialState = { &initial_set, &initial_msgs };
     printf("Initial state ");
-    printGridState(&initialState, rows, cols);
+    print_grid_state(&initialState, rows, cols);
     printf("\n\nSimulating...\n");
     Trace* trace = simulate_dap(
         &ctmc,
@@ -73,10 +73,12 @@ int main(void) {
     for (size_t i = 0; i < trace->len; i++) {
         printf("Event %zu", i);
         printf("  time=%f, ", trace->events[i].time);
-        printGridState(trace->events[i].state, rows, cols);
+        print_grid_state(trace->events[i].state, rows, cols);
         printf("\n\n");
     }
     printf("Simulation completed successfully!\n");
+    free_ids(ids);
+    free_neighbors(all_neighbors, rows, cols);
     free((void*)trace->events);
     free(trace);
     return 0;
