@@ -6,8 +6,6 @@
 #ifndef LIBCTMC_H
 #define LIBCTMC_H
 
-int ScalaNativeInit(void);
-
 /* The opaque type representing a state in a CTMC process. */
 typedef struct State* State;
 

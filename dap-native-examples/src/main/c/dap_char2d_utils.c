@@ -132,3 +132,16 @@ void print_grid_state(const State state, int rows, int cols) {
     free_grid(grid, rows, cols);
     free_grid(message_grid, rows, cols);
 }
+
+void free_trace(Trace *trace) {
+    if (trace == NULL) return;
+    for (size_t i = 0; i < trace->len; i++) {
+        free(trace->events[i].state->tokens->elements);
+        free((void*)trace->events[i].state->tokens);
+        free(trace->events[i].state->messages->elements);
+        free((void*)trace->events[i].state->messages);
+        free(trace->events[i].state);
+    }
+    free((void*)trace->events);
+    free(trace);
+}

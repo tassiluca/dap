@@ -79,7 +79,6 @@ int main(void) {
     printf("Simulation completed successfully!\n");
     free_ids(ids);
     free_neighbors(all_neighbors, rows, cols);
-    free((void*)trace->events);
-    free(trace);
+    free_trace(trace);
     return 0;
 }
