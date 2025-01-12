@@ -21,7 +21,7 @@ mains: 	libdap ctmc.o gossip.o
 ctmc.o: ctmc.c ctmc.h
 	${CC} ${CFLAGS} -c ctmc.c
 
-gossip.o: gossip.c dap.h ctmc.h
+gossip.o: gossip.c dap.h ctmc.h dap_char2d.h dap_char2d_utils.c
 	${CC} ${CFLAGS} -c gossip.c
 
 .PHONY: clean libdap

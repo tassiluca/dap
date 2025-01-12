@@ -30,7 +30,6 @@ const char* toString(const State s) {
 }
 
 int main(void) {
-    assert(ScalaNativeInit() == 0);
     printf("Simulation of a simple Continuous-Time Markov Chain (CTMC)\n");
     Transition transitions[6];
     /* 1) Transition(IDLE, 1.0 --> SEND) */
@@ -59,10 +58,11 @@ int main(void) {
     transitions[5].action.state = DONE;
     /* Actual semantics */
     CTMC ctmc = create_ctmc_from_transitions(transitions, ARRAY_LEN(transitions));
+    int simulation_steps = 10;
     Trace* trace = simulate(
         &ctmc,
         IDLE,   /* initial state */
-        500      /* number of steps */
+        simulation_steps
     );
     for (size_t i = 0; i < trace->len; i++) {
         printf("Event %zu: time=%f, state=%s\n", i, trace->events[i].time, toString(trace->events[i].state));
