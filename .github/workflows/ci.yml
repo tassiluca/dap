@@ -31,7 +31,6 @@ jobs:
           vcvarsall: ${{ contains(matrix.os, 'windows') }}
           make: true
           clang: true
-          apple-clang: ${{ contains(matrix.os, 'macos') }}
 #      - name: Install missing library on Ubuntu
 #        if: contains(matrix.os, 'ubuntu')
 #        run: |
