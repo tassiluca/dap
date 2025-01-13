@@ -54,7 +54,6 @@ object NativeDAPApi:
       .map(i => neighbors(i).toNeighborsMap)
       .toMap
     val initialState = (!s0).toState(net)
-    Zone(stdio.printf(c"Start simulating...\n"))
     ctmc
       .newSimulationTrace(initialState, new java.util.Random)
       .take(steps)
