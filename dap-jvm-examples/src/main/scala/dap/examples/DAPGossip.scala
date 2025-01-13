@@ -1,8 +1,8 @@
 package dap.examples
 
-import dap.modelling.CTMCSimulation.*
-import dap.modelling.{ CTMC, CTMCSimulation, DAP }
-import dap.utils.{ Grids, MSet }
+import dap.modelling.{CTMC, CTMCSimulation, DAP}
+import dap.shared.modelling.{CTMC, CTMCSimulation, DAP}
+import dap.utils.{Grids, MSet}
 
 import java.util.Random
 
@@ -14,8 +14,6 @@ object DAPGossip:
   type ID = (Int, Int)
 
   export Place.*
-  export dap.modelling.DAP.*
-  export dap.modelling.CTMCSimulation.*
 
   private val net = Grids.createRectangularGrid(5, 5)
 
@@ -33,7 +31,7 @@ end DAPGossip
 
 @main def mainDAPGossip =
   import DAPGossip.*
-  import dap.modelling.DAPGrid
+  import dap.shared.modelling.DAPGrid
   gossipCTMC
     .newSimulationTrace(state, new Random)
     .take(250)

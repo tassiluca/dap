@@ -1,4 +1,4 @@
-package dap.utils
+package dap.shared.utils
 
 import scala.util.Random
 

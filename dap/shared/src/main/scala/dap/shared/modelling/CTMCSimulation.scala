@@ -1,8 +1,8 @@
-package dap.modelling
+package dap.shared.modelling
 
 import java.util.Random
 
-import dap.utils.Stochastics
+import dap.shared.utils.Stochastics
 
 object CTMCSimulation:
 

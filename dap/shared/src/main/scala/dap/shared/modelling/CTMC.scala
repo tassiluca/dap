@@ -1,4 +1,4 @@
-package dap.modelling
+package dap.shared.modelling
 
 trait CTMC[S]:
   import CTMC.Action
@@ -14,7 +14,9 @@ object CTMC:
 
   // Factory methods
 
-  def ofTransitions[S](rel: Transition[S]*): CTMC[S] = ofRelation(rel.toSet)
+  def ofTransitions[S](rels: Transition[S]*): CTMC[S] = ofRelation(rels.toSet)
+
+  def ofTransitions[S](rels: Set[Transition[S]]): CTMC[S] = ofRelation(rels)
 
   def ofRelation[S](rel: Set[Transition[S]]): CTMC[S] =
     ofFunction(s => rel filter (_.state == s) map (_.action))
