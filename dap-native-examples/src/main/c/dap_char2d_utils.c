@@ -77,7 +77,7 @@ void process_grid_element(char*** grid, const Token token, int rows, int cols) {
         size_t len = strlen(grid[row][col]);
         char* new_str = malloc(len + 2);
         if (new_str) {
-            strcpy(new_str, grid[row][col]);
+            memcpy(new_str, grid[row][col], len);
             new_str[len] = token.place->p;
             new_str[len + 1] = '\0';
             free(grid[row][col]);
