@@ -34,7 +34,8 @@ jobs:
         uses: sbt/setup-sbt@v1
       - run: clang --version
       - name: Build and test
-        run: | 
+        run: |
+          export GC_INITIAL_HEAP_SIZE=512M
           cd dap-native-examples/src/main/c
           make
           echo ">> Executing ctmc binary"
