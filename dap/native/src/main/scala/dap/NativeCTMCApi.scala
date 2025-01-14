@@ -5,14 +5,6 @@ import scala.scalanative.unsafe.Size.intToSize
 import dap.CUtils.*
 import scala.scalanative.libc.stdlib
 
-/** Bindings with native C types. */
-object NativeCTMCBindings:
-  type State = Ptr[CStruct0]
-  type Action = CStruct2[CDouble, State]
-  type Transition = CStruct2[State, Action]
-  type Event = CStruct2[CDouble, State]
-  type Trace = CStruct2[Ptr[Event], CSize]
-
 /** Static object exposing native API, directly callable from C. */
 object NativeCTMCApi:
 
@@ -46,3 +38,11 @@ object NativeCTMCApi:
     trace._2 = steps.toCSize
     trace
 end NativeCTMCApi
+
+/** Bindings with native C types. */
+object NativeCTMCBindings:
+  type State = Ptr[CStruct0]
+  type Action = CStruct2[CDouble, State]
+  type Transition = CStruct2[State, Action]
+  type Event = CStruct2[CDouble, State]
+  type Trace = CStruct2[Ptr[Event], CSize]
