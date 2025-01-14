@@ -42,6 +42,6 @@ typedef void* CTMC;
 CTMC create_ctmc_from_transitions(const Transition* rel, size_t rel_size);
 
 /* Simulate a CTMC process starting from a given state s0 for a given number of steps. */
-Trace* simulate(const CTMC* ctmc, State s0, int steps);
+Trace* simulate_ctmc(const CTMC* ctmc, State s0, int steps);
 
 #endif
