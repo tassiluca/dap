@@ -1,6 +1,7 @@
 package dap
 
 import scala.reflect.ClassTag
+import scala.scalanative.unsafe
 import scala.scalanative.unsafe.*
 import dap.CUtils.*
 
@@ -16,12 +17,11 @@ object NativeDAPApi:
   import dap.shared.modelling.CTMCSimulation.*
 
   @exported("create_dap_from_rules")
-  def createDAP(rulesPtr: Ptr[CRule], size: CSize): DAP[Place] =
-    val rules: Set[Rule[Place]] = (0 until size.toInt)
+  def createDAP(rulesPtr: Ptr[CRule], size: CSize): DAP[Place] = DAP:
+    (0 until size.toInt)
       .map(rulesPtr(_))
       .map(cRuleConversion)
       .toSet
-    DAP[Place](rules)
 
   @exported("dap_to_ctmc")
   def dapToCTMC(dapPtr: Ptr[DAP[Place]]): CTMC[State[Id, Place]] = DAP.toCTMC(!dapPtr)
@@ -59,34 +59,39 @@ end NativeDAPApi
 object NativeDAPBindings:
   type Place = Ptr[CStruct0]
   type Id = Ptr[CStruct0]
-  type CMSetPlace = CStruct2[Ptr[Place], CSize]
-  type CMSetId = CStruct2[Ptr[Id], CSize]
+  type CMSet[T] = CStruct2[Ptr[T], CSize]
   type CToken = CStruct2[Id, Place]
-  type CMSetToken = CStruct2[Ptr[CToken], CSize]
-  type CState = CStruct2[Ptr[CMSetToken], Ptr[CMSetToken]]
-  type CRateFunction = CFuncPtr1[Ptr[CMSetPlace], CDouble]
-  type CRule = CStruct4[Ptr[CMSetPlace], CRateFunction, Ptr[CMSetPlace], Ptr[CMSetPlace]]
+  type CState = CStruct2[Ptr[CMSet[CToken]], Ptr[CMSet[CToken]]]
+  type CRateFunction = CFuncPtr1[Ptr[CMSet[Place]], CDouble]
+  type CRule = CStruct4[Ptr[CMSet[Place]], CRateFunction, Ptr[CMSet[Place]], Ptr[CMSet[Place]]]
   type CEvent = CStruct2[CDouble, Ptr[CState]]
   type CTrace = CStruct2[Ptr[CEvent], CSize]
-  type CNeighbors = CStruct2[Id, Ptr[CMSetId]]
+  type CNeighbors = CStruct2[Id, Ptr[CMSet[Id]]]
 
   import dap.shared.utils.MSet
   export dap.shared.modelling.DAP.{ Rule, State, Token }
 
-  given Conversion[CMSetPlace, MSet[Place]] = m =>
-    MSet.ofList:
+  given cMSetPlaceConversion: Conversion[CMSet[Place], MSet[Place]] = _.toMSet(identity)
+
+  given cRuleConversion: Conversion[CRule, Rule[Place]] = r =>
+    val rateFun: MSet[Place] => Double = _ => r._2.apply(r._1)
+    Rule(!r._1, rateFun, !r._3, !r._4)
+
+  given cMSetTokenConversion: Conversion[CMSet[CToken], MSet[Token[Id, Place]]] =
+    _.toMSet(t => Token(id = t._1, p = t._2))
+
+  given cMSetIdConversion: Conversion[CMSet[Id], MSet[Id]] = _.toMSet(identity)
+
+  extension [T: ClassTag: unsafe.Tag](m: CMSet[T])
+
+    private def toMSet[R](mapping: T => R = identity): MSet[R] = MSet.ofList:
       (0 until m._2.toInt)
         .map(i => m._1.apply(i))
+        .map(mapping)
         .toList
 
-  given Conversion[CMSetToken, MSet[Token[Id, Place]]] = m =>
-    MSet.ofList:
-      (0 until m._2.toInt)
-        .map(i => Token(id = m._1.apply(i)._1, p = m._1.apply(i)._2))
-        .toList
-
-  given Conversion[MSet[Token[Id, Place]], Ptr[CMSetToken]] = m =>
-    val cm = stdlib.malloc(sizeOf[CMSetToken]).asInstanceOf[Ptr[CMSetToken]]
+  given Conversion[MSet[Token[Id, Place]], Ptr[CMSet[CToken]]] = m =>
+    val cm = stdlib.malloc(sizeOf[CMSet[CToken]]).asInstanceOf[Ptr[CMSet[CToken]]]
     val arrayOfPtrs = stdlib.malloc(sizeof[CToken] * m.size.toCSize).asInstanceOf[Ptr[CToken]]
     m.asList.zipWithIndex.foreach: (t, i) =>
       arrayOfPtrs(i)._1 = t.id
@@ -94,10 +99,6 @@ object NativeDAPBindings:
     cm._1 = arrayOfPtrs
     cm._2 = m.size.toCSize
     cm
-
-  given cRuleConversion: Conversion[CRule, Rule[Place]] = r =>
-    val rateFun: MSet[Place] => Double = _ => r._2.apply(r._1)
-    Rule(!r._1, rateFun, !r._3, !r._4)
 
   given stateConversion: Conversion[State[Id, Place], Ptr[CState]] = s =>
     val cs = stdlib.malloc(sizeOf[CState]).asInstanceOf[Ptr[CState]]
@@ -108,17 +109,7 @@ object NativeDAPBindings:
   extension (s: CState)
 
     def toState(net: Map[Id, Set[Id]]): State[Id, Place] =
-      State(
-        tokens = Option(s._1).fold(MSet())(ptr => !ptr),
-        messages = Option(s._2).fold(MSet())(ptr => !ptr),
-        neighbours = net,
-      )
-
-  given cMSetIdConversion: Conversion[CMSetId, MSet[Id]] = m =>
-    MSet.ofList:
-      (0 until m._2.toInt)
-        .map(i => m._1.apply(i))
-        .toList
+      State(tokens = Option(s._1).fold(MSet())(ptr => !ptr), messages = Option(s._2).fold(MSet())(ptr => !ptr), neighbours = net)
 
   given cNeighborsConversion: Conversion[CNeighbors, (Id, Set[Id])] = n => (n._1, cMSetIdConversion(!n._2).asList.toSet)
 
