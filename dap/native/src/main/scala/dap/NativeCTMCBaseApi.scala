@@ -2,29 +2,26 @@ package dap
 
 import dap.CUtils.requireNonNull
 
-import scala.scalanative.libc.{ stdio, stdlib }
+import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.Size.intToSize
-import scala.scalanative.unsafe.{ sizeOf, CDouble, CInt, CQuote, CSize, CStruct2, Ptr, Zone }
+import scala.scalanative.unsafe.{ sizeOf, CDouble, CInt, CSize, CStruct2, Ptr }
 
+/** A module exposing common native APIs functionalities for CTMC simulation. */
 trait NativeCTMCBaseApi:
 
-  type NativeState
-  type NativeEvent = CStruct2[CDouble, NativeState]
-  type NativeTrace = CStruct2[Ptr[NativeEvent], CSize]
+  type State
+  type Event = CStruct2[CDouble, State]
+  type Trace = CStruct2[Ptr[Event], CSize]
 
   import dap.shared.modelling.CTMC
   import dap.shared.modelling.CTMCSimulation.*
 
-  def simulate[T](
-      ctmcPtr: Ptr[CTMC[T]],
-      s0: NativeState,
-      steps: CInt,
-      f: NativeState => T,
-      fInv: T => NativeState,
-  )(using scalanative.unsafe.Tag[NativeState]): Ptr[NativeTrace] =
+  def simulate[T](ctmcPtr: Ptr[CTMC[T]], s0: State, steps: CInt, f: State => T, fInv: T => State)(using
+      scalanative.unsafe.Tag[State],
+  ): Ptr[Trace] =
     val ctmc = !requireNonNull(ctmcPtr)
-    val trace = stdlib.malloc(sizeOf[NativeTrace]).asInstanceOf[Ptr[NativeTrace]]
-    val events = stdlib.malloc(sizeOf[NativeEvent] * steps).asInstanceOf[Ptr[NativeEvent]]
+    val trace = stdlib.malloc(sizeOf[Trace]).asInstanceOf[Ptr[Trace]]
+    val events = stdlib.malloc(sizeOf[Event] * steps).asInstanceOf[Ptr[Event]]
     ctmc
       .newSimulationTrace(f(s0), new java.util.Random)
       .take(steps)

@@ -5,36 +5,38 @@ import scala.scalanative.unsafe
 import scala.scalanative.unsafe.*
 import dap.CUtils.*
 
-import scala.scalanative.libc.{ stdio, stdlib }
+import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.Size.intToSize
 
+/** Static object exposing native API for Distributed Asynchronous Petri-Nets creation and simulation. */
 object NativeDAPApi extends NativeCTMCBaseApi:
 
   import dap.NativeDAPBindings.*
   import dap.NativeDAPBindings.{ cNeighborsConversion, cRuleConversion }
-  import dap.shared.modelling.*
-  import dap.shared.modelling.DAP.*
 
-  override type NativeState = Ptr[CState]
+  override type State = Ptr[DAPState]
+
+  import dap.shared.modelling.{ CTMC, DAP }
+  import dap.shared.modelling.DAP.DAP
 
   @exported("create_dap_from_rules")
-  def createDAP(rulesPtr: Ptr[CRule], size: CSize): DAP[Place] = DAP:
+  def createDAP(rulesPtr: Ptr[Rule], size: CSize): DAP[Place] = DAP:
     (0 until size.toInt)
       .map(rulesPtr(_))
       .map(cRuleConversion)
       .toSet
 
   @exported("dap_to_ctmc")
-  def dapToCTMC(dapPtr: Ptr[DAP[Place]]): CTMC[State[Id, Place]] = DAP.toCTMC(!dapPtr)
+  def dapToCTMC(dapPtr: Ptr[DAP[Place]]): CTMC[DAP.State[Id, Place]] = DAP.toCTMC(!dapPtr)
 
   @exported("simulate_dap")
   def simulateDAP(
-      ctmcPtr: Ptr[CTMC[State[Id, Place]]],
-      s0: Ptr[CState],
-      neighbors: Ptr[CNeighbors],
+      ctmcPtr: Ptr[CTMC[DAP.State[Id, Place]]],
+      s0: State,
+      neighbors: Ptr[Neighbors],
       neighborsSize: CInt,
       steps: CInt,
-  ): Ptr[NativeTrace] =
+  ): Ptr[Trace] =
     val net = (0 until neighborsSize)
       .map(i => neighbors(i))
       .map(cNeighborsConversion)
@@ -47,23 +49,23 @@ object NativeDAPBindings:
   type Place = Ptr[CStruct0]
   type Id = Ptr[CStruct0]
   type CMSet[T] = CStruct2[Ptr[T], CSize]
-  type CToken = CStruct2[Id, Place]
-  type CState = CStruct2[Ptr[CMSet[CToken]], Ptr[CMSet[CToken]]]
-  type CRateFunction = CFuncPtr1[Ptr[CMSet[Place]], CDouble]
-  type CRule = CStruct4[Ptr[CMSet[Place]], CRateFunction, Ptr[CMSet[Place]], Ptr[CMSet[Place]]]
-  type CNeighbors = CStruct2[Id, Ptr[CMSet[Id]]]
+  type Token = CStruct2[Id, Place]
+  type DAPState = CStruct2[Ptr[CMSet[Token]], Ptr[CMSet[Token]]]
+  type RateFunction = CFuncPtr1[Ptr[CMSet[Place]], CDouble]
+  type Rule = CStruct4[Ptr[CMSet[Place]], RateFunction, Ptr[CMSet[Place]], Ptr[CMSet[Place]]]
+  type Neighbors = CStruct2[Id, Ptr[CMSet[Id]]]
 
   import dap.shared.utils.MSet
-  export dap.shared.modelling.DAP.{ Rule, State, Token }
+  export dap.shared.modelling.DAP
 
   given cMSetPlaceConversion: Conversion[CMSet[Place], MSet[Place]] = _.toMSet(identity)
 
-  given cRuleConversion: Conversion[CRule, Rule[Place]] = r =>
+  given cRuleConversion: Conversion[Rule, DAP.Rule[Place]] = r =>
     val rateFun: MSet[Place] => Double = _ => r._2.apply(r._1)
-    Rule(!r._1, rateFun, !r._3, !r._4)
+    DAP.Rule(!r._1, rateFun, !r._3, !r._4)
 
-  given cMSetTokenConversion: Conversion[CMSet[CToken], MSet[Token[Id, Place]]] =
-    _.toMSet(t => Token(id = t._1, p = t._2))
+  given cMSetTokenConversion: Conversion[CMSet[Token], MSet[DAP.Token[Id, Place]]] =
+    _.toMSet(t => DAP.Token(id = t._1, p = t._2))
 
   given cMSetIdConversion: Conversion[CMSet[Id], MSet[Id]] = _.toMSet(identity)
 
@@ -75,9 +77,9 @@ object NativeDAPBindings:
         .map(mapping)
         .toList
 
-  given Conversion[MSet[Token[Id, Place]], Ptr[CMSet[CToken]]] = m =>
-    val cm = stdlib.malloc(sizeOf[CMSet[CToken]]).asInstanceOf[Ptr[CMSet[CToken]]]
-    val arrayOfPtrs = stdlib.malloc(sizeof[CToken] * m.size.toCSize).asInstanceOf[Ptr[CToken]]
+  given Conversion[MSet[DAP.Token[Id, Place]], Ptr[CMSet[Token]]] = m =>
+    val cm = stdlib.malloc(sizeOf[CMSet[Token]]).asInstanceOf[Ptr[CMSet[Token]]]
+    val arrayOfPtrs = stdlib.malloc(sizeof[Token] * m.size.toCSize).asInstanceOf[Ptr[Token]]
     m.asList.zipWithIndex.foreach: (t, i) =>
       arrayOfPtrs(i)._1 = t.id
       arrayOfPtrs(i)._2 = t.p
@@ -85,23 +87,23 @@ object NativeDAPBindings:
     cm._2 = m.size.toCSize
     cm
 
-  extension (s: State[Id, Place])
+  extension (s: DAP.State[Id, Place])
 
-    def toCState: Ptr[CState] =
-      val cs = stdlib.malloc(sizeOf[CState]).asInstanceOf[Ptr[CState]]
+    def toCState: Ptr[DAPState] =
+      val cs = stdlib.malloc(sizeOf[DAPState]).asInstanceOf[Ptr[DAPState]]
       cs._1 = s.tokens
       cs._2 = s.messages
       cs
 
-  extension (s: CState)
+  extension (s: DAPState)
 
-    def toState(net: Map[Id, Set[Id]]): State[Id, Place] =
-      State(
+    def toState(net: Map[Id, Set[Id]]): DAP.State[Id, Place] =
+      DAP.State(
         tokens = Option(s._1).fold(MSet())(ptr => !ptr),
         messages = Option(s._2).fold(MSet())(ptr => !ptr),
         neighbours = net,
       )
 
-  given cNeighborsConversion: Conversion[CNeighbors, (Id, Set[Id])] = n => (n._1, cMSetIdConversion(!n._2).asList.toSet)
+  given cNeighborsConversion: Conversion[Neighbors, (Id, Set[Id])] = n => (n._1, cMSetIdConversion(!n._2).asList.toSet)
 
 end NativeDAPBindings
