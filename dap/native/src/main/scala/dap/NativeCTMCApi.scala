@@ -1,26 +1,57 @@
 package dap
 
-import scala.scalanative.unsafe.*
+import dap.CUtils.{ freshPointer, requireNonNull }
 
-/** Static object exposing native API for basic CTMC creation and simulation. */
-object NativeCTMCApi extends NativeCTMCBaseApi:
+import scala.scalanative.libc.stdlib
+import scala.scalanative.unsafe.Size.intToSize
+import scala.scalanative.unsafe.{ sizeOf, CDouble, CInt, CSize, CStruct2, Ptr }
 
-  import dap.shared.modelling.CTMC.*
+/** A module exposing common native APIs functionalities for CTMC simulation. */
+trait NativeCTMCApi:
+
   import dap.shared.modelling.CTMC
-  import dap.shared.modelling.CTMC.ofTransitions
+  import dap.shared.modelling.CTMCSimulation
+  import dap.shared.modelling.CTMCSimulation.newSimulationTrace
 
-  override type State = Ptr[CStruct0]
-  type Action = CStruct2[CDouble, State]
-  type Transition = CStruct2[State, Action]
+  /** Native binding for state type in a CTMC process (the generic type of [[CTMC]]). */
+  type State
 
-  @exported("create_ctmc_from_transitions")
-  def ofTransitions(transitionsPtr: Ptr[Transition], size: CSize): CTMC[State] =
-    val transitions = (0 until size.toInt)
-      .map(t => Transition(transitionsPtr(t)._1, Action(transitionsPtr(t)._2._1, transitionsPtr(t)._2._2)))
-      .toSet
-    CTMC.ofTransitions(transitions)
+  /** Native binding fro [[CTMCSimulation.Event]] type. */
+  type Event = CStruct2[CDouble, State]
 
-  @exported("simulate_ctmc")
-  def simulateCTMC(ctmcPtr: Ptr[CTMC[State]], s0: State, steps: CInt): Ptr[Trace] =
-    simulate(ctmcPtr, s0, steps, identity, identity)
+  /** Native binding for the [[CTMCSimulation.Trace]] type. */
+  type Trace = CStruct2[Ptr[Event], CSize]
+
+  /** Native binding of the [[newSimulationTrace]] method.
+    * @param ctmcPtr the pointer to the [[CTMC]] to simulate
+    * @param s0 the initial state
+    * @param steps the number of steps to simulate
+    * @param f the function to convert the simulation [[State]] to the CTMC state type `T`.
+    *          This is used since the two types may not coincide for native interoperability reasons.
+    * @param fInv the inverse function of `f`
+    * @tparam T the type of the CTMC state
+    * @return a pointer to the simulation trace
+    */
+  def simulate[T](
+      ctmcPtr: Ptr[CTMC[T]],
+      s0: State,
+      steps: CInt,
+      f: State => T,
+      fInv: T => State,
+  )(using scalanative.unsafe.Tag[State]): Ptr[Trace] =
+    val ctmc = !requireNonNull(ctmcPtr)
+    val trace = freshPointer[Trace]()
+    val events = freshPointer[Event](steps)
+    ctmc
+      .newSimulationTrace(f(s0), new java.util.Random)
+      .take(steps)
+      .zipWithIndex
+      .foreach: (e, i) =>
+        val event = events(i)
+        event._1 = e.time
+        event._2 = fInv(e.state)
+    trace._1 = events
+    trace._2 = steps.toCSize
+    trace
+  end simulate
 end NativeCTMCApi

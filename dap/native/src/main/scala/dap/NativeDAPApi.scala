@@ -9,7 +9,7 @@ import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.Size.intToSize
 
 /** Static object exposing native API for Distributed Asynchronous Petri-Nets creation and simulation. */
-object NativeDAPApi extends NativeCTMCBaseApi:
+object NativeDAPApi extends NativeCTMCApi:
 
   import dap.NativeDAPBindings.*
   import dap.NativeDAPBindings.{ cNeighborsConversion, cRuleConversion }
@@ -38,7 +38,7 @@ object NativeDAPApi extends NativeCTMCBaseApi:
       steps: CInt,
   ): Ptr[Trace] =
     val net = (0 until neighborsSize)
-      .map(i => neighbors(i))
+      .map(neighbors(_))
       .map(cNeighborsConversion)
       .toMap
     simulate(ctmcPtr, s0, steps, ptr => (!ptr).toState(net), s => s.toCState)
