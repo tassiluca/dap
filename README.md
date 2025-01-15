@@ -51,6 +51,10 @@
       - `NativeDAPApi` defines the bindings for creating and simulating a DAP model;
           - `NativeDAPBindings` includes the necessary conversion utilities for converting Scala types to C types back and forth.
 - `dap-native-examples`: contains the native examples (at the moment, only C) for programming using the DAP native library bindings;
+  - `*.h` contains the data structures and prototypes definitions;
+    - the actual implementations are provided by `@exported` methods in scala native module.
+    - for generic types, opaque pointers are used. The scala code only knows the generic type is a pointer to an opaque structure, hence it can only pass it around without knowing its internals, while the C code knows the actual implementation of the structure and can properly interact with it.
+      - _side effect_: all the operations that need to work on the internals of the generic types must be implemented in C and make them available to the scala code (see `@extern` in scala native). This is necessary, for example, to implement the distribution layer for (un)marshalling the data structures
 - `dap-jvm-examples`: contains the JVM examples for programming using the DAP JVM library.
 
 ### How to run examples
@@ -70,6 +74,8 @@ make
 ```
 
 where `<executable-name>` is either `ctmc` or `gossip`.
+
+[Expected outcome](https://github.com/tassiluca/dap/actions/runs/12787902057/job/35648073751#step:7:94).
 
 ### Known issues (and their solutions)
 
