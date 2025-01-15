@@ -1,6 +1,6 @@
 package dap
 
-import dap.CUtils.requireNonNull
+import dap.CUtils.{ freshPointer, requireNonNull }
 
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.Size.intToSize
@@ -20,8 +20,8 @@ trait NativeCTMCBaseApi:
       scalanative.unsafe.Tag[State],
   ): Ptr[Trace] =
     val ctmc = !requireNonNull(ctmcPtr)
-    val trace = stdlib.malloc(sizeOf[Trace]).asInstanceOf[Ptr[Trace]]
-    val events = stdlib.malloc(sizeOf[Event] * steps).asInstanceOf[Ptr[Event]]
+    val trace = freshPointer[Trace]()
+    val events = freshPointer[Event](steps)
     ctmc
       .newSimulationTrace(f(s0), new java.util.Random)
       .take(steps)

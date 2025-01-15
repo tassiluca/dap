@@ -78,8 +78,8 @@ object NativeDAPBindings:
         .toList
 
   given Conversion[MSet[DAP.Token[Id, Place]], Ptr[CMSet[Token]]] = m =>
-    val cm = stdlib.malloc(sizeOf[CMSet[Token]]).asInstanceOf[Ptr[CMSet[Token]]]
-    val arrayOfPtrs = stdlib.malloc(sizeof[Token] * m.size.toCSize).asInstanceOf[Ptr[Token]]
+    val cm = freshPointer[CMSet[Token]]()
+    val arrayOfPtrs = freshPointer[Token](m.size)
     m.asList.zipWithIndex.foreach: (t, i) =>
       arrayOfPtrs(i)._1 = t.id
       arrayOfPtrs(i)._2 = t.p
@@ -90,7 +90,7 @@ object NativeDAPBindings:
   extension (s: DAP.State[Id, Place])
 
     def toCState: Ptr[DAPState] =
-      val cs = stdlib.malloc(sizeOf[DAPState]).asInstanceOf[Ptr[DAPState]]
+      val cs = freshPointer[DAPState]()
       cs._1 = s.tokens
       cs._2 = s.messages
       cs
