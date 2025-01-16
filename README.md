@@ -6,6 +6,8 @@
 
 - `dap/shared`: contains the shared scala code between all platforms;
 - `dap/native`: contains the code for the native platform;
+  <div style="max-width: 800px">
+
     ```mermaid
     classDiagram
         direction TB
@@ -46,20 +48,23 @@
         NativeCTMCApi <|-- NativeDAPApi
         NativeDAPApi .. NativeDAPBindings
     ```
-    - `NativeCTMCApi` is a trait defining the generic native binding for executing a simulation;
-      - `BasicNativeCTMCApi` defines the bindings for creating and simulating a basic CTMC model;
-      - `NativeDAPApi` defines the bindings for creating and simulating a DAP model;
-          - `NativeDAPBindings` includes the necessary conversion utilities for converting Scala types to C types back and forth.
+
+  </div>
+
+  - `NativeCTMCApi` is a trait defining the generic native binding for executing a simulation;
+    - `BasicNativeCTMCApi` defines the bindings for creating and simulating a basic CTMC model;
+    - `NativeDAPApi` defines the bindings for creating and simulating a DAP model;
+        - `NativeDAPBindings` includes the necessary conversion utilities for converting Scala types to C types back and forth.
 - `dap-native-examples`: contains the native examples (at the moment, only C) for programming using the DAP native library bindings;
   - `*.h` contains the data structures and prototypes definitions;
-    - the actual implementations are provided by `@exported` methods in scala native module.
+    - the actual implementations are provided by `@exported` methods in scala native module (and linked during native code compilation);
     - for generic types, opaque pointers are used. The scala code only knows the generic type is a pointer to an opaque structure, hence it can only pass it around without knowing its internals, while the C code knows the actual implementation of the structure and can properly interact with it.
       - _side effect_: all the operations that need to work on the internals of the generic types must be implemented in C and make them available to the scala code (see `@extern` in scala native). This is necessary, for example, to implement the distribution layer for (un)marshalling the data structures
 - `dap-jvm-examples`: contains the JVM examples for programming using the DAP JVM library.
 
 ### How to run examples
 
-At the moment two C examples are available:
+At the moment, two C examples are available:
 
 - `ctmc.c`: a basic example of a continuous-time Markov chain;
 - `gossip.c`: example of gossiping simulation using the DAP library.
@@ -86,3 +91,5 @@ where `<executable-name>` is either `ctmc` or `gossip`.
     ```
 
   512 MB should be sufficient to run successfully the examples.
+
+- On MacOs ARM CPUs the C compilation flag `-fsanitize=leak` is not supported. To compile the examples, it is necessary to remove the flag from the `Makefile`.
