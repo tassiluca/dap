@@ -59,9 +59,10 @@ int main(void) {
     /* Actual semantics */
     CTMC ctmc = create_ctmc_from_transitions(transitions, ARRAY_LEN(transitions));
     int simulation_steps = 10;
+    State initialState = IDLE;
     Trace* trace = simulate_ctmc(
         &ctmc,
-        IDLE,   /* initial state */
+        initialState,
         simulation_steps
     );
     for (size_t i = 0; i < trace->len; i++) {

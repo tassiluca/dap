@@ -19,8 +19,8 @@
         size_t size;           \
     } MSet_##Type;
 
-typedef struct Place* Place;
-typedef struct Id* Id;
+typedef struct Place *Place;
+typedef struct Id *Id;
 
 DEFINE_MSET(Place)
 
