@@ -1,0 +1,38 @@
+{
+  "configMigration": true,
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    "helpers:pinGitHubActionDigests",
+    ":pinDevDependencies",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":separateMajorReleases",
+    ":separatePatchReleases",
+    ":rebaseStalePrs",
+    ":enableVulnerabilityAlerts",
+    "npm:unpublishSafe"
+  ],
+  "automerge": true,
+  "assignees": [
+    "tassiluca"
+  ],
+  "prHourlyLimit": 0,
+  "packageRules": [
+    {
+      "description": "CI updates must be tagged as `ci`",
+      "matchFileNames": [
+        ".github/workflows/*.yml",
+        ".github/workflows/*.yaml"
+      ],
+      "semanticCommitType": "ci"
+    },
+    {
+      "description": "Core dependencies must be scoped as `core-deps`",
+      "matchPackageNames": [
+        "/^org\\.scala-lang.*/"
+      ],
+      "semanticCommitScope": "core-deps"
+    }
+  ]
+}
