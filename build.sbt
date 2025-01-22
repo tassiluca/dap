@@ -2,7 +2,7 @@ import sbtcc.Executable
 import scala.collection.immutable.ListSet
 import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
 
-ThisBuild / scalaVersion := "3.4.3"
+ThisBuild / scalaVersion := "3.6.3"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
