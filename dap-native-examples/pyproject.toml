@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "dap-native-examples"
+version = "0.1.0"
+description = ""
+authors = [ "Luca Tassinari <luca.tassinari.2000@gmail.com>" ]
+readme = "README.md"
+packages = [
+    { include = "python", from = "src/main" }
+]
+
+[tool.poetry.dependencies]
+python = ">= 3.9.0 < 4.0.0"
+cffi = "^1.17.1"
+setuptools = "^75.8.0"
+
+[tool.poetry.scripts]
+build-library = "scripts:build_library"
+build-cffi = "scripts:build_cffi"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
