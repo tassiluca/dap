@@ -1,16 +1,8 @@
 #ifndef FOO_H
 #define FOO_H
 
-typedef struct Point {
-    int x;
-    int y;
-} Point;
-typedef struct Foo Foo;
+typedef struct State *State;
 
-void print_point(Point*);
-
-Foo* create_foo(int);
-
-void print_foo(Foo*);
+void pass_around(State state);
 
 #endif

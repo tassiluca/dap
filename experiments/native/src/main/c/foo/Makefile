@@ -1,20 +1,22 @@
-CC = gcc
-CFLAGS =
-TARGET = main
-OBJS = main.o foo.o
+ROOT_SCALA_PROJECT=../../../../../../
+PROJECT=experiments
+CC:=clang
+CFLAGS=-ansi -Wpedantic -Wall -fsanitize=address,undefined
+TARGET=main
 
-all: $(TARGET)
+all: 	main
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+main: 	main.o lib
+	  	${CC} ${CFLAGS} -o ${TARGET} main.o -L. -lexperiments
 
 main.o: main.c foo.h
-	$(CC) $(CFLAGS) -c main.c
+	  	${CC} ${CFLAGS} -c main.c
 
-foo.o: foo.c foo.h
-	$(CC) $(CFLAGS) -c foo.c
+.PHONY: clean lib
+
+lib:
+	  	cd ${ROOT_SCALA_PROJECT} && sbt experimentsNative/nativeLink && \
+  			cp ${PROJECT}/native/target/scala-3.4.2/libexperiments.dylib ${PROJECT}/native/src/main/c/foo
 
 clean:
-	rm -f $(TARGET) $(OBJS)
-
-.PHONY: all clean
+	  	-rm -f ${TARGET} *.o *.dylib *.so
