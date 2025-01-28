@@ -1,8 +1,8 @@
 package dap.examples
 
-import dap.modelling.{CTMC, CTMCSimulation, DAP}
-import dap.shared.modelling.{CTMC, CTMCSimulation, DAP}
-import dap.utils.{Grids, MSet}
+import dap.shared.modelling.{ CTMC, CTMCSimulation, DAP }
+import DAP.*
+import dap.shared.utils.{ Grids, MSet }
 
 import java.util.Random
 
@@ -32,6 +32,7 @@ end DAPGossip
 @main def mainDAPGossip =
   import DAPGossip.*
   import dap.shared.modelling.DAPGrid
+  import dap.shared.modelling.CTMCSimulation.*
   gossipCTMC
     .newSimulationTrace(state, new Random)
     .take(250)
