@@ -1,3 +1,7 @@
+OS := $(shell uname -s)
+ifeq ($(OS), Darwin)
+    OS := macOS $(shell sw_vers -productVersion | cut -d. -f1)
+endif
 CC := clang
 CURRENT_DIR := $(shell pwd)
 BINARIES_DIR := ${CURRENT_DIR}
@@ -9,10 +13,14 @@ CFLAGS += -Wall             	# Enable all common warnings
 CFLAGS += -Wextra           	# Enable extra warnings
 CFLAGS += -Werror           	# Treat warnings as errors
 CFLAGS += -fsanitize=address,undefined,null  # Enable address/undefined/null sanitizers
-#CFLAGS += -fsanitize=leak   	# Enable leak sanitizer (not supported on macOS arm chips)
+ifneq ($(OS), macOS 15)
+	CFLAGS += -fsanitize=leak  	# Enable leak sanitizer (not supported on macOS >= 15.x)
+endif
 CFLAGS += -g                	# Include debug symbols
 
 all:	mains
+	@echo "Detected OS: ${OS}"
+	@echo "Run ctmc.exe or gossip.exe to execute the programs."
 
 mains: 	libdap ctmc.o gossip.o
 	${CC} ${CFLAGS} -o ${BINARIES_DIR}/ctmc.exe   ctmc.o   -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
