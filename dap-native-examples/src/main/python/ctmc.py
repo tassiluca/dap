@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import List, Tuple
 from lib import dap_cffi
-import weakref
 
 ffi = dap_cffi.ffi
 lib = dap_cffi.lib
@@ -55,138 +54,37 @@ class Transition:
     def __str__(self):
         return f"Transition({self.get_from_state_name()} --{self.get_action_rate()}--> {self.get_to_state_name()})"
 
-print("*" * 20)
+class CTMC:
+    def __init__(self, transitions: List[Transition]):
+        self.transitions = transitions
+        transition_array = ffi.new(f"Transition[{len(transitions)}]", [trn.c_struct[0] for trn in transitions])
+        self.ctmc = lib.create_ctmc_from_transitions(transition_array, len(transitions))
 
-idle = ffi.new("struct State*")
-idle_name = ffi.new("char[]", b"IDLE")
-idle.name = idle_name
+    @classmethod
+    def of_transitions(cls, *transitions):
+        return cls(list(transitions))
 
-send = ffi.new("struct State*")
-send_name = ffi.new("char[]", b"SEND")
-send.name = send_name
-
-done = ffi.new("struct State*")
-done_name = ffi.new("char[]", b"DONE")
-done.name = done_name
-
-fail = ffi.new("struct State*")
-fail_name = ffi.new("char[]", b"FAIL")
-fail.name = fail_name
-
-print("*" * 20)
+idle = State(StateType.IDLE)
+send = State(StateType.SEND)
+done = State(StateType.DONE)
+fail = State(StateType.FAIL)
 
 trns = ffi.new("Transition[6]")
-trns[0].state = idle
-trns[0].action.rate = 1.0
-trns[0].action.state = send
-
-trns[1].state = send
-trns[1].action.rate = 100_000.0
-trns[1].action.state = send
-
-trns[2].state = send
-trns[2].action.rate = 200_000.0
-trns[2].action.state = done
-
-trns[3].state = send
-trns[3].action.rate = 100_000.0
-trns[3].action.state = fail
-
-trns[4].state = fail
-trns[4].action.rate = 100_000.0
-trns[4].action.state = idle
-
-trns[5].state = done
-trns[5].action.rate = 1.0
-trns[5].action.state = done
+trns[0] = Transition(idle, (1.0, send)).c_struct[0]
+trns[1] = Transition(send, (100_000.0, send)).c_struct[0]
+trns[2] = Transition(send, (200_000.0, done)).c_struct[0]
+trns[3] = Transition(send, (100_000.0, fail)).c_struct[0]
+trns[4] = Transition(fail, (100_000.0, idle)).c_struct[0]
+trns[5] = Transition(done, (1.0, done)).c_struct[0]
 
 ctmc = lib.create_ctmc_from_transitions(trns, 6)
 
 steps = 10
 ctmc_ptr = ffi.new("CTMC *")
 ctmc_ptr[0] = ctmc
-trace_ptr = lib.simulate_ctmc(ctmc_ptr, idle, steps)
+
+trace_ptr = lib.simulate_ctmc(ctmc_ptr, idle.c_struct, steps)
 events_ptr = trace_ptr.events
 events = ffi.unpack(events_ptr, steps)
 for e in events:
     print(f"Time: {e.time} - State: {ffi.string(e.state.name).decode()}")
-
-
-
-# transitions = ffi.new("Transition[1]")
-# transitions[0].state = idle
-# transitions[0].action.rate = 1.0
-# transitions[0].action.state = idle
-
-# Call the C function to create the CTMC
-#ctmc = lib.create_ctmc_from_transitions(transitions, 1)
-###############################
-
-# class CTMC:
-#     def __init__(self, transitions: List[Transition]):
-#         self.transitions = transitions
-#         self.ctmc = ffi.new("CTMC *")
-#         transition_array = ffi.new("Transition[]", [transition.c_struct[0] for transition in transitions])
-#         self.ctmc = lib.create_ctmc_from_transitions(transition_array, len(transitions))
-#         print("get from lib")
-#         print(self.ctmc)
-
-#     @classmethod
-#     def of_transitions(cls, *transitions):
-#         return cls(list(transitions))
-
-#     def __repr__(self):
-#         return "\n".join(map(str, self.transitions))
-
-#     def simulate(self, state: StateType, steps: int):
-#         print("*" * 20)
-#         initial_state = State(state)
-#         trace_ptr = lib.simulate_ctmc(ctmc_ptr, initial_state.c_struct, steps)
-#         print(trace_ptr)
-#         print("OK")
-#         trace = ffi.unpack(trace_ptr[0], steps)
-#         events = []
-#         print(trace)
-#         print("Are you sure?")
-#         # Access events from the trace
-#         for i in range(steps):
-#             event = ffi.cast("Event *", trace_ptr[i])
-#             events.append({
-#                 'time': event.time,
-#                 'state': ffi.string(event.state.name).decode()
-#             })
-#         return events
-
-# print("# ------------------- Example Usage -------------------")
-
-# trns = [
-#     Transition(idle_state, (1.0, send_state)),
-#     Transition(send_state, (100_000.0, send_state)),
-#     Transition(send_state, (200_000.0, done_state)),
-#     Transition(send_state, (100_000.0, fail_state)),
-#     Transition(fail_state, (100_000.0, idle_state)),
-#     Transition(done_state, (1.0, done_state)),
-# ]
-# print("TRANSITIONS")
-# [print(trn) for trn in trns]
-
-# print("# ----------------- Example Simulation -----------------")
-
-# transition_array = ffi.new("Transition[6]", [trn.c_struct[0] for trn in trns])
-# print(transition_array)
-# [print(trn.state) for trn in transition_array]
-# ctmc = lib.create_ctmc_from_transitions(transition_array, len(trns))
-# print("Got ", ctmc)
-
-# initial_state = State(StateType.IDLE)
-# ctmc_ptr = ffi.new("CTMC *", ctmc)
-
-# trace_ptr = lib.simulate_ctmc(ctmc_ptr, initial_state.c_struct, 10)
-# print("hoping to get trace ", trace_ptr)
-
-# Simulate the CTMC process for 10 steps starting from IDLE
-# trace_events = stocChannel.simulate(StateType.IDLE, 10)
-
-# Print trace events
-#for event in trace_events:
-#    print(f"Time: {event['time']} - State: {event['state']}")
