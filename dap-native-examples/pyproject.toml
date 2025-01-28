@@ -16,6 +16,7 @@ setuptools = "^75.8.0"
 [tool.poetry.scripts]
 build-library = "scripts:build_library"
 build-cffi = "scripts:build_cffi"
+clean = "scripts:clean"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
