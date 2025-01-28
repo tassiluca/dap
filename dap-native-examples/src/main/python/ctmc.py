@@ -63,28 +63,27 @@ class CTMC:
     @classmethod
     def of_transitions(cls, *transitions):
         return cls(list(transitions))
+    
+    def simulate(self, initial_state: State, steps: int):
+        ctmc_ptr = ffi.new("CTMC *")
+        ctmc_ptr[0] = self.ctmc
+        trace_ptr = lib.simulate_ctmc(ctmc_ptr, initial_state.c_struct, steps)
+        events_ptr = trace_ptr.events
+        events = ffi.unpack(events_ptr, steps)
+        for e in events:
+            print(f"Time: {e.time} - State: {ffi.string(e.state.name).decode()}")
 
 idle = State(StateType.IDLE)
 send = State(StateType.SEND)
 done = State(StateType.DONE)
 fail = State(StateType.FAIL)
 
-trns = ffi.new("Transition[6]")
-trns[0] = Transition(idle, (1.0, send)).c_struct[0]
-trns[1] = Transition(send, (100_000.0, send)).c_struct[0]
-trns[2] = Transition(send, (200_000.0, done)).c_struct[0]
-trns[3] = Transition(send, (100_000.0, fail)).c_struct[0]
-trns[4] = Transition(fail, (100_000.0, idle)).c_struct[0]
-trns[5] = Transition(done, (1.0, done)).c_struct[0]
-
-ctmc = lib.create_ctmc_from_transitions(trns, 6)
-
-steps = 10
-ctmc_ptr = ffi.new("CTMC *")
-ctmc_ptr[0] = ctmc
-
-trace_ptr = lib.simulate_ctmc(ctmc_ptr, idle.c_struct, steps)
-events_ptr = trace_ptr.events
-events = ffi.unpack(events_ptr, steps)
-for e in events:
-    print(f"Time: {e.time} - State: {ffi.string(e.state.name).decode()}")
+ctmc = CTMC.of_transitions(
+    Transition(idle, (1.0, send)),
+    Transition(send, (100_000.0, send)),
+    Transition(send, (200_000.0, done)),
+    Transition(send, (100_000.0, fail)),
+    Transition(fail, (100_000.0, idle)),
+    Transition(done, (1.0, done))
+)
+ctmc.simulate(idle, 10)
