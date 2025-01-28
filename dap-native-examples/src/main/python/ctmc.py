@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List, Tuple
 from lib import dap_cffi
+import weakref
 
 ffi = dap_cffi.ffi
 lib = dap_cffi.lib
@@ -12,10 +13,27 @@ class StateType(Enum):
     FAIL = "FAIL"
 
 class State:
-    def __init__(self, state: StateType) -> None:
-        self.c_struct = ffi.new("struct State *")
-        self.name_str = ffi.new("char[]", state.value.encode())
-        self.c_struct.name = self.name_str
+    weak_refs = weakref.WeakKeyDictionary()
+
+    def __init__(self, c_state):
+        self.c_struct = c_state
+
+    @classmethod
+    def of_type(cls, state_type: StateType):
+        c_struct = ffi.new("struct State *")
+        name_str = ffi.new("char[]", state_type.value.encode())
+        # Unlike C, the returned pointer object has ownership on the allocated memory: 
+        # when this exact object is garbage-collected, then the memory is freed. 
+        # If, at the level of C, you store a pointer to the memory somewhere else, 
+        # then make sure you also keep the object alive for as long as needed. 
+        # See https://cffi.readthedocs.io/en/stable/using.html
+        cls.weak_refs[c_struct] = name_str
+        c_struct.name = name_str
+        return cls(c_struct)
+    
+    @classmethod
+    def from_c_struct(cls, c_struct):
+        return cls(c_struct)
 
     def get_name(self) -> str:
         return ffi.string(self.c_struct.name).decode()
@@ -54,6 +72,21 @@ class Transition:
     def __str__(self):
         return f"Transition({self.get_from_state_name()} --{self.get_action_rate()}--> {self.get_to_state_name()})"
 
+class Event:
+    def __init__(self, time: float, state: State):
+        self.time = time
+        self.state = state
+
+    def __str__(self):
+        return f"Event({self.time}, {self.state.get_name()})"
+
+class Trace:
+    def __init__(self, events: List[Event]):
+        self.events = events
+
+    def __str__(self):
+        return f"Simulation trace:\n\t" + "\n\t".join(str(e) for e in self.events)
+
 class CTMC:
     def __init__(self, transitions: List[Transition]):
         self.transitions = transitions
@@ -70,13 +103,14 @@ class CTMC:
         trace_ptr = lib.simulate_ctmc(ctmc_ptr, initial_state.c_struct, steps)
         events_ptr = trace_ptr.events
         events = ffi.unpack(events_ptr, steps)
+        return Trace([Event(e.time, State.from_c_struct(e.state)) for e in events])
         for e in events:
             print(f"Time: {e.time} - State: {ffi.string(e.state.name).decode()}")
 
-idle = State(StateType.IDLE)
-send = State(StateType.SEND)
-done = State(StateType.DONE)
-fail = State(StateType.FAIL)
+idle = State.of_type(StateType.IDLE)
+send = State.of_type(StateType.SEND)
+done = State.of_type(StateType.DONE)
+fail = State.of_type(StateType.FAIL)
 
 ctmc = CTMC.of_transitions(
     Transition(idle, (1.0, send)),
@@ -86,4 +120,5 @@ ctmc = CTMC.of_transitions(
     Transition(fail, (100_000.0, idle)),
     Transition(done, (1.0, done))
 )
-ctmc.simulate(idle, 10)
+trace = ctmc.simulate(idle, 10)
+print(trace)
