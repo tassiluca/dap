@@ -7,6 +7,13 @@
 #define BLUE  "\033[1;35m"  // Blue for messages
 #define RESET "\033[0m"  // Reset color
 
+Id create_id(int x, int y) {
+    Id id = malloc(sizeof(struct Id));
+    id->x = x;
+    id->y = y;
+    return id;
+}
+
 MSet_Id *create_grid_of_ids(int rows, int cols) {
     MSet_Id *ids = malloc(sizeof(MSet_Id));
     ids->elements = malloc(rows * cols * sizeof(Id));

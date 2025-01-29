@@ -14,11 +14,4 @@ struct Id {
     int y;
 };
 
-Id create_id(int x, int y) {
-    Id id = malloc(sizeof(struct Id));
-    id->x = x;
-    id->y = y;
-    return id;
-}
-
 #endif
