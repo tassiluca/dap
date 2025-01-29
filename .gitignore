@@ -35,6 +35,9 @@ metals.sbt
 # Prerequisites
 *.d
 
+# Prepocessed C source
+*.i
+
 # Object files
 *.o
 *.ko

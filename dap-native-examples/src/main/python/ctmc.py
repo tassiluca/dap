@@ -1,10 +1,10 @@
 from enum import Enum
 from typing import List, Tuple
-from lib import dap_cffi
+from lib import ctmc_cffi
 import weakref
 
-ffi = dap_cffi.ffi
-lib = dap_cffi.lib
+ffi = ctmc_cffi.ffi
+lib = ctmc_cffi.lib
 
 class StateType(Enum):
     IDLE = "IDLE"

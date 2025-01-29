@@ -50,20 +50,19 @@ def build_cffi(c):
     """
     Build the CFFI wrapper for the DAP library.
     """
-    ffi = cffi.FFI()
-    h_file_name = lib_folder / "ctmc.h"
-    log(f"Reading CFFI Declarations from {h_file_name}")
-    with open(h_file_name) as h_file:
+    ctmc_ffi = cffi.FFI()
+    ctmc_module_h_file_name = lib_folder / "ctmc.h"
+    with open(ctmc_module_h_file_name) as h_file:
         lines = h_file.read().splitlines()
         lines += [
             "struct State {",
             "   const char* name;",
             "};",
         ]
-        ffi.cdef("\n".join(lines))
-    ffi.set_source(
-        "dap_cffi",
-        """
+        ctmc_ffi.cdef("\n".join(lines))
+    ctmc_ffi.set_source(
+        module_name="ctmc_cffi",
+        source="""
         #include "ctmc.h"
         struct State {
             const char* name;
@@ -74,7 +73,21 @@ def build_cffi(c):
         include_dirs=[lib_folder.as_posix()],
         runtime_library_dirs=[lib_folder.as_posix()],
     )
-    ffi.compile(tmpdir=lib_folder.as_posix())
+    ctmc_ffi.compile(tmpdir=lib_folder.as_posix())
+    dap_ffi = cffi.FFI()
+    dap_module_h_file_name = lib_folder / "dap_char2d.h"
+    with open(dap_module_h_file_name) as h_file:
+        lines = h_file.read().splitlines()
+        dap_ffi.cdef("\n".join(lines))
+    dap_ffi.set_source(
+        module_name="dap_cffi",
+        source='#include "dap_char2d.h"',
+        libraries=["dap"],
+        library_dirs=[lib_folder.as_posix()],
+        include_dirs=[lib_folder.as_posix()],
+        runtime_library_dirs=[lib_folder.as_posix()],
+    )
+    dap_ffi.compile(tmpdir=lib_folder.as_posix())
 
 # !Warning! cffi does not support C preprocessor directives. This function pre-processes the header file to remove them.
 def _pre_process(header_file_path: str) -> str:
