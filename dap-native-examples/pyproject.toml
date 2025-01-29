@@ -13,10 +13,8 @@ python = ">= 3.9.0 < 4.0.0"
 cffi = "^1.17.1"
 setuptools = "^75.8.0"
 
-[tool.poetry.scripts]
-build-library = "scripts:build_library"
-build-cffi = "scripts:build_cffi"
-clean = "scripts:clean"
+[tool.poetry.group.dev.dependencies]
+invoke = "^2.2.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

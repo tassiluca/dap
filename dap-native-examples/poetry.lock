@@ -81,6 +81,18 @@ files = [
 pycparser = "*"
 
 [[package]]
+name = "invoke"
+version = "2.2.0"
+description = "Pythonic task execution"
+optional = false
+python-versions = ">=3.6"
+groups = ["dev"]
+files = [
+    {file = "invoke-2.2.0-py3-none-any.whl", hash = "sha256:6ea924cc53d4f78e3d98bc436b08069a03077e6f85ad1ddaa8a116d7dad15820"},
+    {file = "invoke-2.2.0.tar.gz", hash = "sha256:ee6cbb101af1a859c7fe84f2a264c059020b0cb7fe3535f9424300ab568f6bd5"},
+]
+
+[[package]]
 name = "pycparser"
 version = "2.22"
 description = "C parser in Python"
@@ -116,4 +128,4 @@ type = ["importlib_metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (==1.14
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.9.0 < 4.0.0"
-content-hash = "9fae77512b836809ba9641e010acda44df78407be0e1637681f56ff4ee9b96fe"
+content-hash = "ed0c89fc9480dcdc1d38e12ccfff53ac8985d9f6fab232b508a30ed208e0f8f5"
