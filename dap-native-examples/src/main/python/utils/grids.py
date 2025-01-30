@@ -16,7 +16,6 @@ def grid_of_ids(rows: int, cols: int) -> List[dap.Neighbors]:
                 neighbor_ids.append(ids[i][j - 1])
             if j < cols - 1:
                 neighbor_ids.append(ids[i][j + 1])
-            mset = dap.MSet("Id", neighbor_ids)
+            mset = dap.MSet(neighbor_ids)
             neighbors.append(dap.Neighbors(id_obj, mset))
     return neighbors
-
