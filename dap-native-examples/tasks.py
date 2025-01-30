@@ -36,7 +36,7 @@ def build_library(c):
     lib_files = glob.glob(str(this_dir.parent / "dap" / "native" / "target" / "scala-*" / "lib*"))
     log(f"Copying library to {lib_folder}")
     invoke.run(f"mkdir -p {lib_folder}")
-    invoke.run(f"cp {" ".join(lib_files)} {lib_folder}")
+    invoke.run(f'cp {" ".join(lib_files)} {lib_folder}')
     log(f"Copying header file to {lib_folder}")
     h_files_paths = this_dir.glob("src/main/c/*.h")
     for h_file_path in h_files_paths:

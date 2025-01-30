@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
-        jvm-version: [ 11, 17, 21 ]
+        jvm-version: [ 17, 21 ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -70,7 +70,7 @@ jobs:
       matrix:
         os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
         jvm-version: [ 21 ]
-        python-version: [ 3.9, 3.10, 3.11, 3.12, 1.13 ]
+        python-version: [ 3.12, 3.13 ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
