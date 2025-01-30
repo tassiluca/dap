@@ -1,8 +1,9 @@
-from enum import Enum
-from typing import List, Tuple
-from lib import ctmc_cffi
-from dsl import *
 import weakref
+from enum import Enum
+from typing import Tuple
+
+from dsl import *
+from lib import ctmc_cffi
 
 ffi = ctmc_cffi.ffi
 lib = ctmc_cffi.lib
