@@ -68,7 +68,7 @@ jobs:
     needs: build-lib
     strategy:
       matrix:
-        os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
+        os: [ ubuntu-22.04 ] # macos-14 ] #, windows-2022 ]
         jvm-version: [ 21 ]
         python-version: [ 3.12, 3.13 ]
       fail-fast: false
