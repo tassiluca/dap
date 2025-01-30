@@ -24,6 +24,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.jvm-version }}
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@96cf3f09dc501acdad7807fffe97dba9fa0709be # v1
       - name: Build shared library
         run: sbt dapNative/nativeLink
 
@@ -32,7 +34,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
-        jvm-version: 21
+        jvm-version: [ 21 ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -67,9 +69,10 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
-        jvm-version: 21
+        jvm-version: [ 21 ]
         python-version: [ 3.9, 3.10, 3.11, 3.12, 1.13 ]
       fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -78,6 +81,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.jvm-version }}
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@96cf3f09dc501acdad7807fffe97dba9fa0709be # v1
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
