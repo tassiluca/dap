@@ -1,12 +1,27 @@
 from dsl import dap
+from utils import grids
+from lib import dap_cffi
 
-test_id = dap.Id(1, 2)
+ffi = dap_cffi.ffi
+
+sep = "-" * 50
+
+test_id = dap.Id.of(1, 2)
 print(test_id.c_struct)
-print(test_id.c_struct.x, test_id.c_struct.y)
+print(test_id)
+print(sep)
 
-test_mset = dap.MSet("Id", [dap.Id(1, 2), dap.Id(3, 4)])
+test_mset = dap.MSet("Id", [dap.Id.of(0, 2), dap.Id.of(2, 2), dap.Id.of(1, 1), dap.Id.of(1, 3)])
 print(test_mset.c_struct)
-print(test_mset.c_struct.size)
-print(test_mset.c_struct.elements[0])
-print(test_mset.c_struct.elements[0].x, test_mset.c_struct.elements[0].y)
-print(test_mset.c_struct.elements[1].x, test_mset.c_struct.elements[1].y)
+print(test_mset)
+print(sep)
+
+neighbors = grids.grid_of_ids(5, 5)
+for neighbor in neighbors:
+    print(neighbor)
+
+print(neighbors[0].point)
+print(neighbors[1].neighbors.elements[1])
+
+print(int(ffi.cast("uintptr_t", neighbors[0].point.c_struct)))
+print(int(ffi.cast("uintptr_t", neighbors[1].neighbors.elements[1].c_struct)))

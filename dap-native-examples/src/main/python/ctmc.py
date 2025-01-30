@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List, Tuple
 from lib import ctmc_cffi
+from dsl import *
 import weakref
 
 ffi = ctmc_cffi.ffi
@@ -12,7 +13,7 @@ class StateType(Enum):
     DONE = "DONE"
     FAIL = "FAIL"
 
-class State:
+class CTMCState(State):
     weak_refs = weakref.WeakKeyDictionary()
 
     def __init__(self, c_state):
@@ -38,8 +39,11 @@ class State:
     def get_name(self) -> str:
         return ffi.string(self.c_struct.name).decode()
 
+    def __str__(self):
+        return self.get_name()
+
 class Action:
-    def __init__(self, rate: float, target_state: State):
+    def __init__(self, rate: float, target_state: CTMCState):
         self.c_struct = ffi.new("Action *")
         self.c_struct.rate = rate
         self.state = target_state
@@ -52,7 +56,7 @@ class Action:
         return self.state.get_name()
     
 class Transition:
-    def __init__(self, from_state: State, action: Tuple[float, State]) -> None:
+    def __init__(self, from_state: CTMCState, action: Tuple[float, CTMCState]) -> None:
         rate, to_state = action
         self.c_struct = ffi.new("Transition *")
         self.state = from_state
@@ -72,21 +76,6 @@ class Transition:
     def __str__(self):
         return f"Transition({self.get_from_state_name()} --{self.get_action_rate()}--> {self.get_to_state_name()})"
 
-class Event:
-    def __init__(self, time: float, state: State):
-        self.time = time
-        self.state = state
-
-    def __str__(self):
-        return f"Event({self.time}, {self.state.get_name()})"
-
-class Trace:
-    def __init__(self, events: List[Event]):
-        self.events = events
-
-    def __str__(self):
-        return f"Simulation trace:\n\t" + "\n\t".join(str(e) for e in self.events)
-
 class CTMC:
     def __init__(self, transitions: List[Transition]):
         self.transitions = transitions
@@ -97,20 +86,18 @@ class CTMC:
     def of_transitions(cls, *transitions):
         return cls(list(transitions))
     
-    def simulate(self, initial_state: State, steps: int):
+    def simulate(self, initial_state: CTMCState, steps: int):
         ctmc_ptr = ffi.new("CTMC *")
         ctmc_ptr[0] = self.ctmc
         trace_ptr = lib.simulate_ctmc(ctmc_ptr, initial_state.c_struct, steps)
         events_ptr = trace_ptr.events
         events = ffi.unpack(events_ptr, steps)
-        return Trace([Event(e.time, State.from_c_struct(e.state)) for e in events])
-        for e in events:
-            print(f"Time: {e.time} - State: {ffi.string(e.state.name).decode()}")
+        return Trace([Event(e.time, CTMCState.from_c_struct(e.state)) for e in events])
 
-idle = State.of_type(StateType.IDLE)
-send = State.of_type(StateType.SEND)
-done = State.of_type(StateType.DONE)
-fail = State.of_type(StateType.FAIL)
+idle = CTMCState.of_type(StateType.IDLE)
+send = CTMCState.of_type(StateType.SEND)
+done = CTMCState.of_type(StateType.DONE)
+fail = CTMCState.of_type(StateType.FAIL)
 
 ctmc = CTMC.of_transitions(
     Transition(idle, (1.0, send)),
