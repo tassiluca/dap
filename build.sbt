@@ -50,7 +50,6 @@ lazy val dapJVMExamples = project.in(file("dap-jvm-examples"))
   )
   .dependsOn(dap.jvm)
 
-val mainProgram = Executable("main")
 lazy val dapNativeExamples = project.in(file("dap-native-examples"))
   .enablePlugins(CcPlugin)
   .settings(
@@ -58,12 +57,5 @@ lazy val dapNativeExamples = project.in(file("dap-native-examples"))
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.19"
     ),
-    Compile / ccTargets := ListSet(Executable("main")),
-    Compile / cSources := Map(
-      mainProgram -> Seq(
-        baseDirectory.value / "src" / "main" / "c" / "gossip.c",
-      ),
-    ),
-    Compile / ldFlags := Map(mainProgram -> Seq("-L.", "-ldap")),
   )
   .dependsOn(dap.native)

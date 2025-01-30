@@ -9,11 +9,30 @@ defaults:
     shell: bash
 
 jobs:
-  build:
+  build-lib:
     strategy:
       matrix:
         os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
         jvm-version: [ 11, 17, 21 ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Set up JDK ${{ matrix.jvm-version }}
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.jvm-version }}
+      - name: Build shared library
+        run: sbt dapNative/nativeLink
+
+  test-c:
+    needs: build-lib
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
+        jvm-version: 21
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -32,13 +51,47 @@ jobs:
           clang: true
       - name: Setup sbt launcher
         uses: sbt/setup-sbt@96cf3f09dc501acdad7807fffe97dba9fa0709be # v1
-      - run: clang --version
-      - name: Build and test
+      - name: Build examples
+        run: cd dap-native-examples/src/main/c && make
+      - name: Test
         run: |
           export GC_INITIAL_HEAP_SIZE=512M
           cd dap-native-examples/src/main/c
-          make
           echo ">> Executing ctmc binary"
           ./ctmc.exe
           echo ">> Executing gossip binary"
           ./gossip.exe
+
+  test-python:
+    needs: build-lib
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
+        jvm-version: 21
+        python-version: [ 3.9, 3.10, 3.11, 3.12, 1.13 ]
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Set up JDK ${{ matrix.jvm-version }}
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.jvm-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: cd dap-native-examples && pip install -r requirements.txt
+      - name: Install dependencies
+        run: cd dap-native-examples && poetry install
+      - name: Build examples
+        run: cd dap-native-examples && poetry run invoke build-cffi
+      - name: Test
+        run: |
+          cd dap-native-examples
+          echo ">> Executing `ctmc.py`"
+          poetry run python src/main/python/ctmc.py
+          echo ">> Executing `gossip.py`"
+          poetry run python src/main/python/gossip.py
