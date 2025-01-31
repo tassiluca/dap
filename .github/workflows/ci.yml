@@ -95,6 +95,7 @@ jobs:
         run: cd dap-native-examples && poetry run invoke build-cffi
       - name: Test
         run: |
+          export GC_INITIAL_HEAP_SIZE=512M
           cd dap-native-examples
           echo ">> Executing `ctmc.py`"
           poetry run python src/main/python/ctmc.py
