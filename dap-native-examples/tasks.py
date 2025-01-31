@@ -78,6 +78,10 @@ def build_cffi(c):
     dap_module_h_file_name = lib_folder / "dap_char2d.h"
     with open(dap_module_h_file_name) as h_file:
         lines = h_file.read().splitlines()
+        lines += [
+            'extern "Python" double constant_1_rate(const MSet_Place*);' # double (*rate)(const MSet_Place*);
+            'extern "Python" double constant_1k_rate(const MSet_Place*);'  # double (*rate)(const MSet_Place*);
+        ]
         dap_ffi.cdef("\n".join(lines))
     dap_ffi.set_source(
         module_name="dap_cffi",
