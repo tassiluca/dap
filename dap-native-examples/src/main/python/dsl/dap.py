@@ -9,8 +9,8 @@ ffi = dap_cffi.ffi
 lib = dap_cffi.lib
 
 class Id:
-    def __init__(self, c_state):
-        self.c_struct = c_state
+    def __init__(self, c_struct):
+        self.c_struct = c_struct
 
     @classmethod
     def of(cls, x: int, y: int):
@@ -23,8 +23,8 @@ class Id:
         return f"Id({self.c_struct.x}, {self.c_struct.y})"
 
 class Place:
-    def __init__(self, c_place):
-        self.c_struct = c_place
+    def __init__(self, c_struct):
+        self.c_struct = c_struct
 
     @classmethod
     def of(cls, token: str):
@@ -37,10 +37,10 @@ class Place:
         return f"Place({self.c_struct.p.decode()})"
 
 class Token:
-    def __init__(self, c_place):
-        self.c_struct = c_place
-        self.id = Id(c_place.id)
-        self.place = Place(c_place.place)
+    def __init__(self, c_struct):
+        self.c_struct = c_struct
+        self.id = Id(c_struct.id)
+        self.place = Place(c_struct.place)
 
     @classmethod
     def of(cls, id: Id, place: Place):
@@ -55,28 +55,26 @@ class Token:
 T = TypeVar("T", Id, Place, Token)
 
 class MSet(Generic[T]):
-    _weak_refs = weakref.WeakKeyDictionary()
-
     def __init__(self, elems: List[T], type_hint: Type[T] = None):
         if not elems and type_hint is None:
             raise ValueError("Cannot determine type from empty list. Please provide type hint.")
         type_name = elems[0].__class__.__name__ if elems else type_hint.__name__
         self.c_struct = ffi.new(f"MSet_{type_name} *")
         self.c_struct.size = len(elems)
-        self.c_elements = ffi.new(f"{type_name}[{len(elems)}]", [e.c_struct for e in elems]) # this is necessary to avoid to be garbage collected
+        # !Warning! this is necessary to avoid to elements to be garbage collected
+        self.c_elements = ffi.new(f"{type_name}[{len(elems)}]", [e.c_struct for e in elems])
         self.c_struct.elements = self.c_elements
-        self._weak_refs[self.c_struct] = elems # ensure to not be garbage-collected
         self.elements = [getattr(sys.modules[__name__], type_name)(e.c_struct) for e in elems]
 
     def __str__(self):
         return f"MSet({self.c_struct.size}, {[str(elem) for elem in self.elements]})"
 
 class Neighbors:
-    _weak_refs = weakref.WeakKeyDictionary()
+    #_weak_refs = weakref.WeakKeyDictionary()
 
     def __init__(self, id: Id, mset: MSet):
         self.c_struct = ffi.new("Neighbors *")
-        self._weak_refs[self.c_struct] = (id, mset)
+        #self._weak_refs[self.c_struct] = (id, mset)
         self.c_struct.point = id.c_struct
         self.c_struct.neighbors = mset.c_struct
         self.point = id

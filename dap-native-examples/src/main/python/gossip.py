@@ -13,12 +13,7 @@ neighbors = grids.grid_of_ids(5, 5)
 for n in neighbors:
     print(n)
 
-all_neighbors = ffi.new(f"Neighbors[{len(neighbors)}]")
-for i, n in enumerate(neighbors):
-    all_neighbors[i].point = n.c_struct.point
-    all_neighbors[i].neighbors = n.c_struct.neighbors
-
-# all_neighbors = ffi.new(f"Neighbors[{len(neighbors)}]", [n.c_struct[0] for n in neighbors])
+all_neighbors = ffi.new(f"Neighbors[{len(neighbors)}]", [n.c_struct[0] for n in neighbors])
 
 print("*" * 120)
 
