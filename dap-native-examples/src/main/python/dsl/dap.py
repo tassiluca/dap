@@ -1,9 +1,8 @@
 import sys
+from typing import TypeVar, Type, Generic, List
 
 from dsl import State
 from lib import dap_cffi
-from typing import TypeVar, Type, Generic, List
-import weakref
 
 ffi = dap_cffi.ffi
 lib = dap_cffi.lib
@@ -11,6 +10,7 @@ lib = dap_cffi.lib
 class Id:
     def __init__(self, c_struct):
         self.c_struct = c_struct
+        self.coordinates = (c_struct.x, c_struct.y)
 
     @classmethod
     def of(cls, x: int, y: int):
@@ -20,11 +20,12 @@ class Id:
         return cls(c_struct)
 
     def __str__(self):
-        return f"Id({self.c_struct.x}, {self.c_struct.y})"
+        return f"Id({self.coordinates})"
 
 class Place:
     def __init__(self, c_struct):
         self.c_struct = c_struct
+        self.p = c_struct.p.decode()
 
     @classmethod
     def of(cls, token: str):
@@ -34,7 +35,7 @@ class Place:
         return cls(c_struct)
 
     def __str__(self):
-        return f"Place({self.c_struct.p.decode()})"
+        return f"Place({self.p})"
 
 class Token:
     def __init__(self, c_struct):
@@ -115,6 +116,8 @@ class DAPState(State):
 
     def __init__(self, c_struct):
         self.c_struct = c_struct
+        self.tokens = [ Token(self.c_struct.tokens.elements[i]) for i in range(self.c_struct.tokens.size) ]
+        self.messages = [ Token(self.c_struct.messages.elements[i]) for i in range(c_struct.messages.size) ]
 
     def __str__(self):
-        return f"DAPState(tokens={self.tokens}, messages={self.messages})"
+        return f"DAPState(tokens={[str(t) for t in self.tokens]}, messages={[str(m) for m in self.messages]})"
