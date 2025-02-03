@@ -19,7 +19,7 @@ class Id:
         c_struct.y = y
         return cls(c_struct)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Id({self.coordinates})"
 
 class Place:
@@ -34,7 +34,7 @@ class Place:
         c_struct.p = token.encode()
         return cls(c_struct)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Place({self.p})"
 
 class Token:
@@ -50,8 +50,8 @@ class Token:
         cls.c_struct.place = place.c_struct
         return cls(cls.c_struct[0])
 
-    def __str__(self):
-        return f"Token({self.id}, {self.place}"
+    def __str__(self) -> str:
+        return f"Token({self.id}, {self.place})"
 
 T = TypeVar("T", Id, Place, Token)
 
@@ -67,22 +67,19 @@ class MSet(Generic[T]):
         self.c_struct.elements = self.c_elements
         self.elements = [getattr(sys.modules[__name__], type_name)(e.c_struct) for e in elems]
 
-    def __str__(self):
-        return f"MSet({self.c_struct.size}, {[str(elem) for elem in self.elements]})"
+    def __str__(self) -> str:
+        return "{ " + ",".join([str(elem) for elem in self.elements]) + " }"
 
 class Neighbors:
-    #_weak_refs = weakref.WeakKeyDictionary()
-
     def __init__(self, id: Id, mset: MSet):
         self.c_struct = ffi.new("Neighbors *")
-        #self._weak_refs[self.c_struct] = (id, mset)
         self.c_struct.point = id.c_struct
         self.c_struct.neighbors = mset.c_struct
         self.point = id
         self.neighbors = mset
 
     def __str__(self):
-        return f"Neighbors of {str(self.point)} are {str(self.neighbors)}"
+        return f"Neighbors of {self.point} are {self.neighbors}"
 
 class Rule:
     def __init__(self, preconditions: MSet[Place], rate: float, effects: MSet[Place], messages: MSet[Place]):
@@ -90,13 +87,16 @@ class Rule:
         self.c_struct.preconditions = preconditions.c_struct
         self.preconditions = preconditions
         self.c_struct.effects = effects.c_struct
-        self.effects = effects
         self.c_struct.messages = messages.c_struct
-        self.message = messages
         self.c_struct.rate = lib.constant_1_rate if rate == 1.0 else lib.constant_1k_rate
+        self.effects = effects
+        self.message = messages
 
-    def __str__(self):
-        return f"Rule: {(str(self.preconditions), str(self.effects), str(self.message))}"
+    def __str__(self) -> str:
+        return ("Rule: { preconditions = "  + str(self.preconditions) + ", " +
+                        "effects = "        + str(self.effects) + ", " +
+                        "messages = "       + str(self.message) + " " +
+                      "}")
 
 @ffi.def_extern()
 def constant_1_rate(mset):
@@ -119,5 +119,6 @@ class DAPState(State):
         self.tokens = [ Token(self.c_struct.tokens.elements[i]) for i in range(self.c_struct.tokens.size) ]
         self.messages = [ Token(self.c_struct.messages.elements[i]) for i in range(c_struct.messages.size) ]
 
-    def __str__(self):
-        return f"DAPState(tokens={[str(t) for t in self.tokens]}, messages={[str(m) for m in self.messages]})"
+    def __str__(self) -> str:
+        return ("DAPState(tokens = { " + ",".join([str(t) for t in self.tokens]) + " }, " +
+                         "messages = { " + ",".join([str(m) for m in self.messages]) + "} ")
