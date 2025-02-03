@@ -30,8 +30,8 @@ If you encounter any issues, please refer to the [known issues](#known-issues-an
 
 Expected outputs:
 
-- [C examples](https://github.com/tassiluca/dap/actions/runs/13111105081/job/36575144699#step:7:23)
-- [Python examples](https://github.com/tassiluca/dap/actions/runs/13111105081/job/36575146072#step:9:19)
+- [C examples](https://github.com/tassiluca/dap/actions/runs/13112906828/job/36580609448#step:7:23)
+- [Python examples](https://github.com/tassiluca/dap/actions/runs/13112906828/job/36580610523#step:9:21)
 
 ## Native interoperability
 
