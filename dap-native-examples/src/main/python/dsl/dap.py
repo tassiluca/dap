@@ -89,7 +89,8 @@ class Rule:
         self.preconditions = preconditions
         self.c_struct.effects = effects.c_struct
         self.c_struct.messages = messages.c_struct
-        self.c_struct.rate = lib.constant_1_rate if rate == 1.0 else lib.constant_1k_rate
+        self.rate_fun = create_fixed_rate_function(rate)
+        self.c_struct.rate = self.rate_fun
         self.effects = effects
         self.message = messages
 
@@ -99,13 +100,12 @@ class Rule:
                         "messages = "       + str(self.message) + " " +
                       "}")
 
-@ffi.def_extern()
-def constant_1_rate(mset):
-    return 1.0
 
-@ffi.def_extern()
-def constant_1k_rate(mset):
-    return 1000.0
+def create_fixed_rate_function(rate_value):
+    @ffi.callback("double(MSet_Place *)")
+    def rate_func(mset_place_ptr):
+        return rate_value
+    return rate_func
 
 class DAPState(State):
     _weak_refs = weakref.WeakKeyDictionary()
