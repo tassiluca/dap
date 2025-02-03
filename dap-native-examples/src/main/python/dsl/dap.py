@@ -1,7 +1,8 @@
 import sys
+import weakref
 from typing import TypeVar, Type, Generic, List
 
-from dsl import State
+from dsl import State, Trace, Event
 from lib import dap_cffi
 
 ffi = dap_cffi.ffi
@@ -62,7 +63,7 @@ class MSet(Generic[T]):
         type_name = elems[0].__class__.__name__ if elems else type_hint.__name__
         self.c_struct = ffi.new(f"MSet_{type_name} *")
         self.c_struct.size = len(elems)
-        # !Warning! this is necessary to avoid to elements to be garbage collected
+        # !Warning! this is necessary to avoid elements to be garbage collected!
         self.c_elements = ffi.new(f"{type_name}[{len(elems)}]", [e.c_struct for e in elems])
         self.c_struct.elements = self.c_elements
         self.elements = [getattr(sys.modules[__name__], type_name)(e.c_struct) for e in elems]
@@ -107,18 +108,38 @@ def constant_1k_rate(mset):
     return 1000.0
 
 class DAPState(State):
-    @classmethod
-    def of(cls, tokens: MSet[Token], messages: MSet[Token]):
-        c_struct = ffi.new("struct State *")
-        c_struct.tokens = tokens.c_struct
-        c_struct.messages = messages.c_struct
-        return cls(c_struct)
+    _weak_refs = weakref.WeakKeyDictionary()
 
     def __init__(self, c_struct):
         self.c_struct = c_struct
         self.tokens = [ Token(self.c_struct.tokens.elements[i]) for i in range(self.c_struct.tokens.size) ]
         self.messages = [ Token(self.c_struct.messages.elements[i]) for i in range(c_struct.messages.size) ]
 
+    @classmethod
+    def of(cls, tokens: MSet[Token], messages: MSet[Token]):
+        c_struct = ffi.new("struct State *")
+        c_struct.tokens = tokens.c_struct
+        c_struct.messages = messages.c_struct
+        cls._weak_refs[c_struct] = (tokens, messages) # !Warning! Avoid garbage collection!
+        return cls(c_struct)
+
     def __str__(self) -> str:
         return ("DAPState(tokens = { " + ",".join([str(t) for t in self.tokens]) + " }, " +
                          "messages = { " + ",".join([str(m) for m in self.messages]) + "} ")
+
+class DAP:
+    def __init__(self, rules: List[Rule]):
+        self.all_rules = ffi.new(f"Rule[{len(rules)}]", [rule.c_struct[0] for rule in rules])
+        self.c_struct = lib.create_dap_from_rules(self.all_rules, len(rules))
+
+    def simulate(self, initial_state: DAPState, neighbors: List[Neighbors], steps: int) -> Trace:
+        dap_ptr = ffi.new("DAP *")
+        dap_ptr[0] = self.c_struct
+        ctmc = lib.dap_to_ctmc(dap_ptr)
+        ctmc_ptr = ffi.new("CTMC *")
+        ctmc_ptr[0] = ctmc
+        all_neighbors = ffi.new(f"Neighbors[{len(neighbors)}]", [n.c_struct[0] for n in neighbors])
+        trace_ptr = lib.simulate_dap(ctmc_ptr, initial_state.c_struct, all_neighbors, len(neighbors), steps)
+        events_ptr = trace_ptr.events
+        events = ffi.unpack(events_ptr, steps)
+        return Trace([Event(e.time, DAPState(e.state)) for e in events])
