@@ -2,7 +2,6 @@ from dsl import dap, Trace, Event
 from dsl.dap import DAPState
 from utils import grids
 from lib import dap_cffi
-from collections import defaultdict
 
 from collections import defaultdict
 
