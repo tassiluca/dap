@@ -1,5 +1,38 @@
 # DAP proof of concept
 
+## How to run examples
+
+At the moment, two C and Python examples are available:
+
+- [`ctmc.c`](./dap-native-examples/src/main/c/ctmc.c) / [`ctmc.py`](./dap-native-examples/src/main/python/ctmc.py): a basic example of a continuous-time Markov chain;
+- [`gossip.c`](./dap-native-examples/src/main/c/gossip.c) / [`gossip.py`](./dap-native-examples/src/main/python/gossip.py): example of gossiping simulation using the Distributed Asynchronous Petri Nets library.
+
+To execute C examples:
+
+```bash
+git clone https://github.com/tassiluca/dap.git
+cd ./dap-native-examples/src/main/c
+make
+./<executable-name>.exe
+```
+
+```bash
+git clone https://github.com/tassiluca/dap.git
+cd ./dap-native-examples
+pip install -r requirements.txt
+poetry install && poetry run invoke build-cffi
+poetry run python src/main/python/<executable-name>.py
+```
+
+where `<executable-name>` is either `ctmc` or `gossip`.
+
+If you encounter any issues, please refer to the [known issues](#known-issues-and-their-solutions) section.
+
+Expected outputs:
+
+- [C examples](https://github.com/tassiluca/dap/actions/runs/13111105081/job/36575144699#step:7:23)
+- [Python examples](https://github.com/tassiluca/dap/actions/runs/13111105081/job/36575146072#step:9:19)
+
 ## Native interoperability
 
 ### Implementation details
@@ -55,41 +88,23 @@
     - `BasicNativeCTMCApi` defines the bindings for creating and simulating a basic CTMC model;
     - `NativeDAPApi` defines the bindings for creating and simulating a DAP model;
         - `NativeDAPBindings` includes the necessary conversion utilities for converting Scala types to C types back and forth.
-- `dap-native-examples`: contains the native examples (at the moment, only C) for programming using the DAP native library bindings;
-  - `*.h` contains the data structures and prototypes definitions;
-    - the actual implementations are provided by `@exported` methods in scala native module (and linked during native code compilation);
-    - for generic types, opaque pointers are used. The scala code only knows the generic type is a pointer to an opaque structure, hence it can only pass it around without knowing its internals, while the C code knows the actual implementation of the structure and can properly interact with it.
-      - _side effect_: all the operations that need to work on the internals of the generic types must be implemented in C and make them available to the scala code (see `@extern` in scala native). This is necessary, for example, to implement the distribution layer for (un)marshalling the data structures
+- `dap-native-examples`: contains the native examples leveraging the DAP native library bindings;
+  - C code
+    - `*.h` contains the data structures and prototypes definitions;
+      - the actual implementations are provided by `@exported` methods in scala native module (and linked during native code compilation);
+      - for generic types, opaque pointers are used. The scala code only knows the generic type is a pointer to an opaque structure, hence it can only pass it around without knowing its internals, while the C code knows the actual implementation of the structure and can properly interact with it.
+        - _side effect_: all the operations that need to work on the internals of the generic types must be implemented in C and make them available to the scala code (see `@extern` in scala native). This is necessary, for example, to implement the distribution layer for (un)marshalling the data structures
+  - Python
+    - bindings are created through tasks in the [tasks.py](./dap-native-examples/tasks.py) file from the header files of the C code;
+    - a facade over the low-level details is programmed in the [`dsl` package](./dap-native-examples/src/main/python/dsl) to provide a more user-friendly API.
 - `dap-jvm-examples`: contains the JVM examples for programming using the DAP JVM library.
-
-### How to run examples
-
-At the moment, two C examples are available:
-
-- `ctmc.c`: a basic example of a continuous-time Markov chain;
-- `gossip.c`: example of gossiping simulation using the DAP library.
-
-To execute them:
-
-```bash
-git clone https://github.com/tassiluca/dap.git
-cd ./dap/dap-native-examples/src/main/c
-make
-./<executable-name>.exe
-```
-
-where `<executable-name>` is either `ctmc` or `gossip`.
-
-[Expected outcome](https://github.com/tassiluca/dap/actions/runs/12787902057/job/35648073751#step:7:94).
 
 ### Known issues (and their solutions)
 
-- On MacOs it is necessary to increase the Garbage Collector initial heap size with:
+- For executing successfully the `gossip` example depending on your setup could be necessary to increase the Garbage Collector initial heap size with:
 
     ```bash
     export GC_INITIAL_HEAP_SIZE=512M
     ```
 
   512 MB should be sufficient to run successfully the examples.
-
-- On MacOs ARM CPUs the C compilation flag `-fsanitize=leak` is not supported. To compile the examples, it is necessary to remove the flag from the `Makefile`.
