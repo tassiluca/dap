@@ -16,6 +16,8 @@ make
 ./<executable-name>.exe
 ```
 
+To execute Python examples:
+
 ```bash
 git clone https://github.com/tassiluca/dap.git
 cd ./dap-native-examples
