@@ -7,7 +7,7 @@
 #define LIBCTMC_H
 
 /* The opaque type representing a state in a CTMC process. */
-typedef struct State *State;
+typedef void* State;
 
 /* An action in a CTMC process, namely a rate and a target state. */
 typedef struct {

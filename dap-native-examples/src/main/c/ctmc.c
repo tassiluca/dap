@@ -12,20 +12,20 @@
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-struct State {
+struct MyState {
     const char* name;
 };
 
 #define DEFINE_STATE(name) \
-    static struct State name##_state = {#name}; \
-    State name = &name##_state;
+    static struct MyState name##_state = {#name}; \
+    struct MyState* name = &name##_state;
 
 DEFINE_STATE(IDLE)
 DEFINE_STATE(SEND)
 DEFINE_STATE(DONE)
 DEFINE_STATE(FAIL)
 
-const char* toString(const State s) {
+const char* toString(const struct MyState* s) {
     return s ? s->name : "UNKNOWN";
 }
 

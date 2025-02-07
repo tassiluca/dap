@@ -9,7 +9,7 @@ object BasicNativeCTMCApi extends NativeCTMCApi:
   import dap.shared.modelling.CTMC
   import dap.shared.modelling.CTMC.ofTransitions
 
-  override type State = Ptr[CStruct0]
+  override type State = Ptr[Unit]
   type Action = CStruct2[CDouble, State]
   type Transition = CStruct2[State, Action]
 

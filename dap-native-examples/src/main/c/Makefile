@@ -22,9 +22,9 @@ all:	mains
 	@echo "Detected OS: ${OS}"
 	@echo "Run ctmc.exe or gossip.exe to execute the programs."
 
-mains: 	libdap ctmc.o gossip.o
+mains: 	libdap ctmc.o #gossip.o
 	${CC} ${CFLAGS} -o ${BINARIES_DIR}/ctmc.exe   ctmc.o   -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
-	${CC} ${CFLAGS} -o ${BINARIES_DIR}/gossip.exe gossip.o -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
+#	${CC} ${CFLAGS} -o ${BINARIES_DIR}/gossip.exe gossip.o -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
 
 ctmc.o: ctmc.c ctmc.h
 	${CC} ${CFLAGS} -c ctmc.c
