@@ -143,4 +143,4 @@ widechars = ["wcwidth"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.9.0 < 4.0.0"
-content-hash = "966d2a928abb46e197fc522ddb2a854e2ce226322deb3e287ad3bd8c4def81e7"
+content-hash = "2e27f030cf237ee534da824de9f4ed292fa1570205c19a6db5599d5b905a1e39"
