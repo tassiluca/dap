@@ -1,5 +1,3 @@
-import sbtcc.Executable
-import scala.collection.immutable.ListSet
 import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
 
 ThisBuild / scalaVersion := "3.6.3"
@@ -15,18 +13,6 @@ lazy val nativeCommonSettings = Seq(
       .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
   },
 )
-
-/* Experiments subproject, used to experiment with Scala Native */
-lazy val experiments = crossProject(JVMPlatform, NativePlatform)
-  .crossType(CrossType.Full)
-  .in(file("experiments"))
-  .settings(
-    name := "experiments",
-    libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % "3.2.19"
-    )
-  )
-  .nativeSettings(nativeCommonSettings)
 
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
 lazy val dap = crossProject(JVMPlatform, NativePlatform)
@@ -54,8 +40,5 @@ lazy val dapNativeExamples = project.in(file("dap-native-examples"))
   .enablePlugins(CcPlugin)
   .settings(
     name := "dap-native-examples",
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.19"
-    ),
   )
   .dependsOn(dap.native)
