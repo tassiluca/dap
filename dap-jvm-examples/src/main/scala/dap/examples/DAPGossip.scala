@@ -1,6 +1,6 @@
 package dap.examples
 
-import dap.shared.modelling.{ CTMC, CTMCSimulation, DAP }
+import dap.shared.modelling.{ CTMC, DAP }
 import DAP.*
 import dap.shared.utils.{ Grids, MSet }
 
@@ -32,10 +32,9 @@ end DAPGossip
 @main def mainDAPGossip =
   import DAPGossip.*
   import dap.shared.modelling.DAPGrid
-  import dap.shared.modelling.CTMCSimulation.*
   gossipCTMC
-    .newSimulationTrace(state, new Random)
-    .take(250)
+    .simulate(state, new Random)
+    .take(200)
     .toList
     .foreach: step =>
       println(step._1) // print time

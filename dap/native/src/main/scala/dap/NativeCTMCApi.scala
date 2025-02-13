@@ -10,8 +10,7 @@ import scala.scalanative.unsafe.{ sizeOf, CDouble, CInt, CSize, CStruct2, Ptr }
 trait NativeCTMCApi:
 
   import dap.shared.modelling.CTMC
-  import dap.shared.modelling.CTMCSimulation
-  import dap.shared.modelling.CTMCSimulation.newSimulationTrace
+  import .newSimulationTrace
 
   /** Native binding for state type in a CTMC process (the generic type of [[CTMC]]). */
   type State

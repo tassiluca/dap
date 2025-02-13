@@ -21,7 +21,7 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
   .settings(
     name := "dap",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % "3.2.19"
+      "org.scalatest" %%% "scalatest" % "3.2.19",
     )
   )
   .nativeSettings(nativeCommonSettings)
