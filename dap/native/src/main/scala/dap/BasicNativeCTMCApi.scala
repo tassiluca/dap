@@ -5,9 +5,8 @@ import scala.scalanative.unsafe.*
 /** Static object exposing native API for basic CTMC creation and simulation. */
 object BasicNativeCTMCApi extends NativeCTMCApi:
 
-  import dap.shared.modelling.CTMC.*
-  import dap.shared.modelling.CTMC
-  import dap.shared.modelling.CTMC.ofTransitions
+  import it.unibo.dap.modelling.CTMC.ofTransitions
+  import it.unibo.dap.modelling.CTMC
 
   override type State = Ptr[CStruct0]
   type Action = CStruct2[CDouble, State]

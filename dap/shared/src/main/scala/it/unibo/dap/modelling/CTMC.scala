@@ -1,4 +1,4 @@
-package dap.shared.modelling
+package it.unibo.dap.modelling
 
 /** A Continuous Time Markov Chain. */
 trait CTMC[S]:
@@ -27,8 +27,8 @@ object CTMC:
 
   given Simulatable[CTMC] with
 
+    import it.unibo.dap.utils.Stochastics
     import java.util.Random
-    import dap.shared.utils.Stochastics
 
     extension [S](self: CTMC[S])
 

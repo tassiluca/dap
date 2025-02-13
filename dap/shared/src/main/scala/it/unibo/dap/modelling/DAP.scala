@@ -1,7 +1,7 @@
-package dap.shared.modelling
+package it.unibo.dap.modelling
 
 import CTMC.*
-import dap.shared.utils.{ Grids, MSet }
+import it.unibo.dap.utils.{Grids, MSet}
 
 /** Modules defining the concept of Distributed Asynchronous stochastic Petri net. */
 object DAP:
