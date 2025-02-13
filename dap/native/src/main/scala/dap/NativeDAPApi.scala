@@ -4,6 +4,7 @@ import scala.reflect.ClassTag
 import scala.scalanative.unsafe
 import scala.scalanative.unsafe.*
 import dap.CUtils.*
+import it.unibo.dap.modelling.DAP
 
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.Size.intToSize
@@ -15,9 +16,8 @@ object NativeDAPApi extends NativeCTMCApi:
   import dap.NativeDAPBindings.{ cNeighborsConversion, cRuleConversion }
 
   override type State = Ptr[DAPState]
-
-  import dap.shared.modelling.{ CTMC, DAP }
-  import dap.shared.modelling.DAP.DAP
+  import it.unibo.dap.modelling.{CTMC, DAP}
+  import it.unibo.dap.modelling.DAP.DAP
 
   @exported("create_dap_from_rules")
   def createDAP(rulesPtr: Ptr[Rule], size: CSize): DAP[Place] = DAP:
@@ -55,8 +55,8 @@ object NativeDAPBindings:
   type Rule = CStruct4[Ptr[CMSet[Place]], RateFunction, Ptr[CMSet[Place]], Ptr[CMSet[Place]]]
   type Neighbors = CStruct2[Id, Ptr[CMSet[Id]]]
 
-  import dap.shared.utils.MSet
-  export dap.shared.modelling.DAP
+  import it.unibo.dap.utils.MSet
+  export DAP
 
   given cMSetPlaceConversion: Conversion[CMSet[Place], MSet[Place]] = _.toMSet(identity)
 

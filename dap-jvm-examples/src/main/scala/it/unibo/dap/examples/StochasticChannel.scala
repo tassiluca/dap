@@ -1,12 +1,12 @@
-package dap.examples
+package it.unibo.dap.examples
 
 object StochasticChannel:
 
   enum State:
     case IDLE, SEND, DONE, FAIL;
 
-  import dap.shared.dsl.CTMCDsl.*
   export State.*
+  export it.unibo.dap.dsl.CTMCDsl.*
 
   def stocChannel: CTMC[State] = CTMC.ofTransitions(
     IDLE -- 1.0 --> SEND,
@@ -23,8 +23,8 @@ object StochasticChannel:
 
 @main def mainStochasticChannelSimulation(): Unit =
   import java.util.Random
-  import dap.shared.utils.Time
   import StochasticChannel.*
+  import it.unibo.dap.utils.Time
   Time.timed:
     println:
       stocChannel

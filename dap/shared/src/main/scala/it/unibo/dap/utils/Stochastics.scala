@@ -1,4 +1,4 @@
-package dap.shared.utils
+package it.unibo.dap.utils
 
 import scala.util.Random
 
@@ -19,7 +19,7 @@ object Stochastics:
   /** `(p1,a1),...,(pn,an) + 100 --> {a1 -> P1%,...,an -> Pn%} ` */
   def statistics[A](choices: Set[(Double, A)], size: Int)(using rnd: Random): Map[A, Int] =
     (1 to size)
-      .map(i => draw(cumulative(choices.toList)))
+      .map(_ => draw(cumulative(choices.toList)))
       .groupBy(identity)
       .view
       .mapValues(_.size)

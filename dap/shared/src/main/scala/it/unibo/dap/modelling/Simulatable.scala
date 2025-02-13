@@ -1,4 +1,4 @@
-package dap.shared.modelling
+package it.unibo.dap.modelling
 
 trait Simulatable[F[_]]:
 
