@@ -5,7 +5,7 @@ object CTMCDsl:
   export it.unibo.dap.modelling.CTMC
   export CTMC.*
 
-  extension [S](state: S) def --(rate: Double): TransitionRule[S] = TransitionRule(state, rate)
+  extension [S](state: S) def --(rate: Double): (S, Double) = (state, rate)
 
-  class TransitionRule[S] private[CTMCDsl] (initialState: S, rate: Double):
-    def -->(finalState: S): Transition[S] = Transition(initialState, Action(rate, finalState))
+  extension [S](self: (S, Double))
+    def -->(finalState: S): Transition[S] = Transition(self._1, Action(self._2, finalState))

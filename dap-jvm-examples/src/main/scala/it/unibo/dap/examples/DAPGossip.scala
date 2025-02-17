@@ -24,7 +24,7 @@ object DAPGossip:
 
   val gossipCTMC: CTMC[State[ID, Place]] = DAP.toCTMC[ID, Place](gossipRules)
 
-  val state: State[(Int, Int), Place] =
+  val state: State[(Int, Int), Place] = 
     State[ID, Place](MSet(Token((0, 0), A)), MSet(), net) // an `a` initial on top LEFT
 
 end DAPGossip

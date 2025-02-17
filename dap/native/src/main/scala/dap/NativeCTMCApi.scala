@@ -10,18 +10,17 @@ import scala.scalanative.unsafe.{ sizeOf, CDouble, CInt, CSize, CStruct2, Ptr }
 trait NativeCTMCApi:
 
   import it.unibo.dap.modelling.CTMC
-  import .newSimulationTrace
 
   /** Native binding for state type in a CTMC process (the generic type of [[CTMC]]). */
   type State
 
-  /** Native binding fro [[CTMCSimulation.Event]] type. */
+  /** Native binding for [[CTMCSimulation.Event]] type. */
   type Event = CStruct2[CDouble, State]
 
   /** Native binding for the [[CTMCSimulation.Trace]] type. */
   type Trace = CStruct2[Ptr[Event], CSize]
 
-  /** Native binding of the [[newSimulationTrace]] method.
+  /** Native binding of the [[simulate]] method.
     * @param ctmcPtr the pointer to the [[CTMC]] to simulate
     * @param s0 the initial state
     * @param steps the number of steps to simulate
@@ -42,7 +41,7 @@ trait NativeCTMCApi:
     val trace = freshPointer[Trace]()
     val events = freshPointer[Event](steps)
     ctmc
-      .newSimulationTrace(f(s0), new java.util.Random)
+      .simulate(f(s0), new java.util.Random)
       .take(steps)
       .zipWithIndex
       .foreach: (e, i) =>
