@@ -1,3 +1,4 @@
+/*
 package dap
 
 import scala.reflect.ClassTag
@@ -107,3 +108,4 @@ object NativeDAPBindings:
   given cNeighborsConversion: Conversion[Neighbors, (Id, Set[Id])] = n => (n._1, cMSetIdConversion(!n._2).asList.toSet)
 
 end NativeDAPBindings
+*/

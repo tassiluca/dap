@@ -1,3 +1,4 @@
+/*
 package dap
 
 import scala.scalanative.unsafe.*
@@ -23,3 +24,4 @@ object BasicNativeCTMCApi extends NativeCTMCApi:
   def simulateCTMC(ctmcPtr: Ptr[CTMC[State]], s0: State, steps: CInt): Ptr[Trace] =
     simulate(ctmcPtr, s0, steps, identity, identity)
 end BasicNativeCTMCApi
+*/
