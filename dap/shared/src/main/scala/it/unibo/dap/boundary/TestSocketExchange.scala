@@ -1,4 +1,4 @@
-package it.unibo.dap.sockets
+package it.unibo.dap.boundary
 
 import gears.async.*
 import gears.async.default.given

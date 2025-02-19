@@ -1,7 +1,7 @@
-package it.unibo.dap.sockets
+package it.unibo.dap.boundary
 
 import gears.async.{ Async, AsyncOperations, BufferedChannel, Future, ReadableChannel, Retry, SendableChannel, Task }
-import it.unibo.dap.core.Exchange
+import it.unibo.dap.controller.Exchange
 import it.unibo.dap.utils.Spawnable
 
 import java.net.{ ServerSocket, Socket }
@@ -16,7 +16,7 @@ object SocketExchange:
 
   def apply(port: Port, net: Set[Endpoint]): Exchange[String] & Spawnable =
     new SocketExchangeImpl(port, net) with Spawnable:
-      override def start(using Async.Spawn, AsyncOperations): Future[Unit] = Future(startService)
+      override def start(using Async, AsyncOperations): Unit = startService
 
   private class SocketExchangeImpl(port: Port, net: Set[Endpoint]) extends Exchange[String]:
 
@@ -36,7 +36,7 @@ object SocketExchange:
       outChannel.read() match
         case Left(_) => ()
         case Right(message) =>
-          scribe.info(s"Sending message: $message")
+          scribe.debug(s"Sending message: $message")
           val all = net
             .map(e => e -> connections.get(e).filterNot(_.isClosed).orElse(establishConnection(e)))
             .collect { case (e, Some(s)) => e -> s }
@@ -52,7 +52,7 @@ object SocketExchange:
       scribe.info(s"Socket server bound to port $port")
       while !server.isClosed do
         val client = server.accept()
-        scribe.info(s"Accepted connection from ${client.getInetAddress}")
+        scribe.debug(s"Accepted connection from ${client.getInetAddress}")
         Future(serve(client))
 
     private def serve(client: Socket)(using Async): Unit =

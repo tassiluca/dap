@@ -1,4 +1,4 @@
-package it.unibo.dap.dsl
+package it.unibo.dap.modelling.dsl
 
 object CTMCDsl:
 
