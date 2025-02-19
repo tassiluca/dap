@@ -1,6 +1,6 @@
 package it.unibo.dap.boundary
 
-import gears.async.{ Async, AsyncOperations, BufferedChannel, Future, ReadableChannel, Retry, SendableChannel, Task }
+import gears.async.{ Async, AsyncOperations, BufferedChannel, Future, ReadableChannel, SendableChannel, Task }
 import it.unibo.dap.controller.Exchange
 import it.unibo.dap.utils.Spawnable
 
