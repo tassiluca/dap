@@ -1,12 +1,14 @@
 package it.unibo.dap.examples
 
+import it.unibo.dap.modelling.dsl.CTMCDsl
+
 object StochasticChannel:
 
   enum State:
     case IDLE, SEND, DONE, FAIL;
 
   export State.*
-  export it.unibo.dap.dsl.CTMCDsl.*
+  export CTMCDsl.*
 
   def stocChannel: CTMC[State] = CTMC.ofTransitions(
     IDLE -- 1.0 --> SEND,

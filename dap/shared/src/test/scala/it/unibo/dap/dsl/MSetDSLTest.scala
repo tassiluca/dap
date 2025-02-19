@@ -1,7 +1,7 @@
 package it.unibo.dap.dsl
 
 import org.scalatest.flatspec.AnyFlatSpec
-import it.unibo.dap.dsl.MSetDSL.{ *, given }
+import it.unibo.dap.modelling.dsl.MSetDSL.{ *, given }
 import org.scalatest.matchers.should.Matchers
 
 class MSetDSLTest extends AnyFlatSpec with Matchers:

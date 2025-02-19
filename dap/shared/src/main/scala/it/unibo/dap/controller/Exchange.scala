@@ -1,4 +1,4 @@
-package it.unibo.dap.core
+package it.unibo.dap.controller
 
 import gears.async.{ ReadableChannel, SendableChannel }
 

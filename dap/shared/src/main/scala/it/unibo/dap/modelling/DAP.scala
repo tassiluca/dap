@@ -6,22 +6,22 @@ import it.unibo.dap.utils.MSet
 /** Modules defining the concept of Distributed Asynchronous stochastic Petri net. */
 object DAP:
   /** Rule of the net: `pre --rateExp--> eff | ^msg`. */
-  case class Rule(pre: MSet[String], rateExp: MSet[String] => Double, eff: MSet[String], msg: String)
+  case class Rule[T](pre: MSet[T], rateExp: MSet[T] => Double, eff: MSet[T], msg: T)
 
   /** Whole net's type. */
-  type DAP = Set[Rule]
+  type DAP[T] = Set[Rule[T]]
 
   /** State of the network at a given time, with neighboring as a map. */
-  case class State(local: MSet[String], msg: String)
+  case class State[T](local: MSet[T], msg: T)
 
-  def apply(rules: Rule*): DAP = rules.toSet
+  def apply[T](rules: Rule[T]*): DAP[T] = rules.toSet
 
-  def apply(rules: Set[Rule]): DAP = rules
+  def apply[T](rules: Set[Rule[T]]): DAP[T] = rules
 
-  def toCTMC(spn: DAP): CTMC[State] = CTMC.ofFunction(toPartialFunction(spn))
+  def toCTMC[T](spn: DAP[T]): CTMC[State[T]] = CTMC.ofFunction(toPartialFunction(spn))
 
   // Here's the implementation of operational semantics
-  private def toPartialFunction[P](spn: DAP): PartialFunction[State, Set[Action[State]]] =
+  private def toPartialFunction[T](spn: DAP[T]): PartialFunction[State[T], Set[Action[State[T]]]] =
     case State(tokens, _) =>
       for
         Rule(pre, rateExp, eff, msg) <- spn // get any rule
