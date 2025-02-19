@@ -8,7 +8,7 @@ object Pinger:
 
   def apply(port: Int, other: Int) = Async.blocking:
     val exchange = SocketExchange(port, Set(("localhost", other)))
-    exchange.start
+    Future(exchange.start)
     exchange.outputs.send("Ping") // trigger the first message
     while true do
       exchange.inputs
@@ -23,7 +23,7 @@ object Ponger:
 
   def apply(port: Int, other: Int) = Async.blocking:
     val exchange = SocketExchange(port, Set(("localhost", other)))
-    exchange.start
+    Future(exchange.start)
     while true do
       exchange.inputs
         .read()
