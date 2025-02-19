@@ -5,6 +5,7 @@ import it.unibo.dap.utils.MSet
 
 /** Modules defining the concept of Distributed Asynchronous stochastic Petri net. */
 object DAP:
+
   /** Rule of the net: `pre --rateExp--> eff | ^msg`. */
   case class Rule[T](pre: MSet[T], rateExp: MSet[T] => Double, eff: MSet[T], msg: T)
 
@@ -20,7 +21,6 @@ object DAP:
 
   def toCTMC[T](spn: DAP[T]): CTMC[State[T]] = CTMC.ofFunction(toPartialFunction(spn))
 
-  // Here's the implementation of operational semantics
   private def toPartialFunction[T](spn: DAP[T]): PartialFunction[State[T], Set[Action[State[T]]]] =
     case State(tokens, _) =>
       for
