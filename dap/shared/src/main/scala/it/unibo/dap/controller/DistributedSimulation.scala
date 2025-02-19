@@ -11,9 +11,9 @@ import scala.concurrent.duration.DurationDouble
 
 class DistributedSimulation[T](boundary: Exchange[T]):
 
-  def of[F[_]: Simulatable, S: DistributableState[T]](
+  def of[B[_]: Simulatable, S: DistributableState[T]](
       initial: S,
-      behavior: F[S],
+      behavior: B[S],
   )(using Async.Spawn, AsyncOperations): Unit =
     val queue = LinkedBlockingDeque[T]()
     val all = Task(boundary.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
@@ -23,9 +23,9 @@ class DistributedSimulation[T](boundary: Exchange[T]):
     all.awaitAll
 
   @tailrec
-  private final def loop[F[_]: Simulatable, S: DistributableState[T]](
+  private final def loop[B[_]: Simulatable, S: DistributableState[T]](
       queue: BlockingDeque[T],
-      behavior: F[S],
+      behavior: B[S],
       state: S,
   )(using Async.Spawn, AsyncOperations): Unit =
     val event = behavior.simulateStep(state, new Random())
