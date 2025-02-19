@@ -36,6 +36,7 @@ object SocketExchange:
       outChannel.read() match
         case Left(_) => ()
         case Right(message) =>
+          scribe.info(s"Sending message: $message")
           val all = net
             .map(e => e -> connections.get(e).filterNot(_.isClosed).orElse(establishConnection(e)))
             .collect { case (e, Some(s)) => e -> s }

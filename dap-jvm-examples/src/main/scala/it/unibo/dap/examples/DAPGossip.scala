@@ -1,41 +1,32 @@
 package it.unibo.dap.examples
 
+import gears.async.*
+import gears.async.default.given
+import it.unibo.dap.core.DistributedSimulation
 import it.unibo.dap.modelling.DAP.*
-import it.unibo.dap.modelling.{CTMC, DAP}
-import it.unibo.dap.utils.{Grids, MSet}
-
-import java.util.Random
+import it.unibo.dap.modelling.{ CTMC, DAP }
+import it.unibo.dap.utils.{ Grids, MSet }
+import scala.concurrent.duration.DurationInt
 
 object DAPGossip:
 
-  enum Place:
-    case A, B
-
-  type ID = (Int, Int)
-
-  export Place.*
-
-  private val net = Grids.createRectangularGrid(5, 5)
-
-  private val gossipRules = DAP[Place](
-    Rule(MSet(A, A), _ => 1_000, MSet(A), MSet()), // a|a --1000--> a
-    Rule(MSet(A), _ => 1, MSet(A), MSet(A)), // a --1--> a|^a
+  private val gossipRules = DAP(
+    Rule(MSet("a", "a"), _ => 1_000, MSet("a"), ""), // a|a --1000--> a
+    Rule(MSet("a"), _ => 0.5, MSet("a"), "a"), // a --1--> a|^a
   )
 
-  val gossipCTMC: CTMC[State[ID, Place]] = DAP.toCTMC[ID, Place](gossipRules)
+  val gossipCTMC: CTMC[State] = DAP.toCTMC(gossipRules)
 
-  val state: State[(Int, Int), Place] = 
-    State[ID, Place](MSet(Token((0, 0), A)), MSet(), net) // an `a` initial on top LEFT
-
-end DAPGossip
-
-@main def mainDAPGossip =
+@main def leftNode(): Unit = Async.blocking:
   import DAPGossip.*
-  import it.unibo.dap.modelling.DAPGrid
-  gossipCTMC
-    .simulate(state, new Random)
-    .take(200)
-    .toList
-    .foreach: step =>
-      println(step._1) // print time
-      println(DAPGrid.simpleGridStateToString[Place](step.state, A)) // print state, i.e., A's
+  val simulation = DistributedSimulation.create(port = 2550, network = Set(("localhost", 2551)))
+  scribe.info("Wating 5 seconds")
+  AsyncOperations.sleep(5.seconds)
+  simulation.of(State(MSet("a"), ""), gossipCTMC)
+
+@main def rightNode(): Unit = Async.blocking:
+  import DAPGossip.*
+  val simulation = DistributedSimulation.create(port = 2551, network = Set(("localhost", 2550)))
+  scribe.info("Wating 5 seconds")
+  AsyncOperations.sleep(5.seconds)
+  simulation.of(State(MSet(), ""), gossipCTMC)

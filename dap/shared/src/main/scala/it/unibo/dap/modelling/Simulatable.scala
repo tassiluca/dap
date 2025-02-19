@@ -7,7 +7,7 @@ trait Simulatable[M[_]]:
 
   extension [S](self: M[S])
     def simulate(initialState: S, rnd: Random): Trace[S]
-    def simulateStep(s: S, rnd: Random): Event[S] = simulate(s, rnd).head
+    def simulateStep(s: S, rnd: Random): Event[S] = simulate(s, rnd).drop(1).head
 
 object Simulatable:
   /** A simulation trace as a lazy list of events. */
