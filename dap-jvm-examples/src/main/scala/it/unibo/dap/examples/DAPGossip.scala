@@ -26,7 +26,7 @@ object DAPGossip:
   Future(exchange.start)
   scribe.info("Wating 5 seconds")
   AsyncOperations.sleep(5.seconds)
-  DistributedSimulation(exchange).of(State(MSet("a"), ""), gossipCTMC) // side effect
+  DistributedSimulation(exchange).launch(State(MSet("a"), ""), gossipCTMC) // side effect
 
 @main def rightUpNode(): Unit = Async.blocking:
   import it.unibo.dap.controller.DistributableInstances.given
@@ -35,7 +35,7 @@ object DAPGossip:
   Future(exchange.start)
   scribe.info("Wating 5 seconds")
   AsyncOperations.sleep(5.seconds)
-  DistributedSimulation(exchange).of(State(MSet(), ""), gossipCTMC) // side effect
+  DistributedSimulation(exchange).launch(State(MSet(), ""), gossipCTMC) // side effect
 
 @main def leftBtmNode(): Unit = Async.blocking:
   import it.unibo.dap.controller.DistributableInstances.given
@@ -44,7 +44,7 @@ object DAPGossip:
   Future(exchange.start)
   scribe.info("Wating 5 seconds")
   AsyncOperations.sleep(5.seconds)
-  DistributedSimulation(exchange).of(State(MSet(), ""), gossipCTMC) // side effect
+  DistributedSimulation(exchange).launch(State(MSet(), ""), gossipCTMC) // side effect
 
 @main def rightBtmNode(): Unit = Async.blocking:
   import it.unibo.dap.controller.DistributableInstances.given
@@ -53,4 +53,4 @@ object DAPGossip:
   Future(exchange.start)
   scribe.info("Wating 5 seconds")
   AsyncOperations.sleep(5.seconds)
-  DistributedSimulation(exchange).of(State(MSet(), ""), gossipCTMC) // side effect
+  DistributedSimulation(exchange).launch(State(MSet(), ""), gossipCTMC) // side effect

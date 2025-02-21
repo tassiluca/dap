@@ -11,13 +11,12 @@ import scala.concurrent.duration.DurationDouble
 
 class DistributedSimulation[T](boundary: Exchange[T]):
 
-  def of[B[_]: Simulatable, S: DistributableState[T]](
+  def launch[B[_]: Simulatable, S: DistributableState[T]](
       initial: S,
       behavior: B[S],
   )(using Async.Spawn, AsyncOperations): Unit =
     val queue = LinkedBlockingDeque[T]()
     val all = Task(boundary.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
-      Future(watchDog(queue)) ::
       Future(loop(queue, behavior, initial)) ::
       Nil
     all.awaitAll
@@ -35,10 +34,5 @@ class DistributedSimulation[T](boundary: Exchange[T]):
     val newState = in.fold(event.state)(event.state.updated)
     scribe.info(s"New state: $newState")
     loop(queue, behavior, newState)
-
-  private def watchDog(queue: BlockingDeque[?])(using Async, AsyncOperations): Unit =
-    while true do
-      AsyncOperations.sleep(5.second)
-      scribe.info(s"[WatchDog] Accumulated msgs: ${queue.size()}")
 
 end DistributedSimulation
