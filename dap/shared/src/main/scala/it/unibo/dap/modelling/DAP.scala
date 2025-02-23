@@ -7,13 +7,13 @@ import it.unibo.dap.utils.MSet
 object DAP:
 
   /** Rule of the net: `pre --rateExp--> eff | ^msg`. */
-  case class Rule[T](pre: MSet[T], rateExp: MSet[T] => Double, eff: MSet[T], msg: T)
+  case class Rule[T](pre: MSet[T], rateExp: MSet[T] => Double, eff: MSet[T], msg: Option[T])
 
   /** Whole net's type. */
   type DAP[T] = Set[Rule[T]]
 
   /** State of the network at a given time, with neighboring as a map. */
-  case class State[T](local: MSet[T], msg: T)
+  case class State[T](tokens: MSet[T], msg: Option[T])
 
   def apply[T](rules: Rule[T]*): DAP[T] = rules.toSet
 

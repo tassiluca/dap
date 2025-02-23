@@ -1,13 +1,12 @@
-/*
-package dap
+package it.unibo.dap
 
 import scala.scalanative.unsafe.*
 
 /** Static object exposing native API for basic CTMC creation and simulation. */
 object BasicNativeCTMCApi extends NativeCTMCApi:
 
-  import it.unibo.dap.modelling.CTMC.ofTransitions
   import it.unibo.dap.modelling.CTMC
+  import CTMC.*
 
   override type State = Ptr[CStruct0]
   type Action = CStruct2[CDouble, State]
@@ -24,4 +23,3 @@ object BasicNativeCTMCApi extends NativeCTMCApi:
   def simulateCTMC(ctmcPtr: Ptr[CTMC[State]], s0: State, steps: CInt): Ptr[Trace] =
     simulate(ctmcPtr, s0, steps, identity, identity)
 end BasicNativeCTMCApi
-*/
