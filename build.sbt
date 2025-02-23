@@ -6,7 +6,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 lazy val nativeCommonSettings = Seq(
   nativeConfig ~= {
-    _.withGC(GC.default) // garbage collector
+    _.withGC(GC.immix) // garbage collector
       .withLTO(LTO.full) // link-time optimization
       .withMode(Mode.releaseSize) // build mode
       .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to the native linker

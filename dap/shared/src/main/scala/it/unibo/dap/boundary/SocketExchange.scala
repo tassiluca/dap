@@ -2,7 +2,6 @@ package it.unibo.dap.boundary
 
 import gears.async.{ Async, AsyncOperations, BufferedChannel, Future, ReadableChannel, SendableChannel, Task }
 import it.unibo.dap.controller.Exchange
-import it.unibo.dap.utils.Spawnable
 
 import java.net.{ ServerSocket, Socket }
 import scala.annotation.tailrec
@@ -14,9 +13,7 @@ object SocketExchange:
   type Address = String
   type Port = Int
 
-  def apply(port: Port, net: Set[Endpoint]): Exchange[String] & Spawnable =
-    new SocketExchangeImpl(port, net) with Spawnable:
-      override def start(using Async, AsyncOperations): Unit = startService
+  def apply(port: Port, net: Set[Endpoint]): Exchange[String] = SocketExchangeImpl(port, net)
 
   private class SocketExchangeImpl(port: Port, net: Set[Endpoint]) extends Exchange[String]:
 
@@ -27,7 +24,7 @@ object SocketExchange:
 
     override def inputs: ReadableChannel[String] = inChannel.asReadable
 
-    def startService(using Async, AsyncOperations): Unit = Async.group:
+    override def start(using Async, AsyncOperations): Unit = Async.group:
       Task(client()).start()
       serveClients
 

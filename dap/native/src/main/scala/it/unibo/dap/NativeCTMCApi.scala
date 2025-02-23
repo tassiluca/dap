@@ -1,6 +1,6 @@
-package dap
+package it.unibo.dap
 
-import dap.CUtils.{ freshPointer, requireNonNull }
+import CUtils.{ freshPointer, requireNonNull }
 
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.Size.intToSize
