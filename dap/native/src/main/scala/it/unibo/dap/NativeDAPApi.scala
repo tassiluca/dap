@@ -1,3 +1,4 @@
+/*
 package it.unibo.dap
 
 import scala.reflect.ClassTag
@@ -5,8 +6,7 @@ import scala.scalanative.unsafe
 import scala.scalanative.unsafe.*
 import gears.async.default.given
 import gears.async.{Async, AsyncOperations, Future}
-import it.unibo.dap.boundary.SocketExchange
-import it.unibo.dap.controller.DistributedSimulation
+import it.unibo.dap.controller.{DistributedSimulation, SocketExchange}
 
 import java.nio.charset.Charset
 import scala.concurrent.duration.DurationInt
@@ -20,7 +20,7 @@ object DAPSimulationAPI:
 
   import it.unibo.dap.utils.MSet
   import it.unibo.dap.modelling.{ CTMC, DAP }
-  import it.unibo.dap.boundary.SocketExchange.*
+  import SocketExchange.*
 
   @exported("launch_simulation")
   def launchSimulation(rulesPtr: Ptr[CRule], size: CSize, s0: Ptr[CDAPState], neighborhood: Ptr[Neighborhood]) =
@@ -80,3 +80,4 @@ object DAPSimulationAPI:
         new String(bytes,  Charset.defaultCharset())
 
 end DAPSimulationAPI
+ */
