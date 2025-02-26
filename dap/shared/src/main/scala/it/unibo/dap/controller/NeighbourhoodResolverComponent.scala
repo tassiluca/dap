@@ -5,8 +5,7 @@ trait NeighbourhoodResolverComponent:
 
   val neighbourhoodResolver: NeighbourhoodResolver
 
-  trait NeighbourhoodResolver:
-    def apply(): Set[Neighbour]
+  trait NeighbourhoodResolver extends (() => Set[Neighbour])
 
   object NeighbourhoodResolver:
     def static(net: Set[Neighbour]): NeighbourhoodResolver = () => net

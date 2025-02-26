@@ -6,10 +6,10 @@
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
 struct Token {
-  char token;
+  char* token;
 };
 
-static struct Token a = { 'a' };
+static struct Token a = { "a" };
 
 double fixed_rate_1000(const MSet_Token set) {
   return 1000.0;
@@ -31,56 +31,47 @@ int main(int argc, char *argv[]) {
     .preconditions = preconditions1,
     .rate = &fixed_rate_1000,
     .effects = effects1,
-    .msg = &messages1
+    .msg = messages1
   };
-
+  /* 2) a --1--> a | ^a */
   Token in_tokens2[] = { &a };
   MSet_Token preconditions2 = { in_tokens2, ARRAY_LEN(in_tokens2) };
   Token out_places2[] = { &a };
   MSet_Token effects2 = { out_places2, ARRAY_LEN(out_places2) };
-  Token messages2 = { &a };
   Rule rule2 = {
     .preconditions = preconditions2,
     .rate = &fixed_rate_1,
     .effects = effects2,
-    .msg = &in_tokens2[0]
+    .msg = in_tokens2[0]
   };
-  printf("Rule: %p\n", &rule2);
   Rule rules[] = { rule, rule2 };
   /* State */
   Token initial_tokens[] = { &a };
-  MSet_Token initials = { initial_tokens, ARRAY_LEN(initial_tokens) };
-  struct DAPState state = { &initials, NULL };
+  MSet_Token initial_with_token = { initial_tokens, ARRAY_LEN(initial_tokens) };
+  MSet_Token initial_empty = { NULL, 0 };
+  int port = atoi(argv[1]);
+  struct DAPState *state = malloc(sizeof(struct DAPState));
+  if (!state) {
+    perror("Memory allocation failed");
+    return 1;
+  }
+  if (port == 2550) {
+    state->tokens = initial_with_token;
+    state->msg = NULL;
+  } else {
+    state->tokens = initial_empty;
+    state->msg = NULL;
+  }
   /* Neighborhood */
-  Neighborhood nb;
-  nb.my_port = atoi(argv[1]);
-  nb.size = 1;
-  nb.address = malloc(nb.size * sizeof(char*));
-  if (!nb.address) {
-    perror("Failed to allocate memory for address");
-    return 1;
+  int neighbours_size = argc - 2;
+  Neighbour neighbours[neighbours_size];
+  for (int i = 0; i < neighbours_size; i++) {
+    neighbours[i] = argv[i + 2];
   }
-  nb.port = malloc(nb.size * sizeof(int));
-  if (!nb.port) {
-    perror("Failed to allocate memory for port");
-    free(nb.address);
-    return 1;
-  }
-  nb.address[0] = strdup("127.0.0.1"); // strdup allocates memory and copies string
-  if (!nb.address[0]) {
-    perror("Failed to allocate memory for address string");
-    free(nb.port);
-    free(nb.address);
-    return 1;
-  }
-  nb.port[0] = atoi(argv[2]);
+  MSet_Neighbour neighborhood = { neighbours, ARRAY_LEN(neighbours) };
   /* Simulation */
-  printf("Neighborhood: %p\n", &nb);
-  launch_simulation(rules, ARRAY_LEN(rules), &state, &nb);
+  launch_simulation(rules, ARRAY_LEN(rules), state, atoi(argv[1]), &neighborhood);
   printf("COMPLETE!\n");
-  /* Free allocated memory. */
-  free(nb.address[0]);
-  free(nb.address);
-  free(nb.port);
+  free(state);
   return 0;
 }
