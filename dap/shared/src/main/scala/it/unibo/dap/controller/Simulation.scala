@@ -11,15 +11,15 @@ import scala.annotation.tailrec
 import scala.concurrent.duration.DurationDouble
 
 trait Simulation[T]:
-  boundary: Exchange[T] =>
+  boundary: ExchangeComponent[T] =>
 
   def launch[B[_]: Simulatable, S: DistributableState[T]](
       initial: S,
       behavior: B[S],
   )(using Async.Spawn, AsyncOperations): Unit =
     val queue = ConcurrentLinkedDeque[T]()
-    val all = Task(boundary.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
-      Future(boundary.start) ::
+    val all = Task(boundary.exchange.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
+      Future(boundary.exchange.start) ::
       Future(loop(queue, behavior, initial)) ::
       Nil
     all.awaitAll
@@ -31,9 +31,9 @@ trait Simulation[T]:
       state: S,
   )(using Async.Spawn, AsyncOperations): Unit =
     val event = behavior.simulateStep(state, new Random())
-    AsyncOperations.sleep(event.time.seconds)
+    AsyncOperations.sleep(if event.time != 0 then event.time.seconds else 1.seconds)
     scribe.info("Event: " + event)
-    event.state.msg.foreach(boundary.outputs.send)
+    event.state.msg.foreach(boundary.exchange.outputs.send)
     scribe.info("Sent: " + event.state.msg)
     val in = Option(queue.poll())
     scribe.info("Received: " + in)
