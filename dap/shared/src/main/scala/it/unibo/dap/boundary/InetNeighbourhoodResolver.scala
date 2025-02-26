@@ -1,8 +1,8 @@
 package it.unibo.dap.boundary
 
-import it.unibo.dap.controller.NeighbourhoodSensor
+import it.unibo.dap.controller.NeighbourhoodResolverComponent
 
-trait InetNeighbourhoodSensor extends NeighbourhoodSensor:
+trait InetNeighbourhoodResolver extends NeighbourhoodResolverComponent:
   type Address = String
   type Port = Int
   type Endpoint = (Address, Port)

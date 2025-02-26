@@ -2,7 +2,7 @@ package it.unibo.dap.examples
 
 import gears.async.Async
 import gears.async.default.given
-import it.unibo.dap.api.Api.*
+import it.unibo.dap.Api.*
 import it.unibo.dap.modelling.DAP
 import it.unibo.dap.modelling.DAP.*
 import it.unibo.dap.utils.MSet

@@ -1,7 +1,6 @@
-package it.unibo.dap.api
+package it.unibo.dap
 
 import gears.async.{Async, AsyncOperations}
-import it.unibo.dap.controller.{DAPSimulation, Simulation}
 
 object Api:
   import it.unibo.dap.modelling.DAP
