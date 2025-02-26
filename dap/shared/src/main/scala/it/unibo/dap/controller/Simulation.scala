@@ -10,7 +10,8 @@ import java.util.concurrent.ConcurrentLinkedDeque
 import scala.annotation.tailrec
 import scala.concurrent.duration.DurationDouble
 
-class DistributedSimulation[T](boundary: Exchange[T]):
+trait Simulation[T]:
+  boundary: Exchange[T] =>
 
   def launch[B[_]: Simulatable, S: DistributableState[T]](
       initial: S,
@@ -18,6 +19,7 @@ class DistributedSimulation[T](boundary: Exchange[T]):
   )(using Async.Spawn, AsyncOperations): Unit =
     val queue = ConcurrentLinkedDeque[T]()
     val all = Task(boundary.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
+      Future(boundary.start) ::
       Future(loop(queue, behavior, initial)) ::
       Nil
     all.awaitAll
@@ -38,5 +40,4 @@ class DistributedSimulation[T](boundary: Exchange[T]):
     val newState = in.fold(event.state)(event.state.updated)
     scribe.info(s"New state: $newState")
     loop(queue, behavior, newState)
-
-end DistributedSimulation
+end Simulation
