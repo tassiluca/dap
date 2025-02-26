@@ -30,4 +30,5 @@ object DAP:
         rate = rateExp(tokens) // compute rate
       yield Action(rate, State(newtokens, msg))
 
+  given [T] => Conversion[DAP[T], CTMC[State[T]]] = toCTMC
 end DAP

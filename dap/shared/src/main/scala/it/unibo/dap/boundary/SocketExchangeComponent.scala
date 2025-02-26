@@ -12,7 +12,7 @@ import scala.util.{ Failure, Success, Try }
 trait SocketExchangeComponent extends ExchangeComponent[String]:
   ctx: InetNeighbourhoodResolver =>
 
-  lazy val port: Port
+  def port: Port
 
   override val exchange: Exchange = SocketExchange(port)
 
