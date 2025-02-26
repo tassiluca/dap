@@ -5,8 +5,7 @@ trait NeighbourhoodSensor:
 
   def apply(): Set[Neighbour]
 
-trait InetNeighbourhoodSensor extends NeighbourhoodSensor:
-  type Address = String
-  type Port = Int
-  type Endpoint = (Address, Port)
-  override type Neighbour = Endpoint
+trait StaticNeighbourhoodSensor extends NeighbourhoodSensor:
+  val neighbours: Set[Neighbour]
+
+  override def apply(): Set[Neighbour] = neighbours

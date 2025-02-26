@@ -1,19 +1,19 @@
 package it.unibo.dap.boundary
 
 import gears.async.*
-import it.unibo.dap.controller.{ Exchange, InetNeighbourhoodSensor }
+import it.unibo.dap.controller.Exchange
 
 import java.net.{ ServerSocket, Socket }
 import scala.annotation.tailrec
 import scala.collection.Iterator.continually
 import scala.util.{ Failure, Success, Try }
 
-/** An exchange that communicates with other exchanges over plain sockets.
-  *
-  * @param port the port to bind the server socket to
-  */
-trait SocketExchange(port: Int) extends Exchange[String]:
+/** An exchange that communicates with other exchanges over plain sockets. */
+trait SocketExchange extends Exchange[String]:
   neighborhoodSensor: InetNeighbourhoodSensor =>
+
+  /** The port on which the server will listen for incoming connections. */
+  val port: Port
 
   private lazy val inChannel = BufferedChannel[String](size = 10)
   private lazy val outChannel = BufferedChannel[String](size = 10)

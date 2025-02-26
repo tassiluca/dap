@@ -2,7 +2,7 @@ package it.unibo.dap.examples
 
 import gears.async.Async
 import gears.async.default.given
-import it.unibo.dap.api.DAPApi
+import it.unibo.dap.api.Api.*
 import it.unibo.dap.modelling.DAP
 import it.unibo.dap.modelling.DAP.*
 import it.unibo.dap.utils.MSet
@@ -15,13 +15,13 @@ object GossipSimulationApp:
   )
 
   @main def leftUpNode(): Unit = Async.blocking:
-    DAPApi.launchSimulation(gossipRules, State(MSet("a"), None))(2550, Set("localhost:2551", "localhost:2552"))
+    launchSimulation(gossipRules, State(MSet("a"), None))(2550, Set("localhost:2551", "localhost:2552"))
 
   @main def rightUpNode(): Unit = Async.blocking:
-    DAPApi.launchSimulation(gossipRules, State(MSet(), None))(2551, Set("localhost:2550", "localhost:2553"))
+    launchSimulation(gossipRules, State(MSet(), None))(2551, Set("localhost:2550", "localhost:2553"))
 
   @main def leftBtmNode(): Unit = Async.blocking:
-    DAPApi.launchSimulation(gossipRules, State(MSet(), None))(2552, Set("localhost:2550", "localhost:2553"))
+    launchSimulation(gossipRules, State(MSet(), None))(2552, Set("localhost:2550", "localhost:2553"))
 
   @main def rightBtmNode(): Unit = Async.blocking:
-    DAPApi.launchSimulation(gossipRules, State(MSet(), None))(2553, Set("localhost:2551", "localhost:2552"))
+    launchSimulation(gossipRules, State(MSet(), None))(2553, Set("localhost:2551", "localhost:2552"))
