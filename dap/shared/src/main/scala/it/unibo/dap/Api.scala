@@ -8,5 +8,6 @@ object Api:
   def launchSimulation(
       rules: Set[DAP.Rule[String]],
       s0: DAP.State[String],
+      updateFn: DAP.State[String] => Unit,
   )(port: Int, neighbors: Set[String])(using Async.Spawn, AsyncOperations): Unit =
-    DAPSimulation(s0, rules)(port, neighbors).launch
+    DAPSimulation(s0, rules)(port, neighbors).launch(updateFn)

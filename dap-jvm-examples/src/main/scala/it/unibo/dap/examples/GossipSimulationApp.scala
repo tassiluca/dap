@@ -15,13 +15,13 @@ object GossipSimulationApp:
   )
 
   @main def leftUpNode(): Unit = Async.blocking:
-    launchSimulation(gossipRules, State(MSet("a"), None))(2550, Set("localhost:2551", "localhost:2552"))
+    launchSimulation(gossipRules, State(MSet("a"), None), s => scribe.info(s"State: $s"))(2550, Set("localhost:2551", "localhost:2552"))
 
   @main def rightUpNode(): Unit = Async.blocking:
-    launchSimulation(gossipRules, State(MSet(), None))(2551, Set("localhost:2550", "localhost:2553"))
+    launchSimulation(gossipRules, State(MSet(), None), s => scribe.info(s"State: $s"))(2551, Set("localhost:2550", "localhost:2553"))
 
   @main def leftBtmNode(): Unit = Async.blocking:
-    launchSimulation(gossipRules, State(MSet(), None))(2552, Set("localhost:2550", "localhost:2553"))
+    launchSimulation(gossipRules, State(MSet(), None), s => scribe.info(s"State: $s"))(2552, Set("localhost:2550", "localhost:2553"))
 
   @main def rightBtmNode(): Unit = Async.blocking:
-    launchSimulation(gossipRules, State(MSet(), None))(2553, Set("localhost:2551", "localhost:2552"))
+    launchSimulation(gossipRules, State(MSet(), None), s => scribe.info(s"State: $s"))(2553, Set("localhost:2551", "localhost:2552"))

@@ -9,7 +9,7 @@ import it.unibo.dap.modelling.CTMC
 import it.unibo.dap.modelling.CTMC.given_Simulatable_CTMC
 
 object DAPSimulation:
-  
+
   export modelling.DAP
 
   def apply(s0: DAP.State[String], rules: Set[DAP.Rule[String]])(
@@ -22,9 +22,9 @@ object DAPSimulation:
       with SocketExchangeComponent
       with InetNeighbourhoodResolver:
 
-    override val initial: State[Address] = s0
-    override val behavior: CTMC[State[Address]] = DAP(rules)
-    override val port: Port = exchPort
+    override def initial: State[Address] = s0
+    override def behavior: CTMC[State[Address]] = DAP(rules)
+    override def port: Port = exchPort
 
     override val neighbourhoodResolver: NeighbourhoodResolver = NeighbourhoodResolver.static:
       neighbors.map:
