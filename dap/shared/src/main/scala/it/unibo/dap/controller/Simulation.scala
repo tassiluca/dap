@@ -10,26 +10,23 @@ import java.util.concurrent.ConcurrentLinkedDeque
 import scala.annotation.tailrec
 import scala.concurrent.duration.DurationDouble
 
-trait Simulation[T]:
+trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   boundary: ExchangeComponent[T] =>
 
-  def launch[B[_]: Simulatable, S: DistributableState[T]](
-      initial: S,
-      behavior: B[S],
-  )(using Async.Spawn, AsyncOperations): Unit =
+  def initial: S
+
+  def behavior: B[S]
+
+  def launch(using Async.Spawn, AsyncOperations): Unit =
     val queue = ConcurrentLinkedDeque[T]()
     val all = Task(boundary.exchange.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
       Future(boundary.exchange.start) ::
-      Future(loop(queue, behavior, initial)) ::
+      Future(loop(queue, initial)) ::
       Nil
     all.awaitAll
 
   @tailrec
-  private final def loop[B[_]: Simulatable, S: DistributableState[T]](
-      queue: util.Deque[T],
-      behavior: B[S],
-      state: S,
-  )(using Async.Spawn, AsyncOperations): Unit =
+  private final def loop(queue: util.Deque[T], state: S)(using Async.Spawn, AsyncOperations): Unit =
     val event = behavior.simulateStep(state, new Random())
     AsyncOperations.sleep(if event.time != 0 then event.time.seconds else 1.seconds)
     scribe.info("Event: " + event)
@@ -39,5 +36,5 @@ trait Simulation[T]:
     scribe.info("Received: " + in)
     val newState = in.fold(event.state)(event.state.updated)
     scribe.info(s"New state: $newState")
-    loop(queue, behavior, newState)
+    loop(queue, newState)
 end Simulation
