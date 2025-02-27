@@ -38,7 +38,7 @@ def build_library(c):
     invoke.run(f"mkdir -p {lib_folder}")
     invoke.run(f'cp {" ".join(lib_files)} {lib_folder}')
     log(f"Copying header file to {lib_folder}")
-    h_files_paths = this_dir.glob("src/main/c/*.h")
+    h_files_paths = this_dir.parent.glob("dap/native/src/main/resources/*.h")
     for h_file_path in h_files_paths:
         content = _pre_process(h_file_path)
         dest_path = Path(lib_folder) / h_file_path.name
@@ -50,38 +50,24 @@ def build_cffi(c):
     """
     Build the CFFI wrapper for the DAP library.
     """
-    ctmc_ffi = cffi.FFI()
-    ctmc_module_h_file_name = lib_folder / "ctmc.h"
-    with open(ctmc_module_h_file_name) as h_file:
-        lines = h_file.read().splitlines()
-        lines += [
-            "struct State {",
-            "   const char* name;",
-            "};",
-        ]
-        ctmc_ffi.cdef("\n".join(lines))
-    ctmc_ffi.set_source(
-        module_name="ctmc_cffi",
-        source="""
-        #include "ctmc.h"
-        struct State {
-            const char* name;
-        };
-        """,
-        libraries=["dap"],
-        library_dirs=[lib_folder.as_posix()],
-        include_dirs=[lib_folder.as_posix()],
-        runtime_library_dirs=[lib_folder.as_posix()],
-    )
-    ctmc_ffi.compile(tmpdir=lib_folder.as_posix())
     dap_ffi = cffi.FFI()
-    dap_module_h_file_name = lib_folder / "dap_char2d.h"
+    dap_module_h_file_name = lib_folder / "dap.h"
     with open(dap_module_h_file_name) as h_file:
         lines = h_file.read().splitlines()
+        lines += [
+            "struct Token {",
+            "    char* token;",
+            "};",
+        ]
         dap_ffi.cdef("\n".join(lines))
     dap_ffi.set_source(
         module_name="dap_cffi",
-        source='#include "dap_char2d.h"',
+        source="""
+        #include "dap.h"
+        struct Token {
+            char* token;
+        };
+        """,
         libraries=["dap"],
         library_dirs=[lib_folder.as_posix()],
         include_dirs=[lib_folder.as_posix()],

@@ -1,5 +1,5 @@
-from lib import ctmc_cffi
-ffi = ctmc_cffi.ffi
+from lib import dap_cffi
+ffi = dap_cffi.ffi
 
 def addr(cstruct):
     """
