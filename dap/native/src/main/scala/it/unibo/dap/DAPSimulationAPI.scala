@@ -1,20 +1,16 @@
 package it.unibo.dap
 
+import gears.async.Async
+import gears.async.default.given
+
 import scala.reflect.ClassTag
 import scala.scalanative.unsafe.*
-import gears.async.default.given
-import gears.async.{Async, AsyncOperations, Future}
-
-import java.nio.charset.Charset
-import scala.concurrent.duration.DurationInt
 
 /** Static object exposing native API for Distributed Asynchronous Petri-Nets creation and simulation. */
 object DAPSimulationAPI:
 
-  import Bindings.{ *, given }
-
-  import it.unibo.dap.utils.MSet
-  import it.unibo.dap.modelling.{ CTMC, DAP }
+  import Bindings.{*, given}
+  import it.unibo.dap.modelling.DAP
 
   @exported("launch_simulation")
   def launchSimulation(rulesPtr: Ptr[CRule], size: CSize, s0: Ptr[CDAPState], port: CInt, neighborhood: Ptr[CMSet[Neighbour]]) =

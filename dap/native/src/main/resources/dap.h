@@ -16,13 +16,10 @@
         size_t size;           \
     } MSet_##Type;
 
+typedef char* Neighbour;
+
 /* The data structure keeping track of the neighbors of a place in a DAP model. */
-typedef struct {
-    int port;
-    char** address;
-    int* port;
-    size_t size;
-} Neighborhood;
+DEFINE_MSET(Neighbour)
 
 /* The data structure representing a token in a DAP model. */
 typedef struct Token *Token;
@@ -31,8 +28,8 @@ DEFINE_MSET(Token)
 
 /* The overall state of a DAP model. */
 struct DAPState {
-    const MSet_Token* tokens;
-    const Token msg;
+    MSet_Token tokens;
+    Token msg;
 };
 
 /*
@@ -48,6 +45,12 @@ typedef struct {
     const Token msg;
 } Rule;
 
-void launch(const Rule* rules, size_t rules_size, struct DAPState s0, Neighborhood neighborhood);
+void launch_simulation(
+    const Rule* rules,
+    size_t rules_size,
+    struct DAPState *s0,
+    int port,
+    MSet_Neighbour *neighborhood
+);
 
 #endif

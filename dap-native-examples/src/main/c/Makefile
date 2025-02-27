@@ -20,16 +20,11 @@ CFLAGS += -g                	# Include debug symbols
 
 all:	mains
 	@echo "Detected OS: ${OS}"
-	@echo "Run ctmc.exe or gossip.exe to execute the programs."
 
-mains: 	libdap ctmc.o gossip.o
-	${CC} ${CFLAGS} -o ${BINARIES_DIR}/ctmc.exe   ctmc.o   -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
+mains: 	libdap gossip.o
 	${CC} ${CFLAGS} -o ${BINARIES_DIR}/gossip.exe gossip.o -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
 
-ctmc.o: ctmc.c ctmc.h
-	${CC} ${CFLAGS} -c ctmc.c
-
-gossip.o: gossip.c dap.h ctmc.h dap_char2d.h dap_char2d_utils.c
+gossip.o: gossip.c dap.h
 	${CC} ${CFLAGS} -c gossip.c
 
 .PHONY: clean libdap

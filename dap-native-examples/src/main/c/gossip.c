@@ -11,11 +11,11 @@ struct Token {
 
 static struct Token a = { "a" };
 
-double fixed_rate_1000(const MSet_Token set) {
+double fixed_rate_1000(const MSet_Token set __attribute__((unused))) {
   return 1000.0;
 }
 
-double fixed_rate_1(const MSet_Token set) {
+double fixed_rate_1(const MSet_Token set __attribute__((unused))) {
   return 1.0;
 }
 
