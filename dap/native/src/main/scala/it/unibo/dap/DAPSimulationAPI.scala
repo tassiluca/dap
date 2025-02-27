@@ -2,6 +2,7 @@ package it.unibo.dap
 
 import gears.async.Async
 import gears.async.default.given
+import it.unibo.dap.utils.MSet
 
 import scala.reflect.ClassTag
 import scala.scalanative.unsafe.*
@@ -22,7 +23,6 @@ object DAPSimulationAPI:
           .toSet
         val net = cNeighborsCvt(!neighborhood)
         val initialState: DAP.State[String] = cDapStateCvt(!s0)
-        scribe.info(s"Port: $port, Neighbours: $net")
         Api.launchSimulation(rules, initialState, s => scribe.info(s"State: $s"))(port, net.asList.toSet)
       catch case e => scribe.error(s"Error: $e")
 
