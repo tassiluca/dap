@@ -18,14 +18,16 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
 
   def launch(updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
     val queue = ConcurrentLinkedDeque[T]()
-    val all = Task(boundary.exchange.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
-      Future(boundary.exchange.start) ::
-      Future(loop(queue, initial, updateFn)) ::
-      Nil
-    all.awaitAll
+    (
+      Task(boundary.exchange.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
+        Future(boundary.exchange.start) ::
+        Future(loop(queue, initial, updateFn)) ::
+        Nil
+    ).awaitAll
 
   @tailrec
   private final def loop(queue: Deque[T], state: S, updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
+    scribe.info(s"State: $state")
     val event = behavior.simulateStep(state, new Random())
     AsyncOperations.sleep(event.time.seconds)
     updateFn(event.state)
