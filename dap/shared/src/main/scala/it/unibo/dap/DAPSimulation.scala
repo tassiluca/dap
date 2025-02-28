@@ -1,12 +1,11 @@
 package it.unibo.dap
 
-import it.unibo.dap.boundary.{ InetNeighbourhoodResolver, SocketExchangeComponent }
-import it.unibo.dap.controller.Simulation
-import it.unibo.dap.modelling.DAP
-import it.unibo.dap.modelling.DAP.{ *, given }
+import it.unibo.dap.boundary.{InetNeighbourhoodResolver, SocketExchangeComponent}
 import it.unibo.dap.controller.DistributableInstances.given_Distributable_State_T
-import it.unibo.dap.modelling.CTMC
+import it.unibo.dap.controller.Simulation
 import it.unibo.dap.modelling.CTMC.given_Simulatable_CTMC
+import it.unibo.dap.modelling.DAP.{*, given}
+import it.unibo.dap.modelling.{CTMC, DAP}
 
 object DAPSimulation:
 

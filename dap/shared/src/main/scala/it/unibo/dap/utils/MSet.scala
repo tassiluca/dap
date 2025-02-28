@@ -4,7 +4,11 @@ import scala.collection.immutable
 
 /** A multiset datatype. */
 trait MSet[A] extends (A => Int):
+
+  /** @return a new multiset as the union of `this` and `m`. */
   infix def union(m: MSet[A]): MSet[A]
+
+  /** @return a new multiset as the difference of `this` and `m`. */
   def diff(m: MSet[A]): MSet[A]
 
   /** @return true if `this` and `m` have no common elements, false otherwise. */
@@ -17,6 +21,7 @@ trait MSet[A] extends (A => Int):
     *         iff all the elements of `m` are present in `this`, otherwise `None` is returned.
     */
   infix def extract(m: MSet[A]): Option[MSet[A]]
+
   def map[B](f: A => B): MSet[B]
   def flatMap[B](f: A => MSet[B]): MSet[B]
   def filter(f: A => Boolean): MSet[A]

@@ -2,12 +2,22 @@ package it.unibo.dap
 
 import gears.async.{ Async, AsyncOperations }
 
-object Api:
-  import it.unibo.dap.DAPSimulation.*
+trait Api:
 
-  def launchSimulation(
-      rules: Set[DAP.Rule[String]],
-      s0: DAP.State[String],
-      updateFn: DAP.State[String] => Unit,
-  )(port: Int, neighbors: Set[String])(using Async.Spawn, AsyncOperations): Unit =
-    DAPSimulation(s0, rules)(port, neighbors).launch(updateFn)
+  val interface: Interface
+
+  object ADTs:
+    type Token = String
+    type Neighbour = String
+    case class MSet[T](elems: T*)
+    case class Rule(pre: MSet[Token], rateExp: MSet[Token] => Double, eff: MSet[Token], msg: Option[Token])
+    case class State(tokens: MSet[Token], msg: Option[Token])
+
+  trait Interface:
+    import ADTs.*
+
+    def launchSimulation(rules: Set[Rule], initialState: State, updateFn: State => Unit)(
+        port: Int,
+        neighbors: Set[Neighbour],
+    )(using Async.Spawn, AsyncOperations): Unit
+end Api
