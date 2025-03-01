@@ -1,6 +1,7 @@
 package it.unibo.dap.controller
 
 trait NeighbourhoodResolverComponent:
+
   type Neighbour
 
   val neighbourhoodResolver: NeighbourhoodResolver

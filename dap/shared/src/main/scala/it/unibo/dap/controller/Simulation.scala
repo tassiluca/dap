@@ -27,7 +27,6 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
 
   @tailrec
   private final def loop(queue: Deque[T], state: S, updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
-    scribe.info(s"State: $state")
     val event = behavior.simulateStep(state, new Random())
     AsyncOperations.sleep(event.time.seconds)
     updateFn(event.state)

@@ -19,5 +19,5 @@ trait Api:
     def launchSimulation(rules: Set[Rule], initialState: State, updateFn: State => Unit)(
         port: Int,
         neighbors: Set[Neighbour],
-    )(using Async.Spawn, AsyncOperations): Unit
+    ): Unit
 end Api

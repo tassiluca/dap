@@ -1,8 +1,5 @@
 package it.unibo.dap
 
-import gears.async.Async
-import gears.async.default.given
-
 import scala.reflect.ClassTag
 import scala.scalanative.unsafe.*
 
@@ -13,16 +10,15 @@ object DAPSimulationAPI:
 
   @exported("launch_simulation")
   def launchSimulation(rulesPtr: Ptr[CRule], size: CSize, s0: Ptr[CDAPState], port: CInt, neighborhood: Ptr[CMSet[Neighbour]]) =
-    Async.blocking:
-      try
-        val rules = (0 until size.toInt)
-          .map(i => rulesPtr(i))
-          .map(cRuleCvt)
-          .toSet
-        val net = cNeighborsCvt(!neighborhood)
-        val initialState = cDapStateCvt(!s0)
-        ProductAPI.interface.launchSimulation(rules, initialState, s => scribe.info(s"State: $s"))(port, net.elems.toSet)
-      catch case e => scribe.error(s"Error: $e")
+    try
+      val rules = (0 until size.toInt)
+        .map(i => rulesPtr(i))
+        .map(cRuleCvt)
+        .toSet
+      val net = cNeighborsCvt(!neighborhood)
+      val initialState = cDapStateCvt(!s0)
+      ProductAPI.interface.launchSimulation(rules, initialState, s => scribe.info(s"State: $s"))(port, net.elems.toSet)
+    catch case e => scribe.error(s"Error: $e")
 
   object Bindings:
     type CToken = Ptr[CStruct1[CString]]
