@@ -1,3 +1,5 @@
+import bindgen.interface.Binding
+
 import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
 
 ThisBuild / scalaVersion := "3.6.3"
@@ -7,6 +9,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
 lazy val dap = crossProject(JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
+  .enablePlugins(BindgenPlugin)
   .in(file("dap"))
   .nativeSettings(
     nativeConfig ~= {
@@ -15,7 +18,12 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
         .withMode(Mode.releaseSize) // build mode
         .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to the native linker
         .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
-    }
+    },
+    bindgenBindings := Seq(
+      Binding((Compile / resourceDirectory).value / "dap.h", "libdap")
+        .withExport(true)
+        .addCImport("dap.h")
+    )
   )
   .settings(
     name := "dap",

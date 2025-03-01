@@ -1,22 +1,20 @@
-package it.unibo.dap
+package it.unibo.dap.api
 
-import it.unibo.dap.boundary.{InetNeighbourhoodResolver, SocketExchangeComponent}
-import it.unibo.dap.controller.DistributableInstances.given_Distributable_State_T
+import it.unibo.dap.boundary.{ InetNeighbourhoodResolver, SocketExchangeComponent }
+import it.unibo.dap.controller.DistributableInstances.given
 import it.unibo.dap.controller.Simulation
+import it.unibo.dap.modelling.DAP.{ *, given }
+import it.unibo.dap.modelling.{ CTMC, DAP }
 import it.unibo.dap.modelling.CTMC.given_Simulatable_CTMC
-import it.unibo.dap.modelling.DAP.{*, given}
-import it.unibo.dap.modelling.{CTMC, DAP}
 
 object DAPSimulation:
-
-  export modelling.DAP
 
   def apply(s0: DAP.State[String], rules: Set[DAP.Rule[String]])(
       port: Int,
       neighbors: Set[String],
   ): Simulation[CTMC, String, State[String]] = DAPSimulationImpl(s0, rules)(port, neighbors)
 
-  private class DAPSimulationImpl(s0: State[String], rules: Set[Rule[String]])(exchPort: Int, neighbors: Set[String])
+  class DAPSimulationImpl(s0: State[String], rules: Set[Rule[String]])(exchPort: Int, neighbors: Set[String])
       extends Simulation[CTMC, String, State[String]]
       with SocketExchangeComponent
       with InetNeighbourhoodResolver:

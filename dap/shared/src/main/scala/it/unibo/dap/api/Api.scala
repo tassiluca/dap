@@ -1,4 +1,4 @@
-package it.unibo.dap
+package it.unibo.dap.api
 
 import gears.async.{ Async, AsyncOperations }
 
@@ -16,8 +16,8 @@ trait Api:
   trait Interface:
     import ADTs.*
 
-    def launchSimulation(rules: Set[Rule], initialState: State, updateFn: State => Unit)(
-        port: Int,
-        neighbors: Set[Neighbour],
-    ): Unit
-end Api
+    def simulate(
+        rules: Set[Rule],
+        initial: State,
+        updateFn: State => Unit,
+    )(port: Int, neighbours: Set[Neighbour]): Unit

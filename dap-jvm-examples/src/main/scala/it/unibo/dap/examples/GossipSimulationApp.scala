@@ -2,8 +2,7 @@ package it.unibo.dap.examples
 
 import gears.async.Async
 import gears.async.default.given
-import it.unibo.dap.ProductAPI
-import it.unibo.dap.ProductAPI.ADTs.*
+import .ADTs.*
 
 object GossipSimulationApp:
 
