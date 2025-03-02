@@ -1,8 +1,7 @@
 package it.unibo.dap.examples
 
-import gears.async.Async
-import gears.async.default.given
-import .ADTs.*
+import it.unibo.dap.api.ProductAPI
+import it.unibo.dap.api.ProductAPI.ADTs.*
 
 object GossipSimulationApp:
 
@@ -13,27 +12,14 @@ object GossipSimulationApp:
     Rule(MSet("b", "b"), _ => 1_000, MSet("b"), None), // b|b --1000--> b
   )
 
-  @main def leftUpNode(): Unit = Async.blocking:
-    ProductAPI.interface.launchSimulation(gossipRules, State(MSet("a"), None), s => scribe.info(s"State: $s"))(
-      2550,
-      Set("localhost:2551", "localhost:2552"),
-    )
+  def main(args: Array[String]): Unit =
+    val port = args(0).toIntOption.getOrElse(throw IllegalArgumentException(s"Port is required: $help"))
+    val net = args.drop(1).toSet
+    val initial = port match
+      case 2550 => State(MSet("a"), None)
+      case 2553 => State(MSet("b"), None)
+      case _ => State(MSet(), None)
+    ProductAPI.interface.simulate(gossipRules, initial, s => scribe.info(s"State: $s"))(port, net)
 
-  @main def rightUpNode(): Unit = Async.blocking:
-    ProductAPI.interface.launchSimulation(gossipRules, State(MSet(), None), s => scribe.info(s"State: $s"))(
-      2551,
-      Set("localhost:2550", "localhost:2553"),
-    )
-
-  @main def leftBtmNode(): Unit = Async.blocking:
-    ProductAPI.interface.launchSimulation(gossipRules, State(MSet(), None), s => scribe.info(s"State: $s"))(
-      2552,
-      Set("localhost:2550", "localhost:2553"),
-    )
-
-  @main def rightBtmNode(): Unit = Async.blocking:
-    ProductAPI.interface.launchSimulation(gossipRules, State(MSet("b"), None), s => scribe.info(s"State: $s"))(
-      2553,
-      Set("localhost:2551", "localhost:2552"),
-    )
+  private def help: String = "Usage: GossipSimulationApp <port> <neighbour> [<neighbour> ...]"
 end GossipSimulationApp

@@ -6,6 +6,8 @@
 #ifndef LIBDAP_H
 #define LIBDAP_H
 
+#include <stddef.h>
+
 /*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
  * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
@@ -22,9 +24,13 @@ typedef char* Neighbour;
 DEFINE_MSET(Neighbour)
 
 /* The data structure representing a token in a DAP model. */
-typedef struct Token *Token;
+typedef struct TokenImpl *Token;
 
 DEFINE_MSET(Token)
+
+struct TokenImpl {
+  char* token;
+};
 
 /* The overall state of a DAP model. */
 struct DAPState {

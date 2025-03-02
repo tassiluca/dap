@@ -54,20 +54,10 @@ def build_cffi(c):
     dap_module_h_file_name = lib_folder / "dap.h"
     with open(dap_module_h_file_name) as h_file:
         lines = h_file.read().splitlines()
-        lines += [
-            "struct Token {",
-            "    char* token;",
-            "};",
-        ]
         dap_ffi.cdef("\n".join(lines))
     dap_ffi.set_source(
         module_name="dap_cffi",
-        source="""
-        #include "dap.h"
-        struct Token {
-            char* token;
-        };
-        """,
+        source='#include "dap.h"',
         libraries=["dap"],
         library_dirs=[lib_folder.as_posix()],
         include_dirs=[lib_folder.as_posix()],

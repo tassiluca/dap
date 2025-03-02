@@ -1,11 +1,21 @@
 package libdap.impl
 
 import libdap.aliases.size_t
-import libdap.structs.{ DAPState as CDAPState, MSet_Neighbour as CMsetNeighbour, Rule as CRule }
+import libdap.aliases.Token as CToken
+import libdap.structs.{
+  DAPState as CDAPState,
+  MSet_Neighbour as CMsetNeighbour,
+  MSet_Token as CMSetToken,
+  Rule as CRule,
+}
 
-import scala.scalanative.unsafe.{ CInt, Ptr }
+import scala.language.postfixOps
+import scala.scalanative.unsafe.{ fromCString, CInt, Ptr }
 
 object Implementations extends libdap.ExportedFunctions:
+
+  import it.unibo.dap.api.ProductAPI.*
+  import ProductApiBindings.given
 
   override def launch_simulation(
       rules: Ptr[CRule],
@@ -13,17 +23,39 @@ object Implementations extends libdap.ExportedFunctions:
       s0: Ptr[CDAPState],
       port: CInt,
       neighborhood: Ptr[CMsetNeighbour],
-  ): Unit = ???
+  ): Unit =
+    val allrules = (0 until rules_size.toInt).map(i => rules(i)).map(ruleCvt).toSet
+    scribe.info("Rules: " + allrules)
+    scribe.info("Net: " + nnCvt(!neighborhood))
+    scribe.info("State: " + stateCvt(!s0))
+    interface.simulate(allrules, stateCvt(!s0), s => scribe.info(s"State: $s"))(port, !neighborhood)
+    scribe.info("Amazing")
 
-//object ProductApiBindings:
-//
-//  import it.unibo.dap.ProductAPI.ADTs.*
-//
-//  given Conversion[CMSetToken, MSet[Token]] = m => ???
-//
-//  given Conversion[CMSetToken, MSet[Token]] = m =>
-//    (0 until m.size.toInt)
-//      .map(i => m.elements(i))
-//      .map(t => ???)
-//      .toSet
-//    ???
+end Implementations
+
+object ProductApiBindings:
+
+  import it.unibo.dap.api.ProductAPI.ADTs.*
+
+  given Conversion[CMSetToken, MSet[Token]] = m =>
+    MSet(
+      (0 until m.size.toInt)
+        .map(i => m.elements(i))
+        .map(t => fromCString((!t.value).token))
+        .toList*,
+    )
+
+  given nnCvt: Conversion[CMsetNeighbour, Set[Neighbour]] = m =>
+    (0 until m.size.toInt)
+      .map(i => m.elements(i))
+      .map(n => fromCString(n.value))
+      .toSet
+
+  given Conversion[CToken, Option[Token]] = t => Option(t).map(t => fromCString((!t.value).token))
+
+  given ruleCvt: Conversion[CRule, Rule] = r =>
+    val rateF = (_: MSet[Token]) => r.rate(r.preconditions)
+    Rule(pre = r.preconditions, rateExp = rateF, eff = r.effects, msg = r.msg)
+
+  given stateCvt: Conversion[CDAPState, State] = s => State(tokens = s.tokens, msg = s.msg)
+end ProductApiBindings

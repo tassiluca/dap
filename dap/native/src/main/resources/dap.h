@@ -28,6 +28,10 @@ typedef struct TokenImpl *Token;
 
 DEFINE_MSET(Token)
 
+struct TokenImpl {
+  char* token;
+};
+
 /* The overall state of a DAP model. */
 struct DAPState {
     MSet_Token tokens;

@@ -16,7 +16,7 @@ class Token:
 
     @classmethod
     def of(cls, token: str):
-        c_struct = ffi.new("struct Token *")
+        c_struct = ffi.new("struct TokenImpl *")
         token_str = ffi.new("char[]", token.encode())
         cls._weak_refs[c_struct] = token_str  # !Warning! Avoid garbage collection!
         c_struct.token = token_str

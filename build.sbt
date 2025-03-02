@@ -9,21 +9,20 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
 lazy val dap = crossProject(JVMPlatform, NativePlatform)
   .crossType(CrossType.Full)
-  .enablePlugins(BindgenPlugin)
   .in(file("dap"))
-  .nativeSettings(
-    nativeConfig ~= {
-      _.withGC(GC.boehm) // garbage collector
-        .withLTO(LTO.full) // link-time optimization
-        .withMode(Mode.releaseSize) // build mode
-        .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to the native linker
-        .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
-    },
-    bindgenBindings := Seq(
-      Binding((Compile / resourceDirectory).value / "dap.h", "libdap")
-        .withExport(true)
-        .addCImport("dap.h")
-    )
+  .nativeConfigure(
+    _.settings(
+      nativeConfig ~= {
+        _.withGC(GC.boehm) // garbage collector
+          .withLTO(LTO.full) // link-time optimization
+          .withMode(Mode.releaseSize) // build mode
+          .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to the native linker
+          .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
+      },
+      bindgenBindings := Seq(
+        Binding((Compile / resourceDirectory).value / "dap.h", "libdap").withExport(true)
+      )
+    ).enablePlugins(BindgenPlugin)
   )
   .settings(
     name := "dap",
@@ -41,12 +40,13 @@ lazy val dapJVMExamples = project.in(file("dap-jvm-examples"))
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.19"
     ),
+    mainClass := Some("it.unibo.dap.examples.GossipSimulationApp")
   )
   .dependsOn(dap.jvm)
 
 /* Subproject for DAP library's client with some example using the Native platform. */
 lazy val dapNativeExamples = project.in(file("dap-native-examples"))
-  .enablePlugins(CcPlugin)
+  //.enablePlugins(CcPlugin)
   .settings(
     name := "dap-native-examples",
   )
