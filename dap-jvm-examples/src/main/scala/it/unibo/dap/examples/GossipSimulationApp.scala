@@ -6,9 +6,9 @@ import it.unibo.dap.api.ProductAPI.ADTs.*
 object GossipSimulationApp:
 
   private val gossipRules = Set[Rule](
+    Rule(MSet("a", "a"), _ => 1_000, MSet("a"), None), // a|a --1000--> a
     Rule(MSet("a"), _ => 1, MSet("a"), Some("a")), // a --1--> a|^a
     Rule(MSet("a", "b"), _ => 2, MSet("a", "b"), Some("b")), // a|b --2--> a|b|^b
-    Rule(MSet("a", "a"), _ => 1_000, MSet("a"), None), // a|a --1000--> a
     Rule(MSet("b", "b"), _ => 1_000, MSet("b"), None), // b|b --1000--> b
   )
 

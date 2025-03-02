@@ -21,3 +21,16 @@ object CUtils:
     */
   inline def requireNonNull[T](obj: T): T =
     if obj == null then throw new NullPointerException(s"Object $obj is null") else obj
+
+  /** Safely execute a block of code, logging any exceptions that are thrown.
+    * @param block the block of code to execute
+    * @tparam T the return type of the block
+    * @return the result of the block
+    */
+  inline def withLogging[T](block: => T): T =
+    try block
+    catch
+      case e: Exception =>
+        scribe.error(e.getMessage)
+        throw e
+end CUtils

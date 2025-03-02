@@ -9,27 +9,21 @@ def main():
     args = parser.parse_args()
 
     # Create a DAP model with two rules
-    token = Token.of("a")
-    mset = MSet([token, token])
+    a = Token.of("a")
+    b = Token.of("b")
     # 1) a|a --1_000--> a
-    rule1 = Rule(
-        preconditions = MSet([token, token]),
-        rate = 1_000.0,
-        effects = MSet([token]),
-        msg = None
-    )
+    rule1 = Rule(preconditions = MSet(a, a), rate = 1_000.0, effects = MSet(a), msg = None)
     # 2) a --1--> a|^a
-    rule2 = Rule(
-         preconditions = MSet([token]),
-         rate = 1.0,
-         effects = MSet([token]),
-         msg = token
-    )
+    rule2 = Rule(preconditions = MSet(a), rate = 1.0, effects = MSet(a), msg = a)
+    # 3) a|b --2--> a|b|^b
+    rule3 = Rule(preconditions = MSet(a, b), rate = 2.0, effects = MSet(a, b), msg = b)
+    # 4) b|b --1_000--> b
+    rule4 = Rule(preconditions = MSet(b, b), rate = 1_000.0, effects = MSet(b), msg = None)
     port = args.port
     neighbors = [Neighbour.of(n) for n in args.neighbors]
-    initial_state = DAPState.of(MSet([token]), None) if port == 2550 else DAPState.of(MSet([], Token), None)
+    initial_state = DAPState.of(MSet(a), None) if port == 2550 else DAPState.of(MSet(b), None) if port == 2553 else DAPState.of(MSet(type_hint=Token), None)
     # Actual semantics
-    DAP([rule1, rule2], initial_state).launch_simulation(port, neighbors)
+    DAP([rule1, rule2, rule3, rule4], initial_state).launch_simulation(port, neighbors)
 
 if __name__ == "__main__":
     main()

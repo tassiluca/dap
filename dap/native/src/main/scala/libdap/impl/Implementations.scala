@@ -1,5 +1,6 @@
 package libdap.impl
 
+import it.unibo.dap.CUtils.withLogging
 import libdap.aliases.size_t
 import libdap.aliases.Token as CToken
 import libdap.structs.{
@@ -23,13 +24,9 @@ object Implementations extends libdap.ExportedFunctions:
       s0: Ptr[CDAPState],
       port: CInt,
       neighborhood: Ptr[CMsetNeighbour],
-  ): Unit =
+  ): Unit = withLogging:
     val allrules = (0 until rules_size.toInt).map(i => rules(i)).map(ruleCvt).toSet
-    scribe.info("Rules: " + allrules)
-    scribe.info("Net: " + nnCvt(!neighborhood))
-    scribe.info("State: " + stateCvt(!s0))
     interface.simulate(allrules, stateCvt(!s0), s => scribe.info(s"State: $s"))(port, !neighborhood)
-    scribe.info("Amazing")
 
 end Implementations
 

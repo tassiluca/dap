@@ -40,7 +40,7 @@ class Neighbour:
 T = TypeVar("T", Neighbour, Token)
 
 class MSet(Generic[T]):
-    def __init__(self, elems: List[T], type_hint: Type[T] = None):
+    def __init__(self, *elems: T, type_hint: Type[T] = None):
         if not elems and type_hint is None:
             raise ValueError("Cannot determine type from empty list. Please provide type hint.")
         type_name = elems[0].__class__.__name__ if elems else type_hint.__name__
@@ -106,5 +106,5 @@ class DAP:
         self.rules_num = len(rules)
 
     def launch_simulation(self, port: int, neighbors: List[Neighbour]) -> None:
-        net = MSet(neighbors)
+        net = MSet(*neighbors)
         lib.launch_simulation(self.rules, self.rules_num, self.state, port, net.c_struct)
