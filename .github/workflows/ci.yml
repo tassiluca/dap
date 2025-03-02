@@ -12,7 +12,7 @@ jobs:
   build-lib:
     strategy:
       matrix:
-        os: [ ubuntu-22.04 ] # macos-14 ] #, windows-2022 ]
+        os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
         jvm-version: [ 17, 21 ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
@@ -24,6 +24,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.jvm-version }}
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: llvm-17
+          make: true
+          clang: true
       - name: Install Boehm GC on Ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get install -y libgc-dev
