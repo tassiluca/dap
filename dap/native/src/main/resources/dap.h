@@ -61,7 +61,8 @@ void launch_simulation(
     size_t rules_size,
     struct DAPState *s0,
     int port,
-    MSet_Neighbour *neighborhood
+    MSet_Neighbour *neighborhood,
+    void (*on_state_change)(struct DAPState *state)
 );
 
 #endif

@@ -1,6 +1,6 @@
 import sys
 import weakref
-from typing import Optional, TypeVar, Type, Generic, List
+from typing import Optional, TypeVar, Type, Generic, List, Callable
 
 from lib import dap_cffi
 
@@ -105,6 +105,9 @@ class DAP:
         self.state = state.c_struct
         self.rules_num = len(rules)
 
-    def launch_simulation(self, port: int, neighbors: List[Neighbour]) -> None:
+    def launch_simulation(self, port: int, neighbors: List[Neighbour], on_state_change: Callable[DAPState, None]) -> None:
+        @ffi.callback("void(struct DAPState *state)")
+        def update_fn(state_ptr):
+            return on_state_change(DAPState(state_ptr))
         net = MSet(*neighbors)
-        lib.launch_simulation(self.rules, self.rules_num, self.state, port, net.c_struct)
+        lib.launch_simulation(self.rules, self.rules_num, self.state, port, net.c_struct, update_fn)

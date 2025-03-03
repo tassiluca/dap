@@ -32,5 +32,5 @@ object CUtils:
     catch
       case e: Exception =>
         scribe.error(e.getMessage)
-        throw e
+        stdlib.exit(1).asInstanceOf[T]
 end CUtils

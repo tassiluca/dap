@@ -51,12 +51,18 @@ typedef struct {
     const Token msg;
 } Rule;
 
+
+/*
+ * Launches the simulation of a DAP model.
+ * The simulation is guided by the given `rules`, starting from the initial state `s0`.
+ */
 void launch_simulation(
     const Rule* rules,
     size_t rules_size,
     struct DAPState *s0,
     int port,
-    MSet_Neighbour *neighborhood
+    MSet_Neighbour *neighborhood,
+    void (*on_state_change)(struct DAPState *state)
 );
 
 #endif
