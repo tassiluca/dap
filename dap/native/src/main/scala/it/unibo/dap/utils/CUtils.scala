@@ -1,4 +1,4 @@
-package it.unibo.dap
+package it.unibo.dap.utils
 
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.{ sizeOf, Ptr }

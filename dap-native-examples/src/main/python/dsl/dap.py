@@ -57,9 +57,9 @@ class MSet(Generic[T]):
 class Rule:
     def __init__(self, preconditions: MSet[Token], rate: float, effects: MSet[Token], msg: Optional[Token]):
         self.c_struct = ffi.new("Rule *")
-        self.c_struct.preconditions = preconditions.c_struct[0]
+        self.c_struct.preconditions = preconditions.c_struct
         self.preconditions = preconditions
-        self.c_struct.effects = effects.c_struct[0]
+        self.c_struct.effects = effects.c_struct
         self.effects = effects
         self.c_struct.msg = ffi.NULL if msg is None else msg.c_struct
         self.rate_fun = create_fixed_rate_function(rate)
@@ -74,7 +74,7 @@ class Rule:
 
 
 def create_fixed_rate_function(rate_value):
-    @ffi.callback("double(MSet_Token)")
+    @ffi.callback("double(MSet_Token*)")
     def rate_func(mset_place_ptr):
         return rate_value
     return rate_func
@@ -90,7 +90,7 @@ class DAPState:
     @classmethod
     def of(cls, tokens: MSet[Token], msg: Optional[Token]):
         c_struct = ffi.new("struct DAPState *")
-        c_struct.tokens = tokens.c_struct[0]
+        c_struct.tokens = tokens.c_struct
         c_struct.msg = ffi.NULL if msg is None else msg.c_struct
         cls._weak_refs[c_struct] = (tokens, msg) # !Warning! Avoid garbage collection!
         return cls(c_struct)

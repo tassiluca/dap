@@ -2,7 +2,7 @@ package libdap.impl
 
 import scala.scalanative.unsafe.*
 
-import it.unibo.dap.CUtils.withLogging
+import it.unibo.dap.utils.CUtils.withLogging
 import it.unibo.dap.api.ProductAPI
 
 import libdap.aliases.size_t

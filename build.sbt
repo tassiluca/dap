@@ -60,7 +60,6 @@ lazy val dapJVMExamples = project.in(file("dap-jvm-examples"))
 
 /* Subproject for DAP library's client with some example using the Native platform. */
 lazy val dapNativeExamples = project.in(file("dap-native-examples"))
-  //.enablePlugins(CcPlugin)
   .settings(
     name := "dap-native-examples",
   )

@@ -29,8 +29,8 @@ object GossipSimulationApp:
     val output =
       s"""
          |[☕️][⏰] ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"))}
-         |[☕][📦] State Tokens: { ${s.tokens} }
-         |[☕][💬] Message: "${s.msg}"
+         |[☕][📦] State Tokens: { ${s.tokens.elems.mkString(" | ")} }
+         |[☕][💬] Message: ${s.msg}
          |----------------------------------------
          |""".stripMargin
     println(output)

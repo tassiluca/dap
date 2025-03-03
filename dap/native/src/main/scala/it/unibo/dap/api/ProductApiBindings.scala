@@ -4,7 +4,7 @@ import scala.scalanative.unsafe.Size.intToSize
 import scala.language.postfixOps
 import scala.scalanative.unsafe.*
 
-import it.unibo.dap.CUtils.freshPointer
+import it.unibo.dap.utils.CUtils.freshPointer
 import it.unibo.dap.api.ProductAPI.ADTs.*
 
 import libdap.aliases.Token as CToken
@@ -22,10 +22,10 @@ import libdap.structs.{
   */
 object ProductApiBindings:
 
-  given Conversion[CMSetToken, MSet[Token]] = m =>
+  given Conversion[Ptr[CMSetToken], MSet[Token]] = m =>
     MSet(
-      (0 until m.size.toInt)
-        .map(i => m.elements(i))
+      (0 until (!m).size.toInt)
+        .map(i => (!m).elements(i))
         .map(t => fromCString((!t.value).token))
         .toList*,
     )
@@ -34,13 +34,11 @@ object ProductApiBindings:
 
     def toCMSetToken(using Zone): Ptr[CMSetToken] =
       val cmset = CMSetToken()
-      m.elems.zipWithIndex.foreach { case (t, i) =>
-        val tokenImpl: Ptr[TokenImpl] = TokenImpl(toCString(t))
-        val token: Ptr[CToken] = freshPointer[CToken]()
-        !token = CToken(tokenImpl)
-        cmset(i).elements = token
-      }
       (!cmset).size = m.elems.size.toCSize
+      val elems = freshPointer[CToken](m.elems.size)
+      (!cmset).elements = elems
+      m.elems.zipWithIndex.foreach: (t, i) =>
+        elems(i) = CToken(TokenImpl(toCString(t)))
       cmset
 
   given Conversion[CMSetNeighbour, Set[Neighbour]] = m =>
@@ -60,5 +58,5 @@ object ProductApiBindings:
   given Conversion[CDAPState, State] = s => State(tokens = s.tokens, msg = s.msg)
 
   extension (s: State)
-    def toDAPState(using Zone): Ptr[CDAPState] = CDAPState(tokens = !s.tokens.toCMSetToken, msg = s.msg.toCToken)
+    def toDAPState(using Zone): Ptr[CDAPState] = CDAPState(tokens = s.tokens.toCMSetToken, msg = s.msg.toCToken)
 end ProductApiBindings

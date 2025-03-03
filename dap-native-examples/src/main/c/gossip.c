@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>  // Necessario per ottenere i millisecondi
+#include <sys/time.h>
 #include "dap.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-double fixed_rate_1000(const MSet_Token set __attribute__((unused))) {
-  return 1000.0;
+double fixed_rate_1000(MSet_Token *set) {
+  return set == NULL ? 0.0 : 1000.0;
 }
 
-double fixed_rate_1(const MSet_Token set __attribute__((unused))) {
-  return 1.0;
+double fixed_rate_1(MSet_Token *set) {
+  return set == NULL ? 0.0 : 1.0;
 }
 
 void on_state_change(struct DAPState *state);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   Token a = createToken("a");
   Token b = createToken("b");
   if (a == NULL || b == NULL) {
-      perror("Errore allocazione memoria");
+      perror("Allocation memory error on tokens");
       free(a);
       free(b);
       exit(EXIT_FAILURE);
@@ -36,9 +36,9 @@ int main(int argc, char *argv[]) {
   Token out_places1[] = { a };
   MSet_Token effects1 = { out_places1, ARRAY_LEN(out_places1) };
   Rule rule = {
-    .preconditions = preconditions1,
+    .preconditions = &preconditions1,
     .rate = &fixed_rate_1000,
-    .effects = effects1,
+    .effects = &effects1,
     .msg = NULL
   };
   /* 2) a --1--> a|^a */
@@ -47,9 +47,9 @@ int main(int argc, char *argv[]) {
   Token out_places2[] = { a };
   MSet_Token effects2 = { out_places2, ARRAY_LEN(out_places2) };
   Rule rule2 = {
-    .preconditions = preconditions2,
+    .preconditions = &preconditions2,
     .rate = &fixed_rate_1,
-    .effects = effects2,
+    .effects = &effects2,
     .msg = a
   };
   /* 3) a|b --2--> a|b|^b */
@@ -58,9 +58,9 @@ int main(int argc, char *argv[]) {
   Token out_places3[] = { a, b };
   MSet_Token effects3 = { out_places3, ARRAY_LEN(out_places3) };
   Rule rule3 = {
-    .preconditions = preconditions3,
+    .preconditions = &preconditions3,
     .rate = &fixed_rate_1,
-    .effects = effects3,
+    .effects = &effects3,
     .msg = b
   };
   /* 4) b|b --1000--> b */
@@ -69,9 +69,9 @@ int main(int argc, char *argv[]) {
   Token out_places4[] = { b };
   MSet_Token effects4 = { out_places4, ARRAY_LEN(out_places4) };
   Rule rule4 = {
-    .preconditions = preconditions4,
+    .preconditions = &preconditions4,
     .rate = &fixed_rate_1000,
-    .effects = effects4,
+    .effects = &effects4,
     .msg = NULL
   };
   Rule rules[] = { rule, rule2, rule3, rule4 };
@@ -111,7 +111,13 @@ Token createToken(const char* token) {
 }
 
 struct DAPState *createDAPState(Token *initial_tokens, size_t token_count) {
-  MSet_Token initial_with_token = { initial_tokens, token_count };
+  MSet_Token *initial_with_token = malloc(sizeof(MSet_Token));
+  if (initial_with_token == NULL) {
+      perror("Allocation memory error on initial_with_token");
+      exit(EXIT_FAILURE);
+  }
+  initial_with_token->elements = initial_tokens;
+  initial_with_token->size = token_count;
   struct DAPState *state = malloc(sizeof(struct DAPState));
   if (state == NULL) {
       perror("Allocation memory error on state");
@@ -135,11 +141,11 @@ void on_state_change(struct DAPState *state) {
     printf(COLOR_CYAN "[C][⏰] %02d:%02d:%02d.%03d" COLOR_RESET "\n",
       lt->tm_hour, lt->tm_min, lt->tm_sec, tv.tv_usec / 1000);
     printf(COLOR_GREEN "[C][📦] State Tokens: " COLOR_RESET);
-    if (state->tokens.size > 0) {
+    if (state->tokens->size > 0) {
         printf(COLOR_YELLOW "{ ");
-        for (size_t i = 0; i < state->tokens.size; i++) {
-            printf("%s", state->tokens.elements[i]->token);
-            if (i < state->tokens.size - 1) {
+        for (size_t i = 0; i < state->tokens->size; i++) {
+            printf("%s", state->tokens->elements[i]->token);
+            if (i < state->tokens->size - 1) {
                 printf(COLOR_MAGENTA " | " COLOR_YELLOW);
             }
         }

@@ -34,7 +34,7 @@ struct TokenImpl {
 
 /* The overall state of a DAP model. */
 struct DAPState {
-    MSet_Token tokens;
+    MSet_Token *tokens;
     Token msg;
 };
 
@@ -45,9 +45,9 @@ struct DAPState {
  * in the same place and sending messages to the neighbors, according to its rate.
  */
 typedef struct {
-    const MSet_Token preconditions;
-    double (*rate)(MSet_Token);
-    const MSet_Token effects;
+    const MSet_Token *preconditions;
+    double (*rate)(MSet_Token*);
+    const MSet_Token *effects;
     const Token msg;
 } Rule;
 
