@@ -35,7 +35,7 @@ def main():
     # Actual semantics
     on_state_change = lambda state: print(textwrap.dedent(f"""
         [cyan][🐍][⏰] [/cyan]{datetime.now().strftime('%H:%M:%S.%f')[:-3]}
-        [green][🐍][📦] State Tokens:[/green] [yellow]{{ { ",".join(str(t.token) for t in state.tokens) } }}[/yellow]
+        [green][🐍][📦] State Tokens:[/green] [yellow]{{ { " | ".join(str(t.token) for t in state.tokens) } }}[/yellow]
         [green][🐍][💬] Message:[/green] [magenta]"[/magenta]{ state.msg.token }[magenta]"[/magenta]
         [cyan]----------------------------------------[/cyan]
     """).strip())
