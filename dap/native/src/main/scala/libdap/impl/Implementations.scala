@@ -26,7 +26,7 @@ object Implementations extends libdap.ExportedFunctions:
       neighborhood: Ptr[CMsetNeighbour],
   ): Unit = withLogging:
     val allrules = (0 until rules_size.toInt).map(i => rules(i)).map(ruleCvt).toSet
-    interface.simulate(allrules, stateCvt(!s0), s => scribe.info(s"State: $s"))(port, !neighborhood)
+    interface.simulate(allrules, !s0, s => scribe.info(s"State: $s"))(port, !neighborhood)
 
 end Implementations
 
@@ -42,7 +42,7 @@ object ProductApiBindings:
         .toList*,
     )
 
-  given nnCvt: Conversion[CMsetNeighbour, Set[Neighbour]] = m =>
+  given Conversion[CMsetNeighbour, Set[Neighbour]] = m =>
     (0 until m.size.toInt)
       .map(i => m.elements(i))
       .map(n => fromCString(n.value))
@@ -54,5 +54,5 @@ object ProductApiBindings:
     val rateF = (_: MSet[Token]) => r.rate(r.preconditions)
     Rule(pre = r.preconditions, rateExp = rateF, eff = r.effects, msg = r.msg)
 
-  given stateCvt: Conversion[CDAPState, State] = s => State(tokens = s.tokens, msg = s.msg)
+  given Conversion[CDAPState, State] = s => State(tokens = s.tokens, msg = s.msg)
 end ProductApiBindings
