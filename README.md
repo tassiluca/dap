@@ -5,7 +5,7 @@
 ## Requirments
 
 - LLVM 17
-- `Boehm GC ` package (`apt-get install -y libgc-dev` || `brew install bdw-gc`)
+- `Boehm GC` package (`apt-get install -y libgc-dev` || `brew install bdw-gc`)
 
 ## How to run examples
 
@@ -13,7 +13,20 @@ The simulation program is written in [C](./dap-native-examples/src/main/c/gossip
 
 The C and Python examples target the Native platform, while the Scala example targets the JVM platform.
 
-To execute them:
+To execute them, you need to run the following commands, each on a separate shell.
+The idea is that each program will simulate a node in a gossip network, where each node will send a message to the neighbors specified in the command line, following the following  Petri Nets like rules:
+
+```
+1) a|a --1000--> a
+2) a --1--> a|^a
+3) a|b --2--> a|b|^b
+4) b|b --1000--> b
+```
+
+Upon running, you should see the `a` token to be gossiped around the network.
+When it reaches the last node (i.e. the one listening on port 2553), the `b` token will be spread back to the first node.
+
+Communications between nodes happen over plain sockets.
 
 ```bash
 sbt "dapJVMExamples/run 2550 localhost:2551 localhost:2552"
