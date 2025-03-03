@@ -5,6 +5,20 @@ import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
 ThisBuild / scalaVersion := "3.6.3"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / scalacOptions ++= Seq(
+  "-Wunused:all",
+  "-Wvalue-discard",
+  "-Wnonunit-statement",
+  "-Wsafe-init",
+  "-Ycheck-reentrant",
+  "-Xcheck-macros",
+  "-rewrite",
+  "-indent",
+  "-unchecked",
+  "-explain",
+  "-feature",
+  "-language:implicitConversions"
+)
 
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
 lazy val dap = crossProject(JVMPlatform, NativePlatform)

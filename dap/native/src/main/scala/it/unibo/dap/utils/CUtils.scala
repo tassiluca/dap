@@ -4,6 +4,7 @@ import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.{ sizeOf, Ptr }
 
 /** A bunch of utilities for C interop. */
+@SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf", "scalafix:DisableSyntax.null"))
 object CUtils:
 
   /** Allocates memory for a type `T`, possibly multiplied by a factor, returning a pointer to it.

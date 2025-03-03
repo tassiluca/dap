@@ -1,6 +1,7 @@
 package it.unibo.dap.controller
 
 import it.unibo.dap.utils.Spawnable
+
 import gears.async.{ ReadableChannel, SendableChannel }
 
 trait ExchangeComponent[T]:

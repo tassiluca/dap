@@ -1,7 +1,5 @@
 package it.unibo.dap.api
 
-import gears.async.{ Async, AsyncOperations }
-
 trait Api:
 
   val interface: Interface

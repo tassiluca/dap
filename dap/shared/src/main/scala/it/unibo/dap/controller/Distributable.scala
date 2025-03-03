@@ -3,6 +3,7 @@ package it.unibo.dap.controller
 type DistributableState[T] = [S] =>> Distributable[S, T]
 
 trait Distributable[State, Message]:
+
   extension (s: State)
     def msg: Option[Message]
     def updated(msg: Message): State

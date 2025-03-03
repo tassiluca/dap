@@ -1,11 +1,12 @@
 package libdap.impl
 
+import scala.scalanative.unsafe.*
+
 import it.unibo.dap.CUtils.withLogging
 import it.unibo.dap.api.ProductAPI
+
 import libdap.aliases.size_t
 import libdap.structs.*
-
-import scala.scalanative.unsafe.{ CFuncPtr1, CInt, Ptr, Zone }
 
 object Implementations extends libdap.ExportedFunctions:
 

@@ -1,13 +1,15 @@
 package it.unibo.dap.controller
 
-import gears.async.TaskSchedule.RepeatUntilFailure
-import gears.async.{ Async, AsyncOperations, Future, Task }
-import it.unibo.dap.modelling.Simulatable
-
 import java.util.{ Deque, Random }
 import java.util.concurrent.ConcurrentLinkedDeque
+
 import scala.annotation.tailrec
 import scala.concurrent.duration.DurationDouble
+
+import it.unibo.dap.modelling.Simulatable
+
+import gears.async.TaskSchedule.RepeatUntilFailure
+import gears.async.*
 
 trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   boundary: ExchangeComponent[T] =>

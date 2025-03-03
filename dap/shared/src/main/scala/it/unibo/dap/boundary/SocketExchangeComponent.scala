@@ -1,12 +1,14 @@
 package it.unibo.dap.boundary
 
-import gears.async.*
-import it.unibo.dap.controller.ExchangeComponent
-
 import java.net.{ ServerSocket, Socket }
+
 import scala.annotation.tailrec
 import scala.collection.Iterator.continually
 import scala.util.{ Failure, Success, Try }
+
+import it.unibo.dap.controller.ExchangeComponent
+
+import gears.async.*
 
 /** An exchange that communicates with other exchanges over plain sockets. */
 trait SocketExchangeComponent extends ExchangeComponent[String]:
