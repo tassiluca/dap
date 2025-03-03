@@ -54,7 +54,7 @@ lazy val dapJVMExamples = project.in(file("dap-jvm-examples"))
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.19"
     ),
-    mainClass := Some("it.unibo.dap.examples.GossipSimulationApp")
+    Compile / mainClass := Some("it.unibo.dap.examples.GossipSimulationApp")
   )
   .dependsOn(dap.jvm)
 

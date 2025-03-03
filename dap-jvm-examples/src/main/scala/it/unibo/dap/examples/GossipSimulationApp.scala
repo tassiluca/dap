@@ -19,7 +19,20 @@ object GossipSimulationApp:
       case 2550 => State(MSet("a"), None)
       case 2553 => State(MSet("b"), None)
       case _ => State(MSet(), None)
-    ProductAPI.interface.simulate(gossipRules, initial, s => scribe.info(s"State: $s"))(port, net)
+    ProductAPI.interface.simulate(gossipRules, initial, onStateChange)(port, net)
 
   private def help: String = "Usage: GossipSimulationApp <port> <neighbour> [<neighbour> ...]"
+
+  private def onStateChange(s: State): Unit =
+    import java.time.LocalDateTime
+    import java.time.format.DateTimeFormatter
+    val output =
+      s"""
+         |[☕️][⏰] ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"))}
+         |[☕][📦] State Tokens: { ${s.tokens} }
+         |[☕][💬] Message: "${s.msg}"
+         |----------------------------------------
+         |""".stripMargin
+    println(output)
+
 end GossipSimulationApp

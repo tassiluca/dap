@@ -12,7 +12,7 @@ jobs:
   build-lib:
     strategy:
       matrix:
-        os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
+        os: [ ubuntu-22.04 ] #, macos-14 ], windows-2022 ]
         jvm-version: [ 17, 21 ]
       fail-fast: false
     runs-on: ${{ matrix.os }}

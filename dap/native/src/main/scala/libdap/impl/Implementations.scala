@@ -10,7 +10,7 @@ import libdap.structs.*
 
 object Implementations extends libdap.ExportedFunctions:
 
-  import it.unibo.dap.api.native.ProductApiBindings.{ *, given }
+  import it.unibo.dap.api.ProductApiBindings.{ *, given }
 
   override def launch_simulation(
       rules: Ptr[Rule],
