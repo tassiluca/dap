@@ -89,7 +89,7 @@ Mkfile.old
 dkms.conf
 
 # Binaries
-*bin*
+/*bin*/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
