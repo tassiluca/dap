@@ -35,3 +35,9 @@ pip install -r requirements.txt
 poetry install && poetry run invoke build-cffi
 poetry run python src/main/python/gossip.py --port 2553 --neighbors localhost:2551 localhost:2552
 ```
+
+On MacOs this env variable can be needed in case of errors with the Boehm GC library:
+
+```bash
+export LIBRARY_PATH=/opt/homebrew/lib:$LIBRARY_PATH
+```
