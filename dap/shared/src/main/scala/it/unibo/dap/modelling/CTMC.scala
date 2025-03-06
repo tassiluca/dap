@@ -33,7 +33,7 @@ object CTMC:
     extension [S](self: CTMC[S])
 
       /** Simulates the CTMC through the Gillespie algorithm. */
-      override def simulate(initialState: S, rnd: Random): Trace[S] =
+      override def simulate(initialState: S)(using rnd: Random): Trace[S] =
         LazyList.iterate(Event(0.0, initialState)):
           case Event(t, s) =>
             if self.transitions(s).isEmpty
@@ -42,6 +42,6 @@ object CTMC:
               val choices = self.transitions(s) map (t => (t.rate, t.state))
               val next = Stochastics.cumulative(choices.toList)
               val sumR = next.last._1
-              val choice = Stochastics.draw(next)(using rnd)
+              val choice = Stochastics.draw(next)
               Event(t + Math.log(1 / rnd.nextDouble()) / sumR, choice)
 end CTMC

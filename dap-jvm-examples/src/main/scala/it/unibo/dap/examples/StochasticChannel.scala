@@ -30,7 +30,7 @@ object StochasticChannel:
   Time.timed:
     println:
       stocChannel
-        .simulate(IDLE, new Random)
+        .simulate(IDLE)(using Random())
         .take(10)
         .toList
         .mkString("\n")
