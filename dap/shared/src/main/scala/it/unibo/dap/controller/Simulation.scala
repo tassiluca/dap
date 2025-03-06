@@ -11,11 +11,18 @@ import it.unibo.dap.modelling.Simulatable
 import gears.async.TaskSchedule.RepeatUntilFailure
 import gears.async.*
 
+/** A distributed simulation.
+  * @tparam B the [[Simulatable]] behaviour to simulate
+  * @tparam T
+  * @tparam S
+  */
 trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   boundary: ExchangeComponent[T] =>
 
+  /** The initial state of the simulation. */
   def initial: S
 
+  /** The behaviour to simulate. */
   def behavior: B[S]
 
   def launch(updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
@@ -30,7 +37,7 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   @tailrec
   private final def loop(queue: Deque[T], state: S, updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
     scribe.info(s"[Sim] Simulating step for state: $state")
-    val event = behavior.simulateStep(state, new Random())
+    val event = behavior.simulateStep(state)(using Random())
     AsyncOperations.sleep(event.time.seconds)
     updateFn(event.state)
     event.state.msg.foreach(boundary.exchange.outputs.send)

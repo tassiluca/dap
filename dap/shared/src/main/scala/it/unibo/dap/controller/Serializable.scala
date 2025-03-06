@@ -1,5 +1,8 @@
 package it.unibo.dap.controller
 
+/** A type class for serialization and deserialization capabilities.
+  * @tparam T the type to serialize and deserialize
+  */
 trait Serializable[T]:
   def serialize(t: T): Array[Byte]
   def deserialize(bytes: Array[Byte]): T

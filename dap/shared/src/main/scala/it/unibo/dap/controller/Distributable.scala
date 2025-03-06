@@ -1,20 +1,16 @@
 package it.unibo.dap.controller
 
+/** A type alias for a distributable state.
+  * @tparam T the type of the message to distribute
+  */
 type DistributableState[T] = [S] =>> Distributable[S, T]
 
-trait Distributable[State, Message]:
+/** A type class for enriching a model state with distribution capabilities.
+  * @tparam State the type of the state
+  * @tparam Message the type of the message to distribute
+  */
+trait Distributable[State, Message: Serializable]:
 
   extension (s: State)
     def msg: Option[Message]
     def updated(msg: Message): State
-
-object DistributableInstances:
-
-  import it.unibo.dap.modelling.DAP
-  import it.unibo.dap.utils.MSet
-
-  given [T] => Distributable[DAP.State[T], T] =
-    new Distributable[DAP.State[T], T]:
-      extension (s: DAP.State[T])
-        override def msg: Option[T] = s.msg
-        override def updated(msg: T): DAP.State[T] = s.copy(tokens = s.tokens union MSet(msg))
