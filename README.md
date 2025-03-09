@@ -54,3 +54,13 @@ On MacOs this env variable can be needed in case of errors with the Boehm GC lib
 ```bash
 export LIBRARY_PATH=/opt/homebrew/lib:$LIBRARY_PATH
 ```
+
+Why?
+
+> LIBRARY_PATH is used by gcc before compilation to search directories containing static and shared libraries that need to be linked to your program.
+>
+> LD_LIBRARY_PATH is used by your program to search directories containing shared libraries after it has been successfully compiled and linked.
+>
+> EDIT: As pointed below, your libraries can be static or shared. If it is static then the code is copied over into your program and you don't need to search for the library after your program is compiled and linked. If your library is shared then it needs to be dynamically linked to your program and that's when LD_LIBRARY_PATH comes into play.
+> 
+> [from [https://stackoverflow.com/questions/4250624/ld-library-path-vs-library-path](https://stackoverflow.com/questions/4250624/ld-library-path-vs-library-path)]

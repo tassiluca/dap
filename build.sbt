@@ -26,15 +26,17 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
   .in(file("dap"))
   .nativeConfigure(
     _.settings(
-      nativeConfig ~= {
-        _.withGC(GC.boehm) // garbage collector
+      nativeConfig ~= { conf =>
+        conf.withGC(GC.boehm) // garbage collector
           .withLTO(LTO.full) // link-time optimization
           .withMode(Mode.releaseSize) // build mode
-          .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to the native linker
+          .withCompileOptions(Seq()) // a sequence of additional compiler options to be passed to clang
+          .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to clang
           .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
       },
       bindgenBindings := Seq(
-        Binding((Compile / resourceDirectory).value / "dap.h", "libdap").withExport(true)
+        Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName = "libdap")
+          .withExport(true),
       )
     ).enablePlugins(BindgenPlugin)
   )

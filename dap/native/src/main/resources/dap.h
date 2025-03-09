@@ -1,5 +1,5 @@
 /**
- * Module: dap
+* Module: dap
  * =================
  * A module for programming and simulating Distributed Asynchronous Petri Nets (DAP).
  */
@@ -12,25 +12,22 @@
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
  * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
  */
-#define DEFINE_MSET(Type)      \
-    typedef struct {           \
-        Type* elements;        \
-        size_t size;           \
-    } MSet_##Type;
+#define DEFINE_MSET(Type)  \
+typedef struct {           \
+    Type* elements;        \
+    size_t size;           \
+} MSet_##Type;
 
 typedef char* Neighbour;
 
 /* The data structure keeping track of the neighbors of a place in a DAP model. */
 DEFINE_MSET(Neighbour)
 
-/* The data structure representing a token in a DAP model. */
+/* An opaque data structure representing a token in a DAP model. */
 typedef struct TokenImpl *Token;
 
+/** A multi-set of tokens. */
 DEFINE_MSET(Token)
-
-struct TokenImpl {
-  char* token;
-};
 
 /* The overall state of a DAP model. */
 struct DAPState {
@@ -51,10 +48,10 @@ typedef struct {
     const Token msg;
 } Rule;
 
-
 /*
- * Launches the simulation of a DAP model.
- * The simulation is guided by the given `rules`, starting from the initial state `s0`.
+ * Launches the distributed simulation of a DAP model.
+ * The simulation is started on the given `port` with a preconfigured `neighborhood`
+ * and is guided by the given `rules`, which are applied to the initial state `s0`.
  */
 void launch_simulation(
     const Rule* rules,
@@ -63,6 +60,16 @@ void launch_simulation(
     int port,
     MSet_Neighbour *neighborhood,
     void (*on_state_change)(struct DAPState *state)
+);
+
+Token use_just_for_fun(Token token);
+
+/**************************************************************************************/
+
+int register_codec(
+    const char* name,
+    unsigned char* (*serialize_fn)(void *data, size_t *out_size),
+    void* (*deserialize_fn)(const unsigned char *bytes, int size)
 );
 
 #endif
