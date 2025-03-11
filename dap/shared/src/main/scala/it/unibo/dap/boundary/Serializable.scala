@@ -1,4 +1,4 @@
-package it.unibo.dap.controller
+package it.unibo.dap.boundary
 
 /** A type class for serialization and deserialization capabilities.
   * @tparam T the type to serialize and deserialize

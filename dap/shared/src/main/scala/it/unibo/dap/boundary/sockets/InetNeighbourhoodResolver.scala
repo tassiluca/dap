@@ -1,4 +1,4 @@
-package it.unibo.dap.boundary
+package it.unibo.dap.boundary.sockets
 
 import it.unibo.dap.controller.NeighbourhoodResolverComponent
 

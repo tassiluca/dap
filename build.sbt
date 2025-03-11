@@ -30,7 +30,6 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
         conf.withGC(GC.boehm) // garbage collector
           .withLTO(LTO.full) // link-time optimization
           .withMode(Mode.releaseSize) // build mode
-          .withCompileOptions(Seq()) // a sequence of additional compiler options to be passed to clang
           .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to clang
           .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
       },

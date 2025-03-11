@@ -1,12 +1,12 @@
 package it.unibo.dap.api
 
-import it.unibo.dap.boundary.{ InetNeighbourhoodResolver, SocketExchangeComponent }
+import it.unibo.dap.boundary.sockets.{InetNeighbourhoodResolver, SocketExchangeComponent}
 import it.unibo.dap.controller.{ Distributable, Simulation }
 import it.unibo.dap.modelling.DAP.{ *, given }
 import it.unibo.dap.modelling.{ CTMC, DAP }
 import it.unibo.dap.modelling.CTMC.given_Simulatable_CTMC
 import it.unibo.dap.utils.MSet
-import it.unibo.dap.controller.Serializable
+import it.unibo.dap.boundary.Serializable
 
 trait DAPSimulation[Token: Serializable]
     extends Simulation[CTMC, Token, State[Token]]
@@ -19,8 +19,6 @@ object DAPSimulation:
       port: Int,
       neighbors: Set[String],
   ): DAPSimulation[Token] = DAPSimulationImpl(s0, rules)(port, neighbors)
-
-  import it.unibo.dap.controller.SerializableInstances.given
 
   given [T: Serializable] => Distributable[DAP.State[T], T] =
     new Distributable[DAP.State[T], T]:

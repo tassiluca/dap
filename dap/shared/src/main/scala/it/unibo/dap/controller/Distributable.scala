@@ -9,7 +9,7 @@ type DistributableState[T] = [S] =>> Distributable[S, T]
   * @tparam State the type of the state
   * @tparam Message the type of the message to distribute
   */
-trait Distributable[State, Message: Serializable]:
+trait Distributable[State, Message]:
 
   extension (s: State)
     def msg: Option[Message]
