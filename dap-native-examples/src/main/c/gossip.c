@@ -2,17 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
 #include "dap.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
+/* The concrete Token implementation. */
 struct TokenImpl {
     char *token;
 };
 
 unsigned char* serialize_fn(void *data, size_t *out_size) {
     struct TokenImpl *token = data;
-    int str_len = strlen(token->token) + 1;
+    int str_len = strlen(token->token);
     *out_size = str_len;
     unsigned char *bytes = malloc(str_len);
     if (bytes == NULL) {
@@ -25,21 +27,23 @@ unsigned char* serialize_fn(void *data, size_t *out_size) {
 
 void* deserialize_fn(const unsigned char *bytes, int size) {
     if (size <= 0) {
-        fprintf(stderr, "Invalid deserialize size\n");
         return NULL;
     }
+    printf("Size: %d\n", size);
     Token token = malloc(sizeof(struct TokenImpl));
     if (token == NULL) {
         perror("Allocation memory error on token");
         return NULL;
     }
-    token->token = (char*)malloc(size);
+    token->token = (char*)malloc(size + 1);
     if (token->token == NULL) {
         perror("Allocation memory error on token");
         free(token);
         return NULL;
     }
     memcpy(token->token, bytes, size);
+    token->token[size] = '\0';
+    printf("--- Size: %d, Token: %s\n", size, token->token);
     return token;
 }
 
@@ -57,15 +61,89 @@ struct DAPState *createDAPState(Token *initial_tokens, size_t token_count);
 
 Token createToken(const char* token);
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        perror(
+            "Usage: gossip <port> <neighbor> [<neighbor>...]\n"
+            "\n"
+            "\t <port>: the port the node will listen on for incoming neighbors connections\n"
+            "\t <neighbor>: endpoint in the form of <hostname>:<port> of the neighbor node"
+        );
+        return 1;
+    }
     printf("Gossip simulation\n");
     Token a = createToken("a");
-    int res = register_codec("Token", serialize_fn, deserialize_fn);
-    printf("Registered tokens: %s\n", !res ? "yes" : "no");
-    Token newA = use_just_for_fun(a);
-    printf("Real token %s\n", a->token);
-    printf("Using token: %s\n", newA->token);
-    free(a);
+    Token b = createToken("b");
+    /* 1) a|a --1_000--> a */
+    Token in_tokens1[] = { a, a };
+    MSet_Token preconditions1 = { in_tokens1, ARRAY_LEN(in_tokens1) };
+    Token out_places1[] = { a };
+    MSet_Token effects1 = { out_places1, ARRAY_LEN(out_places1) };
+    Rule rule = {
+        .preconditions = &preconditions1,
+        .rate = &fixed_rate_1000,
+        .effects = &effects1,
+        .msg = NULL
+    };
+    /* 2) a --1--> a|^a */
+    Token in_tokens2[] = { a };
+    MSet_Token preconditions2 = { in_tokens2, ARRAY_LEN(in_tokens2) };
+    Token out_places2[] = { a };
+    MSet_Token effects2 = { out_places2, ARRAY_LEN(out_places2) };
+    Rule rule2 = {
+        .preconditions = &preconditions2,
+        .rate = &fixed_rate_1,
+        .effects = &effects2,
+        .msg = a
+    };
+    /* 3) a|b --2--> a|b|^b */
+    Token in_tokens3[] = { a, b };
+    MSet_Token preconditions3 = { in_tokens3, ARRAY_LEN(in_tokens3) };
+    Token out_places3[] = { a, b };
+    MSet_Token effects3 = { out_places3, ARRAY_LEN(out_places3) };
+    Rule rule3 = {
+        .preconditions = &preconditions3,
+        .rate = &fixed_rate_1,
+        .effects = &effects3,
+        .msg = b
+    };
+    /* 4) b|b --1000--> b */
+    Token in_tokens4[] = { b, b };
+    MSet_Token preconditions4 = { in_tokens4, ARRAY_LEN(in_tokens4) };
+    Token out_places4[] = { b };
+    MSet_Token effects4 = { out_places4, ARRAY_LEN(out_places4) };
+    Rule rule4 = {
+        .preconditions = &preconditions4,
+        .rate = &fixed_rate_1000,
+        .effects = &effects4,
+        .msg = NULL
+    };
+    Rule rules[] = { rule, rule2, rule3, rule4 };
+    /* State */
+    int port = atoi(argv[1]);
+    struct DAPState *initial_state;
+    if (port == 2550) {
+        Token initial_tokens[] = { a };
+        initial_state = createDAPState(initial_tokens, ARRAY_LEN(initial_tokens));
+    } else if (port == 2553) {
+        Token initial_tokens[] = { b };
+        initial_state = createDAPState(initial_tokens, ARRAY_LEN(initial_tokens));
+    } else {
+        initial_state = createDAPState(NULL, 0);
+    }
+    /* Neighborhood */
+    int neighbours_size = argc - 2;
+    Neighbour neighbours[neighbours_size];
+    for (int i = 0; i < neighbours_size; i++) {
+        neighbours[i] = argv[i + 2];
+    }
+    MSet_Neighbour neighborhood = { neighbours, ARRAY_LEN(neighbours) };
+    /* Register serde */
+    register_codec("Token", serialize_fn, deserialize_fn);
+    /* Simulation */
+    printf("Starting gossip simulation\n");
+    launch_simulation(rules, ARRAY_LEN(rules), initial_state, atoi(argv[1]), &neighborhood, &on_state_change);
+    free(initial_state);
     return 0;
 }
 
@@ -125,7 +203,7 @@ void on_state_change(struct DAPState *state) {
     if (state->msg != NULL) {
         printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "\"%s\"\n", state->msg->token);
     } else {
-        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "Nessun messaggio disponibile.\n");
+        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "No message.\n");
     }
     printf(COLOR_CYAN "----------------------------------------" COLOR_RESET "\n");
 }

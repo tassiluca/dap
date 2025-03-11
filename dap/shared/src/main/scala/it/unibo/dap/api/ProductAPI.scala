@@ -2,26 +2,37 @@ package it.unibo.dap.api
 
 trait ProductAPI extends Api:
 
-  override val interface: Interface = ProductInterface()
-
-  private class ProductInterface extends Interface with ADTs:
+  trait ProductInterface extends Interface:
+    ctx: ADTs =>
 
     import ProductADTsConversions.given
     import gears.async.Async
     import gears.async.default.given
     import it.unibo.dap.utils.as
-    import it.unibo.dap.controller.Serializable
+    import it.unibo.dap.boundary.SerializerRegistry
+    import it.unibo.dap.boundary.Serializable
+
+    private val serializerRegistry = SerializerRegistry()
 
     override def simulate(rules: Set[Rule], s0: State, updateFn: State => Unit)(
         port: Int,
         neighbors: Set[Neighbour],
     ): Unit = Async.blocking:
-      given Serializable[Token] = ???
+      given Serializable[Token] = serializerRegistry
+        .of[Token]("Token")
+        .getOrElse:
+          throw IllegalArgumentException("Token serializer not found")
       DAPSimulation(s0.as, rules.map(rCvt))(port, neighbors).launch(updateFn)
+
+    override def register(
+        typeName: String,
+        serializer: AnyRef => Array[Byte],
+        deserializer: Array[Byte] => AnyRef,
+    ): Unit = serializerRegistry.register(typeName, serializer, deserializer)
 
     private object ProductADTsConversions:
 
-      import it.unibo.dap.utils.{Iso, as, back}
+      import it.unibo.dap.utils.{ as, back, Iso }
       import it.unibo.dap.modelling.DAP
       import it.unibo.dap.utils
 
@@ -37,8 +48,7 @@ trait ProductAPI extends Api:
 
       given Conversion[State => Unit, DAP.State[Token] => Unit] = f => s => f(s.back)
 
-      given rCvt: Conversion[Rule, DAP.Rule[Token]] = r =>
-        DAP.Rule(r.pre.as, m => r.rateExp(m.back), r.eff.as, r.msg)
+      given rCvt: Conversion[Rule, DAP.Rule[Token]] = r => DAP.Rule(r.pre.as, m => r.rateExp(m.back), r.eff.as, r.msg)
     end ProductADTsConversions
   end ProductInterface
 

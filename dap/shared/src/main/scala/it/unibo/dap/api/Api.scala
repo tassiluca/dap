@@ -19,4 +19,6 @@ trait Api:
         initial: State,
         updateFn: State => Unit,
     )(port: Int, neighbours: Set[Neighbour]): Unit
+
+    def register(typeName: String, serializer: AnyRef => Array[Byte], deserializer: Array[Byte] => AnyRef): Unit
 end Api

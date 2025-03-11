@@ -1,14 +1,13 @@
-package it.unibo.dap.boundary
+package it.unibo.dap.boundary.sockets
+
+import gears.async.*
+import it.unibo.dap.boundary.Serializable
+import it.unibo.dap.controller.ExchangeComponent
 
 import java.net.{ ServerSocket, Socket }
-
 import scala.annotation.tailrec
 import scala.collection.Iterator.continually
 import scala.util.{ Failure, Success, Try }
-
-import it.unibo.dap.controller.{ ExchangeComponent, Serializable }
-
-import gears.async.*
 
 /** An exchange that communicates with other exchanges over plain sockets. */
 trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
@@ -66,6 +65,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
         .takeWhile(_ > 0)
         .foreach: readBytes =>
           // val message = new String(buffer, 0, readBytes)
+          scribe.info(">> Received message... trying to deserialize!")
           val message = summon[Serializable[T]].deserialize(buffer.take(readBytes))
           scribe.debug(s"Received message: $message")
           inChannel.send(message)

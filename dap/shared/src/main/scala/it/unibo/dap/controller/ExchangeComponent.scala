@@ -7,7 +7,7 @@ import gears.async.{ ReadableChannel, SendableChannel }
 /** The component providing the exchange of messages between neighbours.
   * @tparam T the type of the messages to exchange
   */
-trait ExchangeComponent[T: Serializable]:
+trait ExchangeComponent[T]:
   ctx: NeighbourhoodResolverComponent =>
 
   /** The exchange instance. */

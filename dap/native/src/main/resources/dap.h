@@ -62,8 +62,6 @@ void launch_simulation(
     void (*on_state_change)(struct DAPState *state)
 );
 
-Token use_just_for_fun(Token token);
-
 /**************************************************************************************/
 
 int register_codec(
