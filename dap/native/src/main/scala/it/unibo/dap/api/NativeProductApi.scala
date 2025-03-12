@@ -41,14 +41,6 @@ object NativeProductApi extends ProductAPI:
           elems(i) = CToken(t.value)
         cmset
 
-    extension (cset: CMSetNeighbour)
-
-      def toNeighbours: Set[Neighbour] =
-        (0 until cset.size.toInt)
-          .map(i => cset.elements(i))
-          .map(n => fromCString(n.value))
-          .toSet
-
     given Conversion[Ptr[CMSetNeighbour], Set[Neighbour]] = m =>
       (0 until (!m).size.toInt)
         .map(i => (!m).elements(i))
@@ -66,7 +58,6 @@ object NativeProductApi extends ProductAPI:
     extension (s: State)
 
       def toDAPState(using Zone): Ptr[CDAPState] =
-        scribe.info(s"=> Tokens: ${s.tokens}, Msg: ${s.msg}")
         CDAPState(tokens = s.tokens.toCMSetToken, msg = CToken(s.msg.map(_.value).orNull))
   end NativeADTs
 end NativeProductApi

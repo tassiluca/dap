@@ -1,5 +1,5 @@
 /**
-* Module: dap
+ * Module: dap
  * =================
  * A module for programming and simulating Distributed Asynchronous Petri Nets (DAP).
  */
@@ -7,6 +7,7 @@
 #define LIBDAP_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 /*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
@@ -62,12 +63,17 @@ void launch_simulation(
     void (*on_state_change)(struct DAPState *state)
 );
 
-/**************************************************************************************/
+/*===================================== CAPABILITIES =====================================*/
 
-int register_codec(
+int register_serde(
     const char* name,
-    unsigned char* (*serialize_fn)(void *data, size_t *out_size),
-    void* (*deserialize_fn)(const unsigned char *bytes, int size)
+    uint8_t* (*serialize_fn)(void *data, size_t *out_size),
+    void* (*deserialize_fn)(uint8_t *bytes, int size)
+);
+
+int register_equatable(
+    const char* name,
+    int (*equals_fn)(void *a, void *b)
 );
 
 #endif

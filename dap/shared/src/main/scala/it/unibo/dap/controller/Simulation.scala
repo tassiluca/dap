@@ -13,8 +13,8 @@ import gears.async.*
 
 /** A distributed simulation.
   * @tparam B the [[Simulatable]] behaviour to simulate
-  * @tparam T
-  * @tparam S
+  * @tparam T the type of the messages to exchange
+  * @tparam S the [[DistributableState]] on which the simulation can be
   */
 trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   boundary: ExchangeComponent[T] =>

@@ -1,6 +1,6 @@
 package it.unibo.dap.controller
 
-/** A component providing a neighbourhood resolver strategy with which, in any moment,
+/** A component providing the [[NeighbourhoodResolver]] strategy with which, in any moment,
   * it is possible to retrieve the current set of neighbours.
   */
 trait NeighbourhoodResolverComponent:

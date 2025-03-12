@@ -12,11 +12,11 @@ struct TokenImpl {
     char *token;
 };
 
-unsigned char* serialize_fn(void *data, size_t *out_size) {
+uint8_t* serialize_fn(void *data, size_t *out_size) {
     struct TokenImpl *token = data;
     int str_len = strlen(token->token);
     *out_size = str_len;
-    unsigned char *bytes = malloc(str_len);
+    uint8_t *bytes = malloc(str_len);
     if (bytes == NULL) {
         perror("Allocation memory error on bytes");
         return NULL;
@@ -25,11 +25,10 @@ unsigned char* serialize_fn(void *data, size_t *out_size) {
     return bytes;
 }
 
-void* deserialize_fn(const unsigned char *bytes, int size) {
+void* deserialize_fn(uint8_t *bytes, int size) {
     if (size <= 0) {
         return NULL;
     }
-    printf("Size: %d\n", size);
     Token token = malloc(sizeof(struct TokenImpl));
     if (token == NULL) {
         perror("Allocation memory error on token");
@@ -43,8 +42,19 @@ void* deserialize_fn(const unsigned char *bytes, int size) {
     }
     memcpy(token->token, bytes, size);
     token->token[size] = '\0';
-    printf("--- Size: %d, Token: %s\n", size, token->token);
     return token;
+}
+
+int equals_fn(void *a, void *b) {
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+    Token token_a = (Token)a;
+    Token token_b = (Token)b;
+    if (token_a->token == NULL || token_b->token == NULL) {
+        return 0;
+    }
+    return strcmp(token_a->token, token_b->token) == 0;
 }
 
 double fixed_rate_1000(MSet_Token *set) {
@@ -138,8 +148,9 @@ int main(int argc, char *argv[]) {
         neighbours[i] = argv[i + 2];
     }
     MSet_Neighbour neighborhood = { neighbours, ARRAY_LEN(neighbours) };
-    /* Register serde */
-    register_codec("Token", serialize_fn, deserialize_fn);
+    /* Capabilities */
+    register_serde("Token", serialize_fn, deserialize_fn);
+    register_equatable("Token", equals_fn);
     /* Simulation */
     printf("Starting gossip simulation\n");
     launch_simulation(rules, ARRAY_LEN(rules), initial_state, atoi(argv[1]), &neighborhood, &on_state_change);
