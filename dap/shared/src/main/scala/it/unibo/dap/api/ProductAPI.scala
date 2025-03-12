@@ -1,5 +1,7 @@
 package it.unibo.dap.api
 
+import it.unibo.dap.modelling.Equatable
+
 trait ProductAPI extends Api:
 
   trait ProductInterface extends Interface:
@@ -9,10 +11,11 @@ trait ProductAPI extends Api:
     import gears.async.Async
     import gears.async.default.given
     import it.unibo.dap.utils.as
-    import it.unibo.dap.boundary.SerializerRegistry
+    import it.unibo.dap.api.capabilities.{ EquatablesRegistry, SerializerRegistry }
     import it.unibo.dap.boundary.Serializable
 
     private val serializerRegistry = SerializerRegistry()
+    private val equatablesRegistry = EquatablesRegistry()
 
     override def simulate(rules: Set[Rule], s0: State, updateFn: State => Unit)(
         port: Int,
@@ -20,24 +23,30 @@ trait ProductAPI extends Api:
     ): Unit = Async.blocking:
       given Serializable[Token] = serializerRegistry
         .of[Token]("Token")
-        .getOrElse:
-          throw IllegalArgumentException("Token serializer not found")
+        .getOrElse(throw IllegalArgumentException("Token serializer not found"))
+      given Equatable[Token] = equatablesRegistry
+        .of[Token]("Token")
+        .getOrElse(throw IllegalArgumentException("Token equalizer not found"))
       DAPSimulation(s0.as, rules.map(rCvt))(port, neighbors).launch(updateFn)
 
-    override def register(
+    override def registerSerDe(
         typeName: String,
         serializer: AnyRef => Array[Byte],
         deserializer: Array[Byte] => AnyRef,
     ): Unit = serializerRegistry.register(typeName, serializer, deserializer)
 
+    override def registerEquatable(typeName: String, equalizer: (AnyRef, AnyRef) => Boolean): Unit =
+      equatablesRegistry.register(typeName, equalizer)
+
     private object ProductADTsConversions:
 
       import it.unibo.dap.utils.{ as, back, Iso }
+      import it.unibo.dap.modelling
       import it.unibo.dap.modelling.DAP
       import it.unibo.dap.utils
 
-      given [T] => Iso[MSet[T], utils.MSet[T]] = Iso(
-        m => utils.MSet(m.elems*),
+      given [T] => Iso[MSet[T], modelling.MSet[T]] = Iso(
+        m => modelling.MSet(m.elems*),
         m => MSet(m.asList*),
       )
 

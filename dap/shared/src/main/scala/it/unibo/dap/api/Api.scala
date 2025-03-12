@@ -20,5 +20,7 @@ trait Api:
         updateFn: State => Unit,
     )(port: Int, neighbours: Set[Neighbour]): Unit
 
-    def register(typeName: String, serializer: AnyRef => Array[Byte], deserializer: Array[Byte] => AnyRef): Unit
+    def registerSerDe(typeName: String, serializer: AnyRef => Array[Byte], deserializer: Array[Byte] => AnyRef): Unit
+
+    def registerEquatable(typeName: String, equalizer: (AnyRef, AnyRef) => Boolean): Unit
 end Api

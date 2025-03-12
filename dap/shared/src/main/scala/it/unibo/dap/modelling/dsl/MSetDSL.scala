@@ -2,7 +2,7 @@ package it.unibo.dap.modelling.dsl
 
 object MSetDSL:
 
-  export it.unibo.dap.utils.MSet
+  export it.unibo.dap.modelling.MSet
   export MSetDSL.given
 
   extension [T](a: T) def |(b: T): List[T] = List[T](a, b)

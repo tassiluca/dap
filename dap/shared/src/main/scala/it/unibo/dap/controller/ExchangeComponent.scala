@@ -4,7 +4,7 @@ import it.unibo.dap.utils.Spawnable
 
 import gears.async.{ ReadableChannel, SendableChannel }
 
-/** The component providing the exchange of messages between neighbours.
+/** The component providing the [[Exchange]] of messages between neighbours.
   * @tparam T the type of the messages to exchange
   */
 trait ExchangeComponent[T]:

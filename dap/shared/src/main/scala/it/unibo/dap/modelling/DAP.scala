@@ -1,7 +1,6 @@
 package it.unibo.dap.modelling
 
 import it.unibo.dap.modelling.CTMC.*
-import it.unibo.dap.utils.MSet
 
 /** Modules defining the concept of Distributed Asynchronous stochastic Petri net. */
 object DAP:
@@ -15,13 +14,13 @@ object DAP:
   /** State of the network at a given time, with neighboring as a map. */
   case class State[T](tokens: MSet[T], msg: Option[T])
 
-  def apply[T](rules: Rule[T]*): DAP[T] = rules.toSet
+  def apply[T: Equatable](rules: Rule[T]*): DAP[T] = rules.toSet
 
-  def apply[T](rules: Set[Rule[T]]): DAP[T] = rules
+  def apply[T: Equatable](rules: Set[Rule[T]]): DAP[T] = rules
 
-  def toCTMC[T](spn: DAP[T]): CTMC[State[T]] = CTMC.ofFunction(toPartialFunction(spn))
+  def toCTMC[T: Equatable](spn: DAP[T]): CTMC[State[T]] = CTMC.ofFunction(toPartialFunction(spn))
 
-  private def toPartialFunction[T](spn: DAP[T]): PartialFunction[State[T], Set[Action[State[T]]]] =
+  private def toPartialFunction[T: Equatable](spn: DAP[T]): PartialFunction[State[T], Set[Action[State[T]]]] =
     case State(tokens, _) =>
       for
         Rule(pre, rateExp, eff, msg) <- spn // get any rule
@@ -30,5 +29,5 @@ object DAP:
         rate = rateExp(tokens) // compute rate
       yield Action(rate, State(newtokens, msg))
 
-  given [T] => Conversion[DAP[T], CTMC[State[T]]] = toCTMC
+  given [T: Equatable] => Conversion[DAP[T], CTMC[State[T]]] = toCTMC
 end DAP

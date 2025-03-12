@@ -64,8 +64,6 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       continually(in.read(buffer))
         .takeWhile(_ > 0)
         .foreach: readBytes =>
-          // val message = new String(buffer, 0, readBytes)
-          scribe.info(">> Received message... trying to deserialize!")
           val message = summon[Serializable[T]].deserialize(buffer.take(readBytes))
           scribe.debug(s"Received message: $message")
           inChannel.send(message)

@@ -2,7 +2,7 @@ package libdap.impl
 
 import it.unibo.dap.api.NativeProductApi
 import it.unibo.dap.utils.CUtils.withLogging
-import libdap.aliases.{Token, size_t}
+import libdap.aliases.{ size_t, uint8_t, Token }
 import libdap.structs.*
 
 import scala.scalanative.libc
@@ -14,10 +14,10 @@ object Implementations extends libdap.ExportedFunctions:
 
   import it.unibo.dap.api.NativeProductApi.NativeInterface.{ toDAPState, toRule, toState, given }
 
-  override def register_codec(
+  override def register_serde(
       name: CString,
-      serialize_fn: CFuncPtr2[Ptr[CSignedChar], Ptr[size_t], Ptr[CUnsignedChar]],
-      deserialize_fn: CFuncPtr2[Ptr[CUnsignedChar], CInt, Ptr[CSignedChar]],
+      serialize_fn: CFuncPtr2[Ptr[CSignedChar], Ptr[size_t], Ptr[uint8_t]],
+      deserialize_fn: CFuncPtr2[Ptr[uint8_t], CInt, Ptr[CSignedChar]],
   ): CInt =
     val ser: AnyRef => Array[Byte] = obj =>
       val size = stackalloc[size_t]()
@@ -30,7 +30,14 @@ object Implementations extends libdap.ExportedFunctions:
       val ptr = stackalloc[CUnsignedChar](size)
       for i <- 0 until size do ptr(i) = UByte.valueOf(arr(i))
       deserialize_fn(ptr, size)
-    NativeProductApi.interface.register(fromCString(name), ser, de)
+    NativeProductApi.interface.registerSerDe(fromCString(name), ser, de)
+    0
+
+  override def register_equatable(name: CString, equals_fn: CFuncPtr2[Ptr[CSignedChar], Ptr[CSignedChar], CInt]): CInt =
+    val eq: (AnyRef, AnyRef) => Boolean = (a, b) =>
+      val res = equals_fn(a.asInstanceOf[Ptr[CSignedChar]], b.asInstanceOf[Ptr[CSignedChar]])
+      res != 0
+    NativeProductApi.interface.registerEquatable(fromCString(name), eq)
     0
 
   override def launch_simulation(
