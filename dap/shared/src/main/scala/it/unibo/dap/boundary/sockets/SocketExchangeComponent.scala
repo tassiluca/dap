@@ -26,7 +26,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
     override def outputs: SendableChannel[T] = outChannel.asSendable
 
     override def start(using Async, AsyncOperations): Unit = Async.group:
-      Task(client()).start()
+      Future(client())
       serveClients()
 
     @tailrec
@@ -34,14 +34,13 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       outChannel.read() match
         case Left(_) => ()
         case Right(message) =>
+          val bytes = summon[Serializable[T]].serialize(message)
           val newConnections =
             for
-              bytes <- summon[Serializable[T]].serialize(message)
               (n, s) <- ctx
                 .neighbourhoodResolver()
                 .map(n => n -> connections.get(n).filterNot(_.isClosed).orElse(establishConnection(n)))
                 .collect { case (e, Some(s)) => e -> s }
-              _ = scribe.debug(s"Sending message $message to $n")
               c <- Try(s.getOutputStream.write(bytes)) match
                 case Failure(e) => scribe.error(e); None
                 case Success(_) => Some(n -> s)
@@ -65,7 +64,6 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
         .takeWhile(_ > 0)
         .foreach: readBytes =>
           val message = summon[Serializable[T]].deserialize(buffer.take(readBytes))
-          scribe.debug(s"Received message: $message")
           inChannel.send(message)
       client.close()
   end SocketExchange

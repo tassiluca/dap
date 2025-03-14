@@ -2,7 +2,7 @@ package libdap.impl
 
 import it.unibo.dap.api.NativeProductApi
 import it.unibo.dap.utils.CUtils.withLogging
-import libdap.aliases.{ size_t, uint8_t, Token }
+import libdap.aliases.{ size_t, uint8_t }
 import libdap.structs.*
 
 import scala.scalanative.libc

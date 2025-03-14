@@ -259,3 +259,7 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+# Proto C
+*.pb-c.*
+*.pb-h.*
