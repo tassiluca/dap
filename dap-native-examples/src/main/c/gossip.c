@@ -3,58 +3,45 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include "gossip.pb-c.h"
 #include "dap.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-/* The concrete Token implementation. */
-struct TokenImpl {
-    char *token;
-};
-
 uint8_t* serialize_fn(void *data, size_t *out_size) {
-    struct TokenImpl *token = data;
-    int str_len = strlen(token->token);
-    *out_size = str_len;
-    uint8_t *bytes = malloc(str_len);
-    if (bytes == NULL) {
-        perror("Allocation memory error on bytes");
+    TokenImpl *token = data;
+    *out_size = token_impl__get_packed_size(token);
+    if (*out_size == 0) {
+        perror("Error during serialization. Size = 0!");
         return NULL;
     }
-    memcpy(bytes, token->token, str_len);
+    uint8_t *bytes = malloc(*out_size);
+    if (!bytes) {
+        perror("Error during serialization.");
+        return NULL;
+    }
+    token_impl__pack(token, bytes);
     return bytes;
 }
 
 void* deserialize_fn(uint8_t *bytes, int size) {
-    if (size <= 0) {
+    if (!bytes || size <= 0) return NULL;
+    TokenImpl *token = token_impl__unpack(NULL, size, bytes);
+    if (!token) {
+        perror("Error during deserialization. Token is NULL");
         return NULL;
     }
-    Token token = malloc(sizeof(struct TokenImpl));
-    if (token == NULL) {
-        perror("Allocation memory error on token");
-        return NULL;
-    }
-    token->token = (char*)malloc(size + 1);
-    if (token->token == NULL) {
-        perror("Allocation memory error on token");
-        free(token);
-        return NULL;
-    }
-    memcpy(token->token, bytes, size);
-    token->token[size] = '\0';
     return token;
 }
 
 int equals_fn(void *a, void *b) {
-    if (a == NULL || b == NULL) {
-        return 0;
-    }
+    if (a == NULL || b == NULL) return 0;
     Token token_a = (Token)a;
     Token token_b = (Token)b;
-    if (token_a->token == NULL || token_b->token == NULL) {
+    if (token_a->name == NULL || token_b->name == NULL) {
         return 0;
     }
-    return strcmp(token_a->token, token_b->token) == 0;
+    return strcmp(token_a->name, token_b->name) == 0;
 }
 
 double fixed_rate_1000(MSet_Token *set) {
@@ -159,13 +146,20 @@ int main(int argc, char *argv[]) {
 }
 
 Token createToken(const char* token) {
-  Token t = malloc(sizeof(struct TokenImpl));
-  if (t == NULL) {
-      perror("Allocation memory error on token");
-      exit(EXIT_FAILURE);
-  }
-  t->token = strdup(token);
-  return t;
+    TokenImpl *t = malloc(sizeof(TokenImpl));
+    if (!t) return NULL;
+    *t = (TokenImpl) TOKEN_IMPL__INIT;
+    t->name = strdup(token);
+    t->timestamp = malloc(sizeof(Google__Protobuf__Timestamp));
+    if (!t->timestamp) {
+        free(t->name);
+        free(t);
+        return NULL;
+    }
+    *t->timestamp = (Google__Protobuf__Timestamp) GOOGLE__PROTOBUF__TIMESTAMP__INIT;
+    t->timestamp->seconds = time(NULL);
+    t->timestamp->nanos = 0;
+    return t;
 }
 
 struct DAPState *createDAPState(Token *initial_tokens, size_t token_count) {
@@ -202,7 +196,7 @@ void on_state_change(struct DAPState *state) {
     if (state->tokens->size > 0) {
         printf(COLOR_YELLOW "{ ");
         for (size_t i = 0; i < state->tokens->size; i++) {
-            printf("%s", state->tokens->elements[i]->token);
+            printf("%s", state->tokens->elements[i]->name);
             if (i < state->tokens->size - 1) {
                 printf(COLOR_MAGENTA " | " COLOR_YELLOW);
             }
@@ -212,7 +206,7 @@ void on_state_change(struct DAPState *state) {
         printf(COLOR_YELLOW "{ }" COLOR_RESET "\n");
     }
     if (state->msg != NULL) {
-        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "\"%s\"\n", state->msg->token);
+        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "\"%s\"\n", state->msg->name);
     } else {
         printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "No message.\n");
     }

@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-message Token {
-    string name = 1;
-}
