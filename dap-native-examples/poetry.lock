@@ -178,14 +178,14 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "setuptools"
-version = "77.0.3"
+version = "78.0.1"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "setuptools-77.0.3-py3-none-any.whl", hash = "sha256:67122e78221da5cf550ddd04cf8742c8fe12094483749a792d56cd669d6cf58c"},
-    {file = "setuptools-77.0.3.tar.gz", hash = "sha256:583b361c8da8de57403743e756609670de6fb2345920e36dc5c2d914c319c945"},
+    {file = "setuptools-78.0.1-py3-none-any.whl", hash = "sha256:1cc9b32ee94f93224d6c80193cbb768004667aa2f2732a473d6949b0236c1d4e"},
+    {file = "setuptools-78.0.1.tar.gz", hash = "sha256:4321d2dc2157b976dee03e1037c9f2bc5fea503c0c47d3c9458e0e8e49e659ce"},
 ]
 
 [package.extras]
@@ -228,4 +228,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.9.0 < 4.0.0"
-content-hash = "41238cfe5a26e056ee208bb25f7971ae01fecd50022130bc45dd554bdff2ebb6"
+content-hash = "3e517c69a424d9a0f5b4de137ea26795cf9ffd109d6b0f5cc31995c69886a6bd"
