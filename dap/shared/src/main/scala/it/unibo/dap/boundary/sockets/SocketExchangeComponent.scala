@@ -34,6 +34,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       outChannel.read() match
         case Left(_) => ()
         case Right(message) =>
+          scribe.info("[Sim exch] Sending message to neighbours")
           val bytes = summon[Serializable[T]].serialize(message)
           val newConnections =
             for
@@ -63,6 +64,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       continually(in.read(buffer))
         .takeWhile(_ > 0)
         .foreach: readBytes =>
+          scribe.info("[Sim exch] Received message from neighbour")
           val message = summon[Serializable[T]].deserialize(buffer.take(readBytes))
           inChannel.send(message)
       client.close()

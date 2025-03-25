@@ -8,7 +8,7 @@ trait Api:
     type Token
     type Neighbour = String
     case class MSet[T](elems: T*)
-    case class Rule(pre: MSet[Token], rateExp: MSet[Token] => Double, eff: MSet[Token], msg: Option[Token])
+    case class Rule(pre: MSet[Token], rate: Double, eff: MSet[Token], msg: Option[Token])
     case class State(tokens: MSet[Token], msg: Option[Token])
 
   trait Interface:

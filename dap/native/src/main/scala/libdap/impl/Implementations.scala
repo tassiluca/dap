@@ -41,15 +41,17 @@ object Implementations extends libdap.ExportedFunctions:
     0
 
   override def launch_simulation(
-      rules: Ptr[Rule],
-      rules_size: size_t,
+      rules: Ptr[MSet_Rule],
       s0: Ptr[DAPState],
       port: CInt,
       neighborhood: Ptr[MSet_Neighbour],
       n_state_change: CFuncPtr1[Ptr[DAPState], Unit],
   ): Unit = withLogging:
-    scribe.info("Launching simulation...")
-    val allRules = (0 until rules_size.toInt).map(i => rules(i)).map(_.toRule).toSet
+    val allRules = crulesCvt(rules)
+    allRules.foreach: r =>
+      scribe.info("Rule: " + r)
+    scribe.info(s"Neighborhood: ${neighborhood: Set[NativeProductApi.NativeInterface.Neighbour]}")
+    scribe.info(s"Initial state: ${(!s0).toState}")
     val simulation =
       NativeProductApi.interface.simulate(allRules, (!s0).toState, s => Zone(n_state_change(s.toDAPState)))
     simulation(port, neighborhood)

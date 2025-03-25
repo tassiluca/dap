@@ -6,6 +6,10 @@
 #ifndef LIBDAP_H
 #define LIBDAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -44,10 +48,12 @@ struct DAPState {
  */
 typedef struct {
     const MSet_Token *preconditions;
-    double (*rate)(MSet_Token*);
+    double rate;
     const MSet_Token *effects;
     const Token msg;
 } Rule;
+
+DEFINE_MSET(Rule)
 
 /*
  * Launches the distributed simulation of a DAP model.
@@ -55,8 +61,7 @@ typedef struct {
  * and is guided by the given `rules`, which are applied to the initial state `s0`.
  */
 void launch_simulation(
-    const Rule* rules,
-    size_t rules_size,
+    MSet_Rule* rules,
     struct DAPState *s0,
     int port,
     MSet_Neighbour *neighborhood,
@@ -75,5 +80,9 @@ int register_equatable(
     const char* name,
     int (*equals_fn)(void *a, void *b)
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

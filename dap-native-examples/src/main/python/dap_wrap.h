@@ -17,6 +17,7 @@ struct SwigDirector_Codec : public Codec, public Swig::Director {
 
 public:
     SwigDirector_Codec(PyObject *self);
+<<<<<<< HEAD
     virtual uint8_t *serialize(Token data,SizeTPtr *out_size);
     virtual Token deserialize(uint8_t *bytes,int size);
     virtual ~SwigDirector_Codec();
@@ -126,6 +127,76 @@ private:
         method = PyObject_GetAttr(swig_get_self(), name);
         if (!method) {
           std::string msg = "Method in class StateChangeListener doesn't exist, undefined ";
+||||||| parent of 7f3b6d6 (feat: add py swig interface)
+=======
+    virtual uint8_t *serialize(void *data,size_t *out_size);
+    virtual void *deserialize(uint8_t *bytes,int size);
+    virtual ~SwigDirector_Codec();
+
+/* Internal director utilities */
+public:
+    bool swig_get_inner(const char *swig_protected_method_name) const {
+      std::map<std::string, bool>::const_iterator iv = swig_inner.find(swig_protected_method_name);
+      return (iv != swig_inner.end() ? iv->second : false);
+    }
+    void swig_set_inner(const char *swig_protected_method_name, bool swig_val) const {
+      swig_inner[swig_protected_method_name] = swig_val;
+    }
+private:
+    mutable std::map<std::string, bool> swig_inner;
+
+#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+/* VTable implementation */
+    PyObject *swig_get_method(size_t method_index, const char *method_name) const {
+      PyObject *method = vtable[method_index];
+      if (!method) {
+        swig::SwigVar_PyObject name = SWIG_Python_str_FromChar(method_name);
+        method = PyObject_GetAttr(swig_get_self(), name);
+        if (!method) {
+          std::string msg = "Method in class Codec doesn't exist, undefined ";
+          msg += method_name;
+          Swig::DirectorMethodException::raise(msg.c_str());
+        }
+        vtable[method_index] = method;
+      }
+      return method;
+    }
+private:
+    mutable swig::SwigVar_PyObject vtable[2];
+#endif
+
+};
+
+
+struct SwigDirector_Equatable : public Equatable, public Swig::Director {
+
+public:
+    SwigDirector_Equatable(PyObject *self);
+    virtual int equals(void *a,void *b);
+    virtual ~SwigDirector_Equatable();
+
+/* Internal director utilities */
+public:
+    bool swig_get_inner(const char *swig_protected_method_name) const {
+      std::map<std::string, bool>::const_iterator iv = swig_inner.find(swig_protected_method_name);
+      return (iv != swig_inner.end() ? iv->second : false);
+    }
+    void swig_set_inner(const char *swig_protected_method_name, bool swig_val) const {
+      swig_inner[swig_protected_method_name] = swig_val;
+    }
+private:
+    mutable std::map<std::string, bool> swig_inner;
+
+#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+/* VTable implementation */
+    PyObject *swig_get_method(size_t method_index, const char *method_name) const {
+      PyObject *method = vtable[method_index];
+      if (!method) {
+        swig::SwigVar_PyObject name = SWIG_Python_str_FromChar(method_name);
+        method = PyObject_GetAttr(swig_get_self(), name);
+        if (!method) {
+          std::string msg = "Method in class Equatable doesn't exist, undefined ";
+>>>>>>> 7f3b6d6 (feat: add py swig interface)
           msg += method_name;
           Swig::DirectorMethodException::raise(msg.c_str());
         }

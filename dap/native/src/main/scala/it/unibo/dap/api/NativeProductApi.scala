@@ -8,6 +8,7 @@ import libdap.aliases.Token as CToken
 import libdap.structs.{
   DAPState as CDAPState,
   MSet_Neighbour as CMSetNeighbour,
+  MSet_Rule as CMSetRule,
   MSet_Token as CMSetToken,
   Rule as CRule,
 }
@@ -30,6 +31,9 @@ object NativeProductApi extends ProductAPI:
     given cmsetCvt: Conversion[Ptr[CMSetToken], MSet[Token]] = m =>
       MSet((0 until (!m).size.toInt).map(i => (!m).elements(i)).toList*)
 
+    given crulesCvt: Conversion[Ptr[CMSetRule], Set[Rule]] = m =>
+      (0 until (!m).size.toInt).map(i => (!m).elements(i).toRule).toSet
+
     extension (m: MSet[Token])
 
       def toCMSetToken(using Zone): Ptr[CMSetToken] =
@@ -47,11 +51,7 @@ object NativeProductApi extends ProductAPI:
         .map(n => fromCString(n.value))
         .toSet
 
-    extension (r: CRule)
-
-      def toRule: Rule =
-        val rateF = (_: MSet[Token]) => r.rate(r.preconditions)
-        Rule(pre = r.preconditions, rateExp = rateF, eff = r.effects, msg = Option(r.msg))
+    extension (r: CRule) def toRule: Rule = Rule(r.preconditions, r.rate, r.effects, Option(r.msg))
 
     extension (s: CDAPState) def toState: State = State(tokens = s.tokens, msg = Option(s.msg))
 

@@ -44,13 +44,13 @@ int equals_fn(void *a, void *b) {
     return strcmp(token_a->name, token_b->name) == 0;
 }
 
-double fixed_rate_1000(MSet_Token *set) {
-  return set == NULL ? 0.0 : 1000.0;
-}
+// double fixed_rate_1000(MSet_Token *set) {
+//   return set == NULL ? 0.0 : 1000.0;
+// }
 
-double fixed_rate_1(MSet_Token *set) {
-  return set == NULL ? 0.0 : 1.0;
-}
+// double fixed_rate_1(MSet_Token *set) {
+//   return set == NULL ? 0.0 : 1.0;
+// }
 
 void on_state_change(struct DAPState *state);
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     MSet_Token effects1 = { out_places1, ARRAY_LEN(out_places1) };
     Rule rule = {
         .preconditions = &preconditions1,
-        .rate = &fixed_rate_1000,
+        .rate = 1000,
         .effects = &effects1,
         .msg = NULL
     };
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
     MSet_Token effects2 = { out_places2, ARRAY_LEN(out_places2) };
     Rule rule2 = {
         .preconditions = &preconditions2,
-        .rate = &fixed_rate_1,
+        .rate = 1,
         .effects = &effects2,
         .msg = a
     };
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     MSet_Token effects3 = { out_places3, ARRAY_LEN(out_places3) };
     Rule rule3 = {
         .preconditions = &preconditions3,
-        .rate = &fixed_rate_1,
+        .rate = 1,
         .effects = &effects3,
         .msg = b
     };
@@ -111,11 +111,12 @@ int main(int argc, char *argv[]) {
     MSet_Token effects4 = { out_places4, ARRAY_LEN(out_places4) };
     Rule rule4 = {
         .preconditions = &preconditions4,
-        .rate = &fixed_rate_1000,
+        .rate = 1000,
         .effects = &effects4,
         .msg = NULL
     };
     Rule rules[] = { rule, rule2, rule3, rule4 };
+    MSet_Rule all_rules = { rules, ARRAY_LEN(rules) };
     /* State */
     int port = atoi(argv[1]);
     struct DAPState *initial_state;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[]) {
     register_equatable("Token", equals_fn);
     /* Simulation */
     printf("Starting gossip simulation\n");
-    launch_simulation(rules, ARRAY_LEN(rules), initial_state, atoi(argv[1]), &neighborhood, &on_state_change);
+    launch_simulation(&all_rules, initial_state, atoi(argv[1]), &neighborhood, &on_state_change);
     free(initial_state);
     return 0;
 }

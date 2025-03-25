@@ -38,7 +38,9 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   private final def loop(queue: Deque[T], state: S, updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
     scribe.info(s"[Sim] Simulating step for state: $state")
     val event = behavior.simulateStep(state)(using Random())
+    scribe.info(s"[Sim] Next event: ${event.state} - ${event.time}")
     AsyncOperations.sleep(event.time.seconds)
+    scribe.info("[Sim] Calling update function")
     updateFn(event.state)
     event.state.msg.foreach(boundary.exchange.outputs.send)
     val in = Option(queue.poll())
