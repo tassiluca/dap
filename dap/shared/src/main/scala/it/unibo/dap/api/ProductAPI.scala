@@ -57,7 +57,7 @@ trait ProductAPI extends Api:
 
       given Conversion[State => Unit, DAP.State[Token] => Unit] = f => s => f(s.back)
 
-      given rCvt: Conversion[Rule, DAP.Rule[Token]] = r => DAP.Rule(r.pre.as, m => r.rateExp(m.back), r.eff.as, r.msg)
+      given rCvt: Conversion[Rule, DAP.Rule[Token]] = r => DAP.Rule(r.pre.as, _ => r.rate, r.eff.as, r.msg)
     end ProductADTsConversions
   end ProductInterface
 
