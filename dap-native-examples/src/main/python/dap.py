@@ -60,6 +60,29 @@ class _SwigNonDynamicMeta(type):
 
 import weakref
 
+class SizeTPtr(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        _dap.SizeTPtr_swiginit(self, _dap.new_SizeTPtr())
+    __swig_destroy__ = _dap.delete_SizeTPtr
+
+    def assign(self, value):
+        return _dap.SizeTPtr_assign(self, value)
+
+    def value(self):
+        return _dap.SizeTPtr_value(self)
+
+    def cast(self):
+        return _dap.SizeTPtr_cast(self)
+
+    @staticmethod
+    def frompointer(t):
+        return _dap.SizeTPtr_frompointer(t)
+
+# Register SizeTPtr in _dap:
+_dap.SizeTPtr_swigregister(SizeTPtr)
 class Codec(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -105,12 +128,39 @@ class Equatable(object):
 
 # Register Equatable in _dap:
 _dap.Equatable_swigregister(Equatable)
+class StateChangeListener(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def on_state_change(self, state):
+        return _dap.StateChangeListener_on_state_change(self, state)
+    __swig_destroy__ = _dap.delete_StateChangeListener
+
+    def __init__(self):
+        if self.__class__ == StateChangeListener:
+            _self = None
+        else:
+            _self = self
+        _dap.StateChangeListener_swiginit(self, _dap.new_StateChangeListener(_self, ))
+    def __disown__(self):
+        self.this.disown()
+        _dap.disown_StateChangeListener(self)
+        return weakref.proxy(self)
+
+# Register StateChangeListener in _dap:
+_dap.StateChangeListener_swigregister(StateChangeListener)
 
 def register_serde_wrapper(name, c):
     return _dap.register_serde_wrapper(name, c)
 
 def register_eq_wrapper(name, e):
     return _dap.register_eq_wrapper(name, e)
+
+def launch_simulation_wrapper(rules, s0, port, neighborhood, listener):
+    return _dap.launch_simulation_wrapper(rules, s0, port, neighborhood, listener)
+
+def token_impl_equals_wrapper(a, b):
+    return _dap.token_impl_equals_wrapper(a, b)
 class UInt8Array(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -131,6 +181,9 @@ class UInt8Array(object):
     @staticmethod
     def frompointer(t):
         return _dap.UInt8Array_frompointer(t)
+
+    def data(self):
+        return _dap.UInt8Array_data(self)
 
 # Register UInt8Array in _dap:
 _dap.UInt8Array_swigregister(UInt8Array)
@@ -155,6 +208,9 @@ def MSet_Neighbour_destroy(set):
 
 def MSet_Neighbour_set(set, index, value):
     return _dap.MSet_Neighbour_set(set, index, value)
+
+def MSet_Neighbour_get(set, index):
+    return _dap.MSet_Neighbour_get(set, index)
 class MSet_Token(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -176,6 +232,9 @@ def MSet_Token_destroy(set):
 
 def MSet_Token_set(set, index, value):
     return _dap.MSet_Token_set(set, index, value)
+
+def MSet_Token_get(set, index):
+    return _dap.MSet_Token_get(set, index)
 class DAPState(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -223,6 +282,9 @@ def MSet_Rule_destroy(set):
 
 def MSet_Rule_set(set, index, value):
     return _dap.MSet_Rule_set(set, index, value)
+
+def MSet_Rule_get(set, index):
+    return _dap.MSet_Rule_get(set, index)
 
 def launch_simulation(rules, s0, port, neighborhood, on_state_change):
     return _dap.launch_simulation(rules, s0, port, neighborhood, on_state_change)

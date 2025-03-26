@@ -46,6 +46,11 @@ static inline void MSet_##Type##_set(MSet_##Type* set, size_t index, Type value)
     if (index < set->size) {                                                \
         set->elements[index] = value;                                       \
     }                                                                       \
+}                                                                           \
+                                                                            \
+/* Getter */                                                                \
+static inline Type MSet_##Type##_get(MSet_##Type* set, size_t index) {      \
+    return set->elements[index];                                            \
 }
 
 typedef char* Neighbour;

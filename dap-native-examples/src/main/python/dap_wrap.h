@@ -18,6 +18,12 @@ struct SwigDirector_Codec : public Codec, public Swig::Director {
 public:
     SwigDirector_Codec(PyObject *self);
 <<<<<<< HEAD
+<<<<<<< HEAD
+||||||| parent of 476ba79 (fix: correct py serialization codec)
+    virtual uint8_t *serialize(void *data,size_t *out_size);
+    virtual void *deserialize(uint8_t *bytes,int size);
+=======
+>>>>>>> 476ba79 (fix: correct py serialization codec)
     virtual uint8_t *serialize(Token data,SizeTPtr *out_size);
     virtual Token deserialize(uint8_t *bytes,int size);
     virtual ~SwigDirector_Codec();
@@ -127,6 +133,7 @@ private:
         method = PyObject_GetAttr(swig_get_self(), name);
         if (!method) {
           std::string msg = "Method in class StateChangeListener doesn't exist, undefined ";
+<<<<<<< HEAD
 ||||||| parent of 7f3b6d6 (feat: add py swig interface)
 =======
     virtual uint8_t *serialize(void *data,size_t *out_size);
@@ -197,6 +204,9 @@ private:
         if (!method) {
           std::string msg = "Method in class Equatable doesn't exist, undefined ";
 >>>>>>> 7f3b6d6 (feat: add py swig interface)
+||||||| parent of 476ba79 (fix: correct py serialization codec)
+=======
+>>>>>>> 476ba79 (fix: correct py serialization codec)
           msg += method_name;
           Swig::DirectorMethodException::raise(msg.c_str());
         }

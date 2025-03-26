@@ -2,6 +2,7 @@ package it.unibo.dap.boundary.sockets
 
 import gears.async.*
 import it.unibo.dap.boundary.Serializable
+import it.unibo.dap.boundary.Serializable.*
 import it.unibo.dap.controller.ExchangeComponent
 
 import java.net.{ ServerSocket, Socket }
@@ -34,8 +35,8 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       outChannel.read() match
         case Left(_) => ()
         case Right(message) =>
-          scribe.info("[Sim exch] Sending message to neighbours")
-          val bytes = summon[Serializable[T]].serialize(message)
+          scribe.info(s"[Sim exch] Sending message $message to neighbours")
+          val bytes = serialize(message)
           val newConnections =
             for
               (n, s) <- ctx
@@ -65,7 +66,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
         .takeWhile(_ > 0)
         .foreach: readBytes =>
           scribe.info("[Sim exch] Received message from neighbour")
-          val message = summon[Serializable[T]].deserialize(buffer.take(readBytes))
+          val message = deserialize(buffer.take(readBytes))
           inChannel.send(message)
       client.close()
   end SocketExchange
