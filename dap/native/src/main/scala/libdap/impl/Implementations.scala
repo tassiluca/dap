@@ -12,7 +12,7 @@ import scala.scalanative.unsigned.UByte
 
 object Implementations extends libdap.ExportedFunctions:
 
-  import it.unibo.dap.api.NativeProductApi.NativeInterface.{ toDAPState, toRule, toState, given }
+  import it.unibo.dap.api.NativeProductApi.NativeInterface.{ toDAPState, toState, given }
 
   override def register_serde(
       name: CString,
@@ -35,7 +35,6 @@ object Implementations extends libdap.ExportedFunctions:
 
   override def register_equatable(name: CString, equals_fn: CFuncPtr2[Ptr[CSignedChar], Ptr[CSignedChar], CInt]): CInt =
     val eq: (AnyRef, AnyRef) => Boolean = (a, b) =>
-      scribe.info("Calling equals_fn")
       val res = equals_fn(a.asInstanceOf[Ptr[CSignedChar]], b.asInstanceOf[Ptr[CSignedChar]])
       res != 0
     NativeProductApi.interface.registerEquatable(fromCString(name), eq)
@@ -49,14 +48,8 @@ object Implementations extends libdap.ExportedFunctions:
       n_state_change: CFuncPtr1[Ptr[DAPState], Unit],
   ): Unit = withLogging:
     val allRules = crulesCvt(rules)
-    allRules.foreach: r =>
-      scribe.info("Rule: " + r)
-    scribe.info(s"Neighborhood: ${neighborhood: Set[NativeProductApi.NativeInterface.Neighbour]}")
     val initialState = (!s0).toState
-    scribe.info(s"Initial state: $initialState")
-    scribe.info(initialState.tokens.elems.mkString)
-    val simulation =
-      NativeProductApi.interface.simulate(allRules, (!s0).toState, s => Zone(n_state_change(s.toDAPState)))
-    simulation(port, neighborhood)
+    val simulate = NativeProductApi.interface.simulate(allRules, initialState, s => Zone(n_state_change(s.toDAPState)))
+    simulate(port, neighborhood)
 
 end Implementations

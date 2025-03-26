@@ -1,4 +1,6 @@
 from dap import *
+import dap
+import time
 import os
 
 token = TokenImpl()
@@ -17,6 +19,7 @@ print(net)
 
 _global_codec_instance = None
 _global_eq_instance = None
+_global_state_change_listener = None
 
 class PyCodec(Codec):
     def __init__(self):
@@ -25,13 +28,12 @@ class PyCodec(Codec):
         _global_codec_instance = self
 
     def serialize(self, data, out_size):
-        print("PyCodec::serialize")
         try:
             size = token_impl__get_packed_size(data)
-            out_size[0] = size
+            out_size.assign(size)
             bytes = UInt8Array(size)
-            if token_impl__pack(data, bytes) > 0:
-                return bytes
+            if token_impl__pack(data, bytes.data()) > 0:
+                return bytes.data()
             return None
         except Exception as e:
             print(f"Exception in serialize: {e}")
@@ -62,24 +64,31 @@ class PyEq(Equatable):
         _global_eq_instance = self
         
     def equals(self, a, b):
-        print("PyEq::equals")
-        return 0
-        # try:
-        #     time.sleep(5)
-        #     if not isinstance(a, TokenImpl) or not isinstance(b, TokenImpl):
-        #         return 0
-        #     if a.device_id == None or b.device_id == None or a.name == None or b.name == None or a.device_id == 0 or b.device_id == 0:
-        #         return 0
-        #     print("-----------------------")
-        #     if a.device_id == b.device_id and a.name == b.name:
-        #         return 1
-        #     else:
-        #         return 0
-        # except Exception as e:
-        #     print(f"Exception in equals: {e}")
-        #     import traceback
-        #     traceback.print_exc()
-        #     return 0
+        try:
+            res = token_impl_equals_wrapper(a, b)
+            time.sleep(1)
+            print(f"PyEq::equals: {res}")
+            return res
+        except Exception as e:
+            print(f"Exception in equals: {e}")
+            import traceback
+            traceback.print_exc()
+            return 0
+
+class PyStateChangeListener(StateChangeListener):
+    def __init__(self):
+        global _global_state_change_listener
+        super().__init__()
+        _global_state_change_listener = self
+        
+    def on_state_change(self, state):
+        tokens = state.tokens
+        msg = state.msg
+        print("New state")
+        for i in range(tokens.size):
+            token = MSet_Token_get(tokens, i)
+            print(f"-> Token: {token.name} {token.device_id}")
+        print(f"-> Msg: {msg.name} {msg.device_id}")
 
 # 1) a --1--> a|^a
 rule = Rule()
@@ -114,8 +123,6 @@ MSet_Rule_set(all_rules, 1, rule2)
 register_eq_wrapper("Token", PyEq())
 register_serde_wrapper("Token", PyCodec())
 
-try:
-    launch_simulation(all_rules, initial_state, 2550, net, None)
-except KeyboardInterrupt:
-    print("KeyboardInterrupt")
-    os._exit(0)
+launch_simulation_wrapper(all_rules, initial_state, 2550, net, PyStateChangeListener())
+
+#launch_simulation(all_rules, initial_state, 2550, net, None)

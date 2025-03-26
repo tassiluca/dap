@@ -7,6 +7,10 @@ trait Serializable[T]:
   def serialize(t: T): Array[Byte]
   def deserialize(bytes: Array[Byte]): T
 
+object Serializable:
+  def serialize[T](t: T)(using s: Serializable[T]): Array[Byte] = s.serialize(t)
+  def deserialize[T](t: Array[Byte])(using s: Serializable[T]): T = s.deserialize(t)
+
 object SerializableInstances:
 
   given Serializable[String] with

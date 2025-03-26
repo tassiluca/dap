@@ -11,6 +11,7 @@
 #define SWIGPYTHON
 #define SWIG_DIRECTORS
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define SWIG_PYTHON_THREADS
 #define SWIG_PYTHON_DIRECTOR_NO_VTABLE
 
@@ -8806,6 +8807,10 @@ SWIG_init(void) {
   SWIG_PYTHON_INITIALIZE_THREADS;
 ||||||| parent of 7f3b6d6 (feat: add py swig interface)
 =======
+||||||| parent of 476ba79 (fix: correct py serialization codec)
+=======
+#define SWIG_PYTHON_THREADS
+>>>>>>> 476ba79 (fix: correct py serialization codec)
 #define SWIG_PYTHON_DIRECTOR_NO_VTABLE
 
 #define SWIG_name    "_dap"
@@ -12514,27 +12519,29 @@ namespace Swig {
 #define SWIGTYPE_p_ProtobufCMessage swig_types[8]
 #define SWIGTYPE_p_ProtobufCMessageDescriptor swig_types[9]
 #define SWIGTYPE_p_Rule swig_types[10]
-#define SWIGTYPE_p_TokenImpl swig_types[11]
-#define SWIGTYPE_p_UInt8Array swig_types[12]
-#define SWIGTYPE_p_char swig_types[13]
-#define SWIGTYPE_p_f_p_DAPState__void swig_types[14]
-#define SWIGTYPE_p_f_p_unsigned_char_int__p_void swig_types[15]
-#define SWIGTYPE_p_f_p_void_p_size_t__p_unsigned_char swig_types[16]
-#define SWIGTYPE_p_f_p_void_p_void__int swig_types[17]
-#define SWIGTYPE_p_int swig_types[18]
-#define SWIGTYPE_p_long_long swig_types[19]
-#define SWIGTYPE_p_p_TokenImpl swig_types[20]
-#define SWIGTYPE_p_p_char swig_types[21]
-#define SWIGTYPE_p_short swig_types[22]
-#define SWIGTYPE_p_signed_char swig_types[23]
-#define SWIGTYPE_p_size_t swig_types[24]
-#define SWIGTYPE_p_unsigned_char swig_types[25]
-#define SWIGTYPE_p_unsigned_int swig_types[26]
-#define SWIGTYPE_p_unsigned_long_long swig_types[27]
-#define SWIGTYPE_p_unsigned_short swig_types[28]
-#define SWIGTYPE_p_void swig_types[29]
-static swig_type_info *swig_types[31];
-static swig_module_info swig_module = {swig_types, 30, 0, 0, 0, 0};
+#define SWIGTYPE_p_SizeTPtr swig_types[11]
+#define SWIGTYPE_p_StateChangeListener swig_types[12]
+#define SWIGTYPE_p_TokenImpl swig_types[13]
+#define SWIGTYPE_p_UInt8Array swig_types[14]
+#define SWIGTYPE_p_char swig_types[15]
+#define SWIGTYPE_p_f_p_DAPState__void swig_types[16]
+#define SWIGTYPE_p_f_p_unsigned_char_int__p_void swig_types[17]
+#define SWIGTYPE_p_f_p_void_p_size_t__p_unsigned_char swig_types[18]
+#define SWIGTYPE_p_f_p_void_p_void__int swig_types[19]
+#define SWIGTYPE_p_int swig_types[20]
+#define SWIGTYPE_p_long_long swig_types[21]
+#define SWIGTYPE_p_p_TokenImpl swig_types[22]
+#define SWIGTYPE_p_p_char swig_types[23]
+#define SWIGTYPE_p_short swig_types[24]
+#define SWIGTYPE_p_signed_char swig_types[25]
+#define SWIGTYPE_p_size_t swig_types[26]
+#define SWIGTYPE_p_unsigned_char swig_types[27]
+#define SWIGTYPE_p_unsigned_int swig_types[28]
+#define SWIGTYPE_p_unsigned_long_long swig_types[29]
+#define SWIGTYPE_p_unsigned_short swig_types[30]
+#define SWIGTYPE_p_void swig_types[31]
+static swig_type_info *swig_types[33];
+static swig_module_info swig_module = {swig_types, 32, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -12684,33 +12691,14 @@ namespace swig {
 #include <stdint.h>		// Use the C99 official header
 
 
-#include <cstdio>
-#include <cstdlib>
+typedef size_t SizeTPtr;
 
-#include "dap.h"
-#include "gossip.pb-c.h"
-
-
-    struct Codec {
-        virtual uint8_t* serialize(void *data, size_t *out_size) = 0;
-        virtual void* deserialize(uint8_t *bytes, int size) = 0;
-        virtual ~Codec() {}
-    };
-    struct Equatable {
-        virtual int equals(void *a, void *b) = 0;
-        virtual ~Equatable() {}
-    };
-
-
-#include <limits.h>
-#if !defined(SWIG_NO_LLONG_MAX)
-# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
-#   define LLONG_MAX __LONG_LONG_MAX__
-#   define LLONG_MIN (-LLONG_MAX - 1LL)
-#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
-# endif
-#endif
-
+SWIGINTERN SizeTPtr *new_SizeTPtr(){
+    return (new size_t());
+  }
+SWIGINTERN void delete_SizeTPtr(SizeTPtr *self){
+    delete self;
+  }
 
 SWIGINTERN int
 SWIG_AsVal_double (PyObject *obj, double *val)
@@ -12797,6 +12785,203 @@ SWIG_CanCastAsInteger(double *d, double min, double max) {
 
 
 SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyInt_Check(obj)) {
+    long v = PyInt_AsLong(obj);
+    if (v >= 0) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      return SWIG_OverflowError;
+    }
+  } else
+#endif
+  if (PyLong_Check(obj)) {
+    unsigned long v = PyLong_AsUnsignedLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      return SWIG_OverflowError;
+    }
+  }
+#ifdef SWIG_PYTHON_CAST_MODE
+  {
+    int dispatch = 0;
+    unsigned long v = PyLong_AsUnsignedLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_AddCast(SWIG_OK);
+    } else {
+      PyErr_Clear();
+    }
+    if (!dispatch) {
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
+      // Largest double not larger than ULONG_MAX (not portably calculated easily)
+      // Note that double(ULONG_MAX) is stored in a double rounded up by one (for 64-bit unsigned long)
+      // 0xfffffffffffff800ULL == (uint64_t)std::nextafter(double(__uint128_t(ULONG_MAX)+1), double(0))
+      const double ulong_max = sizeof(unsigned long) == 8 ? 0xfffffffffffff800ULL : ULONG_MAX;
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ulong_max)) {
+	if (val) *val = (unsigned long)(d);
+	return res;
+      }
+    }
+  }
+#endif
+  return SWIG_TypeError;
+}
+
+
+#include <limits.h>
+#if !defined(SWIG_NO_LLONG_MAX)
+# if !defined(LLONG_MAX) && defined(__GNUC__) && defined (__LONG_LONG_MAX__)
+#   define LLONG_MAX __LONG_LONG_MAX__
+#   define LLONG_MIN (-LLONG_MAX - 1LL)
+#   define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# endif
+#endif
+
+
+#if defined(LLONG_MAX) && !defined(SWIG_LONG_LONG_AVAILABLE)
+#  define SWIG_LONG_LONG_AVAILABLE
+#endif
+
+
+#ifdef SWIG_LONG_LONG_AVAILABLE
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long_SS_long (PyObject *obj, unsigned long long *val)
+{
+  int res = SWIG_TypeError;
+  if (PyLong_Check(obj)) {
+    unsigned long long v = PyLong_AsUnsignedLongLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      res = SWIG_OverflowError;
+    }
+  } else {
+    unsigned long v;
+    res = SWIG_AsVal_unsigned_SS_long (obj,&v);
+    if (SWIG_IsOK(res)) {
+      if (val) *val = v;
+      return res;
+    }
+  }
+#ifdef SWIG_PYTHON_CAST_MODE
+  {
+    const double mant_max = 1LL << DBL_MANT_DIG;
+    double d;
+    res = SWIG_AsVal_double (obj,&d);
+    if (SWIG_IsOK(res) && !SWIG_CanCastAsInteger(&d, 0, mant_max))
+      return SWIG_OverflowError;
+    if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
+      if (val) *val = (unsigned long long)(d);
+      return SWIG_AddCast(res);
+    }
+    res = SWIG_TypeError;
+  }
+#endif
+  return res;
+}
+#endif
+
+
+SWIGINTERNINLINE int
+SWIG_AsVal_size_t (PyObject * obj, size_t *val)
+{
+  int res = SWIG_TypeError;
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  if (sizeof(size_t) <= sizeof(unsigned long)) {
+#endif
+    unsigned long v;
+    res = SWIG_AsVal_unsigned_SS_long (obj, val ? &v : 0);
+    if (SWIG_IsOK(res) && val) *val = static_cast< size_t >(v);
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  } else if (sizeof(size_t) <= sizeof(unsigned long long)) {
+    unsigned long long v;
+    res = SWIG_AsVal_unsigned_SS_long_SS_long (obj, val ? &v : 0);
+    if (SWIG_IsOK(res) && val) *val = static_cast< size_t >(v);
+  }
+#endif
+  return res;
+}
+
+SWIGINTERN void SizeTPtr_assign(SizeTPtr *self,size_t value){
+    *self = value;
+  }
+SWIGINTERN size_t SizeTPtr_value(SizeTPtr *self){
+    return *self;
+  }
+
+  #define SWIG_From_long   PyInt_FromLong 
+
+
+SWIGINTERNINLINE PyObject* 
+SWIG_From_unsigned_SS_long  (unsigned long value)
+{
+  return (value > LONG_MAX) ?
+    PyLong_FromUnsignedLong(value) : PyInt_FromLong(static_cast< long >(value));
+}
+
+
+#ifdef SWIG_LONG_LONG_AVAILABLE
+SWIGINTERNINLINE PyObject* 
+SWIG_From_unsigned_SS_long_SS_long  (unsigned long long value)
+{
+  return (value > LONG_MAX) ?
+    PyLong_FromUnsignedLongLong(value) : PyInt_FromLong(static_cast< long >(value));
+}
+#endif
+
+
+SWIGINTERNINLINE PyObject *
+SWIG_From_size_t  (size_t value)
+{    
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  if (sizeof(size_t) <= sizeof(unsigned long)) {
+#endif
+    return SWIG_From_unsigned_SS_long  (static_cast< unsigned long >(value));
+#ifdef SWIG_LONG_LONG_AVAILABLE
+  } else {
+    /* assume sizeof(size_t) <= sizeof(unsigned long long) */
+    return SWIG_From_unsigned_SS_long_SS_long  (static_cast< unsigned long long >(value));
+  }
+#endif
+}
+
+SWIGINTERN size_t *SizeTPtr_cast(SizeTPtr *self){
+    return self;
+  }
+SWIGINTERN SizeTPtr *SizeTPtr_frompointer(size_t *t){
+    return (SizeTPtr *) t;
+  }
+
+#include "dap.h"
+#include "gossip.pb-c.h"
+
+
+    struct Codec {
+        virtual uint8_t* serialize(Token data, SizeTPtr *out_size) = 0;
+        virtual Token deserialize(uint8_t *bytes, int size) = 0;
+        virtual ~Codec() {}
+    };
+    struct Equatable {
+        virtual int equals(void *a, void *b) = 0;
+        virtual ~Equatable() {}
+    };
+    struct StateChangeListener {
+        virtual void on_state_change(struct DAPState *state) = 0;
+        virtual ~StateChangeListener() {}
+    };
+
+
+SWIGINTERN int
 SWIG_AsVal_long (PyObject *obj, long* val)
 {
 #if PY_VERSION_HEX < 0x03000000
@@ -12870,23 +13055,25 @@ SWIGINTERNINLINE PyObject*
     struct DirectorManager {
         static Codec* current_codec;
         static Equatable* current_equatable;
-        
+        static StateChangeListener* current_state_listener;
+
         static void reset() {
             current_codec = nullptr;
             current_equatable = nullptr;
+            current_state_listener = nullptr;
         }
     };
 
     Codec* DirectorManager::current_codec = nullptr;
     Equatable* DirectorManager::current_equatable = nullptr;
+    StateChangeListener* DirectorManager::current_state_listener = nullptr;
 
     static uint8_t* serialize_helper(void *data, size_t *out_size) {
-        printf("[Swig] Serializing token\n");
         if (DirectorManager::current_codec == nullptr) {
             fprintf(stderr, "Codec is NULL\n");
             return nullptr;
         }
-        return DirectorManager::current_codec->serialize(data, out_size);
+        return DirectorManager::current_codec->serialize((Token)data, out_size);
     }
 
     static void* deserialize_helper(uint8_t *bytes, int size) {
@@ -12899,26 +13086,52 @@ SWIGINTERNINLINE PyObject*
     }
 
     static int equals_helper(void *a, void *b) {
-        printf("[Swig] Equals helper\n");
         if (DirectorManager::current_equatable == nullptr) {
             fprintf(stderr, "Equatable is NULL\n");
             return 0;
         }
-        printf("[Swig] before calling the equals on equatable\n");
         return DirectorManager::current_equatable->equals(a, b);
+    }
+
+    static void state_change_helper(struct DAPState *state) {
+        if (DirectorManager::current_state_listener == nullptr) {
+            fprintf(stderr, "StateChangeListener is NULL\n");
+            return;
+        }
+        DirectorManager::current_state_listener->on_state_change(state);
     }
 
 
     int register_serde_wrapper(const char *name, Codec *c) {
-        printf("[Swig] Registering codec\n");
         DirectorManager::current_codec = c;
         return register_serde(name, serialize_helper, deserialize_helper);
     }
     
     int register_eq_wrapper(const char *name, Equatable *e) {
-        printf("[Swig] Registering equatable\n");
         DirectorManager::current_equatable = e;
         return register_equatable(name, equals_helper);
+    }
+
+    void launch_simulation_wrapper(
+        MSet_Rule* rules,
+        struct DAPState *s0,
+        int port,
+        MSet_Neighbour *neighborhood,
+        StateChangeListener *listener
+    ) {
+        printf("[Swig] Registering state change listener\n");
+        DirectorManager::current_state_listener = listener;
+        launch_simulation(rules, s0, port, neighborhood, state_change_helper);
+    }
+    
+    int token_impl_equals_wrapper(void *a, void *b) {
+        if (a == NULL || b == NULL) return 0;
+        TokenImpl *ta = (TokenImpl*)a;
+        TokenImpl *tb = (TokenImpl*)b;
+        if (ta->device_id != tb->device_id) return 0;
+        if ((ta->name == NULL && tb->name != NULL) || (ta->name != NULL && tb->name == NULL)) return 0;
+        if (ta->name != NULL && strcmp(ta->name, tb->name) != 0) return 0;
+        return 1;
     }
 
 
@@ -13025,125 +13238,6 @@ SWIG_AsCharPtrAndSize(PyObject *obj, char **cptr, size_t *psize, int *alloc)
 
 typedef uint8_t UInt8Array;
 
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
-{
-#if PY_VERSION_HEX < 0x03000000
-  if (PyInt_Check(obj)) {
-    long v = PyInt_AsLong(obj);
-    if (v >= 0) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      return SWIG_OverflowError;
-    }
-  } else
-#endif
-  if (PyLong_Check(obj)) {
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      PyErr_Clear();
-      return SWIG_OverflowError;
-    }
-  }
-#ifdef SWIG_PYTHON_CAST_MODE
-  {
-    int dispatch = 0;
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_AddCast(SWIG_OK);
-    } else {
-      PyErr_Clear();
-    }
-    if (!dispatch) {
-      double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
-      // Largest double not larger than ULONG_MAX (not portably calculated easily)
-      // Note that double(ULONG_MAX) is stored in a double rounded up by one (for 64-bit unsigned long)
-      // 0xfffffffffffff800ULL == (uint64_t)std::nextafter(double(__uint128_t(ULONG_MAX)+1), double(0))
-      const double ulong_max = sizeof(unsigned long) == 8 ? 0xfffffffffffff800ULL : ULONG_MAX;
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ulong_max)) {
-	if (val) *val = (unsigned long)(d);
-	return res;
-      }
-    }
-  }
-#endif
-  return SWIG_TypeError;
-}
-
-
-#if defined(LLONG_MAX) && !defined(SWIG_LONG_LONG_AVAILABLE)
-#  define SWIG_LONG_LONG_AVAILABLE
-#endif
-
-
-#ifdef SWIG_LONG_LONG_AVAILABLE
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long_SS_long (PyObject *obj, unsigned long long *val)
-{
-  int res = SWIG_TypeError;
-  if (PyLong_Check(obj)) {
-    unsigned long long v = PyLong_AsUnsignedLongLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      PyErr_Clear();
-      res = SWIG_OverflowError;
-    }
-  } else {
-    unsigned long v;
-    res = SWIG_AsVal_unsigned_SS_long (obj,&v);
-    if (SWIG_IsOK(res)) {
-      if (val) *val = v;
-      return res;
-    }
-  }
-#ifdef SWIG_PYTHON_CAST_MODE
-  {
-    const double mant_max = 1LL << DBL_MANT_DIG;
-    double d;
-    res = SWIG_AsVal_double (obj,&d);
-    if (SWIG_IsOK(res) && !SWIG_CanCastAsInteger(&d, 0, mant_max))
-      return SWIG_OverflowError;
-    if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, mant_max)) {
-      if (val) *val = (unsigned long long)(d);
-      return SWIG_AddCast(res);
-    }
-    res = SWIG_TypeError;
-  }
-#endif
-  return res;
-}
-#endif
-
-
-SWIGINTERNINLINE int
-SWIG_AsVal_size_t (PyObject * obj, size_t *val)
-{
-  int res = SWIG_TypeError;
-#ifdef SWIG_LONG_LONG_AVAILABLE
-  if (sizeof(size_t) <= sizeof(unsigned long)) {
-#endif
-    unsigned long v;
-    res = SWIG_AsVal_unsigned_SS_long (obj, val ? &v : 0);
-    if (SWIG_IsOK(res) && val) *val = static_cast< size_t >(v);
-#ifdef SWIG_LONG_LONG_AVAILABLE
-  } else if (sizeof(size_t) <= sizeof(unsigned long long)) {
-    unsigned long long v;
-    res = SWIG_AsVal_unsigned_SS_long_SS_long (obj, val ? &v : 0);
-    if (SWIG_IsOK(res) && val) *val = static_cast< size_t >(v);
-  }
-#endif
-  return res;
-}
-
 SWIGINTERN UInt8Array *new_UInt8Array(size_t nelements){
     return (new uint8_t[nelements]());
   }
@@ -13153,17 +13247,6 @@ SWIGINTERN void delete_UInt8Array(UInt8Array *self){
 SWIGINTERN uint8_t UInt8Array___getitem__(UInt8Array *self,size_t index){
     return self[index];
   }
-
-  #define SWIG_From_long   PyInt_FromLong 
-
-
-SWIGINTERNINLINE PyObject* 
-SWIG_From_unsigned_SS_long  (unsigned long value)
-{
-  return (value > LONG_MAX) ?
-    PyLong_FromUnsignedLong(value) : PyInt_FromLong(static_cast< long >(value));
-}
-
 
 SWIGINTERNINLINE PyObject *
 SWIG_From_unsigned_SS_char  (unsigned char value)
@@ -13196,30 +13279,39 @@ SWIGINTERN uint8_t *UInt8Array_cast(UInt8Array *self){
 SWIGINTERN UInt8Array *UInt8Array_frompointer(uint8_t *t){
     return static_cast< UInt8Array * >(t);
   }
-
-#ifdef SWIG_LONG_LONG_AVAILABLE
-SWIGINTERNINLINE PyObject* 
-SWIG_From_unsigned_SS_long_SS_long  (unsigned long long value)
-{
-  return (value > LONG_MAX) ?
-    PyLong_FromUnsignedLongLong(value) : PyInt_FromLong(static_cast< long >(value));
-}
-#endif
-
+SWIGINTERN uint8_t *UInt8Array_data(UInt8Array *self){
+        return self;
+    }
 
 SWIGINTERNINLINE PyObject *
-SWIG_From_size_t  (size_t value)
-{    
-#ifdef SWIG_LONG_LONG_AVAILABLE
-  if (sizeof(size_t) <= sizeof(unsigned long)) {
+SWIG_FromCharPtrAndSize(const char* carray, size_t size)
+{
+  if (carray) {
+    if (size > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      return pchar_descriptor ? 
+	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+#if defined(SWIG_PYTHON_STRICT_BYTE_CHAR)
+      return PyBytes_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
+#else
+      return PyUnicode_DecodeUTF8(carray, static_cast< Py_ssize_t >(size), "surrogateescape");
 #endif
-    return SWIG_From_unsigned_SS_long  (static_cast< unsigned long >(value));
-#ifdef SWIG_LONG_LONG_AVAILABLE
+#else
+      return PyString_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
+#endif
+    }
   } else {
-    /* assume sizeof(size_t) <= sizeof(unsigned long long) */
-    return SWIG_From_unsigned_SS_long_SS_long  (static_cast< unsigned long long >(value));
+    return SWIG_Py_Void();
   }
-#endif
+}
+
+
+SWIGINTERNINLINE PyObject * 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
 }
 
 
@@ -13278,38 +13370,6 @@ SWIG_From_long_SS_long  (long long value)
 #endif
 
 
-SWIGINTERNINLINE PyObject *
-SWIG_FromCharPtrAndSize(const char* carray, size_t size)
-{
-  if (carray) {
-    if (size > INT_MAX) {
-      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
-      return pchar_descriptor ? 
-	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
-    } else {
-#if PY_VERSION_HEX >= 0x03000000
-#if defined(SWIG_PYTHON_STRICT_BYTE_CHAR)
-      return PyBytes_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
-#else
-      return PyUnicode_DecodeUTF8(carray, static_cast< Py_ssize_t >(size), "surrogateescape");
-#endif
-#else
-      return PyString_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
-#endif
-    }
-  } else {
-    return SWIG_Py_Void();
-  }
-}
-
-
-SWIGINTERNINLINE PyObject * 
-SWIG_FromCharPtr(const char *cptr)
-{ 
-  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
-}
-
-
 
 /* ---------------------------------------------------
  * C++ director class methods
@@ -13324,77 +13384,87 @@ SwigDirector_Codec::SwigDirector_Codec(PyObject *self): Codec(), Swig::Director(
 
 
 
-uint8_t *SwigDirector_Codec::serialize(void *data,size_t *out_size) {
+uint8_t *SwigDirector_Codec::serialize(Token data,SizeTPtr *out_size) {
   uint8_t *c_result = 0 ;
   void *swig_argp ;
   int swig_res ;
   swig_owntype own ;
   
-  swig::SwigVar_PyObject obj0;
-  obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(data), SWIGTYPE_p_void,  0 );
-  swig::SwigVar_PyObject obj1;
-  obj1 = SWIG_NewPointerObj(SWIG_as_voidptr(out_size), SWIGTYPE_p_size_t,  0 );
-  if (!swig_get_self()) {
-    Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call Codec.__init__.");
-  }
-#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
-  const size_t swig_method_index = 0;
-  const char *const swig_method_name = "serialize";
-  PyObject *method = swig_get_method(swig_method_index, swig_method_name);
-  swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0,(PyObject *)obj1, NULL);
-#else
-  swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("serialize");
-  swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0,(PyObject *)obj1, NULL);
-#endif
-  if (!result) {
-    PyObject *error = PyErr_Occurred();
-    if (error) {
-      Swig::DirectorMethodException::raise("Error detected when calling 'Codec.serialize'");
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  {
+    swig::SwigVar_PyObject obj0;
+    obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(data), SWIGTYPE_p_TokenImpl,  0 );
+    swig::SwigVar_PyObject obj1;
+    obj1 = SWIG_NewPointerObj(SWIG_as_voidptr(out_size), SWIGTYPE_p_SizeTPtr,  0 );
+    if (!swig_get_self()) {
+      Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call Codec.__init__.");
     }
+#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+    const size_t swig_method_index = 0;
+    const char *const swig_method_name = "serialize";
+    PyObject *method = swig_get_method(swig_method_index, swig_method_name);
+    swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0,(PyObject *)obj1, NULL);
+#else
+    swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("serialize");
+    swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0,(PyObject *)obj1, NULL);
+#endif
+    if (!result) {
+      PyObject *error = PyErr_Occurred();
+      if (error) {
+        Swig::DirectorMethodException::raise("Error detected when calling 'Codec.serialize'");
+      }
+    }
+    swig_res = SWIG_ConvertPtrAndOwn(result, &swig_argp, SWIGTYPE_p_unsigned_char,  0  | SWIG_POINTER_DISOWN, &own);
+    if (!SWIG_IsOK(swig_res)) {
+      Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""uint8_t *""'");
+    }
+    c_result = reinterpret_cast< uint8_t * >(swig_argp);
+    swig_acquire_ownership_obj(SWIG_as_voidptr(c_result), own /* & TODO: SWIG_POINTER_OWN */);
   }
-  swig_res = SWIG_ConvertPtrAndOwn(result, &swig_argp, SWIGTYPE_p_unsigned_char,  0  | SWIG_POINTER_DISOWN, &own);
-  if (!SWIG_IsOK(swig_res)) {
-    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""uint8_t *""'");
-  }
-  c_result = reinterpret_cast< uint8_t * >(swig_argp);
-  swig_acquire_ownership_obj(SWIG_as_voidptr(c_result), own /* & TODO: SWIG_POINTER_OWN */);
+  SWIG_PYTHON_THREAD_END_BLOCK;
   return (uint8_t *) c_result;
 }
 
 
-void *SwigDirector_Codec::deserialize(uint8_t *bytes,int size) {
-  void *c_result = 0 ;
-  void *argp ;
-  int res ;
+Token SwigDirector_Codec::deserialize(uint8_t *bytes,int size) {
+  Token c_result = SwigValueInit< Token >() ;
+  void *swig_argp ;
+  int swig_res ;
+  swig_owntype own ;
   
-  swig::SwigVar_PyObject obj0;
-  obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(bytes), SWIGTYPE_p_unsigned_char,  0 );
-  swig::SwigVar_PyObject obj1;
-  obj1 = SWIG_From_int(static_cast< int >(size));
-  if (!swig_get_self()) {
-    Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call Codec.__init__.");
-  }
-#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
-  const size_t swig_method_index = 1;
-  const char *const swig_method_name = "deserialize";
-  PyObject *method = swig_get_method(swig_method_index, swig_method_name);
-  swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0,(PyObject *)obj1, NULL);
-#else
-  swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("deserialize");
-  swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0,(PyObject *)obj1, NULL);
-#endif
-  if (!result) {
-    PyObject *error = PyErr_Occurred();
-    if (error) {
-      Swig::DirectorMethodException::raise("Error detected when calling 'Codec.deserialize'");
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  {
+    swig::SwigVar_PyObject obj0;
+    obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(bytes), SWIGTYPE_p_unsigned_char,  0 );
+    swig::SwigVar_PyObject obj1;
+    obj1 = SWIG_From_int(static_cast< int >(size));
+    if (!swig_get_self()) {
+      Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call Codec.__init__.");
     }
+#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+    const size_t swig_method_index = 1;
+    const char *const swig_method_name = "deserialize";
+    PyObject *method = swig_get_method(swig_method_index, swig_method_name);
+    swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0,(PyObject *)obj1, NULL);
+#else
+    swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("deserialize");
+    swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0,(PyObject *)obj1, NULL);
+#endif
+    if (!result) {
+      PyObject *error = PyErr_Occurred();
+      if (error) {
+        Swig::DirectorMethodException::raise("Error detected when calling 'Codec.deserialize'");
+      }
+    }
+    swig_res = SWIG_ConvertPtrAndOwn(result, &swig_argp, SWIGTYPE_p_TokenImpl,  0  | SWIG_POINTER_DISOWN, &own);
+    if (!SWIG_IsOK(swig_res)) {
+      Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""Token""'");
+    }
+    c_result = reinterpret_cast< Token >(swig_argp);
+    swig_acquire_ownership_obj(SWIG_as_voidptr(c_result), own /* & TODO: SWIG_POINTER_OWN */);
   }
-  res = SWIG_ConvertPtr(result, &argp, 0, 0);
-  if (!SWIG_IsOK(res)) {
-    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(res)), "in output value of type '""void *""'");
-  }
-  c_result = reinterpret_cast< void * >(argp);
-  return (void *) c_result;
+  SWIG_PYTHON_THREAD_END_BLOCK;
+  return (Token) c_result;
 }
 
 
@@ -13411,34 +13481,38 @@ SwigDirector_Equatable::SwigDirector_Equatable(PyObject *self): Equatable(), Swi
 int SwigDirector_Equatable::equals(void *a,void *b) {
   int c_result = SwigValueInit< int >() ;
   
-  swig::SwigVar_PyObject obj0;
-  obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(a), SWIGTYPE_p_void,  0 );
-  swig::SwigVar_PyObject obj1;
-  obj1 = SWIG_NewPointerObj(SWIG_as_voidptr(b), SWIGTYPE_p_void,  0 );
-  if (!swig_get_self()) {
-    Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call Equatable.__init__.");
-  }
-#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
-  const size_t swig_method_index = 0;
-  const char *const swig_method_name = "equals";
-  PyObject *method = swig_get_method(swig_method_index, swig_method_name);
-  swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0,(PyObject *)obj1, NULL);
-#else
-  swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("equals");
-  swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0,(PyObject *)obj1, NULL);
-#endif
-  if (!result) {
-    PyObject *error = PyErr_Occurred();
-    if (error) {
-      Swig::DirectorMethodException::raise("Error detected when calling 'Equatable.equals'");
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  {
+    swig::SwigVar_PyObject obj0;
+    obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(a), SWIGTYPE_p_void,  0 );
+    swig::SwigVar_PyObject obj1;
+    obj1 = SWIG_NewPointerObj(SWIG_as_voidptr(b), SWIGTYPE_p_void,  0 );
+    if (!swig_get_self()) {
+      Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call Equatable.__init__.");
     }
+#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+    const size_t swig_method_index = 0;
+    const char *const swig_method_name = "equals";
+    PyObject *method = swig_get_method(swig_method_index, swig_method_name);
+    swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0,(PyObject *)obj1, NULL);
+#else
+    swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("equals");
+    swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0,(PyObject *)obj1, NULL);
+#endif
+    if (!result) {
+      PyObject *error = PyErr_Occurred();
+      if (error) {
+        Swig::DirectorMethodException::raise("Error detected when calling 'Equatable.equals'");
+      }
+    }
+    int swig_val;
+    int swig_res = SWIG_AsVal_int(result, &swig_val);
+    if (!SWIG_IsOK(swig_res)) {
+      Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""int""'");
+    }
+    c_result = static_cast< int >(swig_val);
   }
-  int swig_val;
-  int swig_res = SWIG_AsVal_int(result, &swig_val);
-  if (!SWIG_IsOK(swig_res)) {
-    Swig::DirectorTypeMismatchException::raise(SWIG_ErrorType(SWIG_ArgError(swig_res)), "in output value of type '""int""'");
-  }
-  c_result = static_cast< int >(swig_val);
+  SWIG_PYTHON_THREAD_END_BLOCK;
   return (int) c_result;
 }
 
@@ -13446,17 +13520,230 @@ int SwigDirector_Equatable::equals(void *a,void *b) {
 SwigDirector_Equatable::~SwigDirector_Equatable() {
 }
 
+SwigDirector_StateChangeListener::SwigDirector_StateChangeListener(PyObject *self): StateChangeListener(), Swig::Director(self) {
+  SWIG_DIRECTOR_RGTR((StateChangeListener *)this, this); 
+}
+
+
+
+
+void SwigDirector_StateChangeListener::on_state_change(DAPState *state) {
+  SWIG_PYTHON_THREAD_BEGIN_BLOCK;
+  {
+    swig::SwigVar_PyObject obj0;
+    obj0 = SWIG_NewPointerObj(SWIG_as_voidptr(state), SWIGTYPE_p_DAPState,  0 );
+    if (!swig_get_self()) {
+      Swig::DirectorException::raise("'self' uninitialized, maybe you forgot to call StateChangeListener.__init__.");
+    }
+#if defined(SWIG_PYTHON_DIRECTOR_VTABLE)
+    const size_t swig_method_index = 0;
+    const char *const swig_method_name = "on_state_change";
+    PyObject *method = swig_get_method(swig_method_index, swig_method_name);
+    swig::SwigVar_PyObject result = PyObject_CallFunctionObjArgs(method ,(PyObject *)obj0, NULL);
+#else
+    swig::SwigVar_PyObject swig_method_name = SWIG_Python_str_FromChar("on_state_change");
+    swig::SwigVar_PyObject result = PyObject_CallMethodObjArgs(swig_get_self(), (PyObject *) swig_method_name ,(PyObject *)obj0, NULL);
+#endif
+    if (!result) {
+      PyObject *error = PyErr_Occurred();
+      if (error) {
+        Swig::DirectorMethodException::raise("Error detected when calling 'StateChangeListener.on_state_change'");
+      }
+    }
+  }
+  SWIG_PYTHON_THREAD_END_BLOCK;
+}
+
+
+SwigDirector_StateChangeListener::~SwigDirector_StateChangeListener() {
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+SWIGINTERN PyObject *_wrap_new_SizeTPtr(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  SizeTPtr *result = 0 ;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "new_SizeTPtr", 0, 0, 0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (SizeTPtr *)new_SizeTPtr();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SizeTPtr, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_SizeTPtr(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  SizeTPtr *arg1 = (SizeTPtr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SizeTPtr, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SizeTPtr" "', argument " "1"" of type '" "SizeTPtr *""'"); 
+  }
+  arg1 = reinterpret_cast< SizeTPtr * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete_SizeTPtr(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SizeTPtr_assign(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  SizeTPtr *arg1 = (SizeTPtr *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "SizeTPtr_assign", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SizeTPtr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SizeTPtr_assign" "', argument " "1"" of type '" "SizeTPtr *""'"); 
+  }
+  arg1 = reinterpret_cast< SizeTPtr * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SizeTPtr_assign" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    SizeTPtr_assign(arg1,SWIG_STD_MOVE(arg2));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SizeTPtr_value(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  SizeTPtr *arg1 = (SizeTPtr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  size_t result;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SizeTPtr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SizeTPtr_value" "', argument " "1"" of type '" "SizeTPtr *""'"); 
+  }
+  arg1 = reinterpret_cast< SizeTPtr * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = SizeTPtr_value(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_size_t(static_cast< size_t >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SizeTPtr_cast(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  SizeTPtr *arg1 = (SizeTPtr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  size_t *result = 0 ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SizeTPtr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SizeTPtr_cast" "', argument " "1"" of type '" "SizeTPtr *""'"); 
+  }
+  arg1 = reinterpret_cast< SizeTPtr * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (size_t *)SizeTPtr_cast(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_size_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SizeTPtr_frompointer(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  size_t *arg1 = (size_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  SizeTPtr *result = 0 ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_size_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SizeTPtr_frompointer" "', argument " "1"" of type '" "size_t *""'"); 
+  }
+  arg1 = reinterpret_cast< size_t * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (SizeTPtr *)SizeTPtr_frompointer(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SizeTPtr, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *SizeTPtr_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj = NULL;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_SizeTPtr, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *SizeTPtr_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
 SWIGINTERN PyObject *_wrap_Codec_serialize(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Codec *arg1 = (Codec *) 0 ;
-  void *arg2 = (void *) 0 ;
-  size_t *arg3 = (size_t *) 0 ;
+  Token arg2 = (Token) 0 ;
+  SizeTPtr *arg3 = (SizeTPtr *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int res2 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
   void *argp3 = 0 ;
   int res3 = 0 ;
   PyObject *swig_obj[3] ;
@@ -13471,15 +13758,16 @@ SWIGINTERN PyObject *_wrap_Codec_serialize(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Codec_serialize" "', argument " "1"" of type '" "Codec *""'"); 
   }
   arg1 = reinterpret_cast< Codec * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, 0);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_TokenImpl, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Codec_serialize" "', argument " "2"" of type '" "void *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Codec_serialize" "', argument " "2"" of type '" "Token""'"); 
   }
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_size_t, 0 |  0 );
+  arg2 = reinterpret_cast< Token >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_SizeTPtr, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Codec_serialize" "', argument " "3"" of type '" "size_t *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Codec_serialize" "', argument " "3"" of type '" "SizeTPtr *""'"); 
   }
-  arg3 = reinterpret_cast< size_t * >(argp3);
+  arg3 = reinterpret_cast< SizeTPtr * >(argp3);
   director = SWIG_DIRECTOR_CAST(arg1);
   upcall = (director && (director->swig_get_self()==swig_obj[0]));
   try {
@@ -13515,7 +13803,7 @@ SWIGINTERN PyObject *_wrap_Codec_deserialize(PyObject *self, PyObject *args) {
   PyObject *swig_obj[3] ;
   Swig::Director *director = 0;
   bool upcall = false;
-  void *result = 0 ;
+  Token result;
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "Codec_deserialize", 3, 3, swig_obj)) SWIG_fail;
@@ -13540,12 +13828,12 @@ SWIGINTERN PyObject *_wrap_Codec_deserialize(PyObject *self, PyObject *args) {
     if (upcall) {
       Swig::DirectorPureVirtualException::raise("Codec::deserialize");
     } else {
-      result = (void *)(arg1)->deserialize(arg2,arg3);
+      result = (Token)(arg1)->deserialize(arg2,arg3);
     }
   } catch (Swig::DirectorException&) {
     SWIG_fail;
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TokenImpl, 0 |  0 );
   if (director) {
     SWIG_AcquirePtr(resultobj, director->swig_release_ownership(SWIG_as_voidptr(result)));
   }
@@ -13570,7 +13858,11 @@ SWIGINTERN PyObject *_wrap_delete_Codec(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Codec" "', argument " "1"" of type '" "Codec *""'"); 
   }
   arg1 = reinterpret_cast< Codec * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -13588,14 +13880,18 @@ SWIGINTERN PyObject *_wrap_new_Codec(PyObject *self, PyObject *args) {
   if (!args) SWIG_fail;
   swig_obj[0] = args;
   arg1 = swig_obj[0];
-  if ( arg1 != Py_None ) {
-    /* subclassed */
-    result = (Codec *)new SwigDirector_Codec(arg1); 
-  } else {
-    SWIG_SetErrorMsg(PyExc_RuntimeError,"accessing abstract class or protected constructor"); 
-    SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if ( arg1 != Py_None ) {
+      /* subclassed */
+      result = (Codec *)new SwigDirector_Codec(arg1); 
+    } else {
+      SWIG_SetErrorMsg(PyExc_RuntimeError,"accessing abstract class or protected constructor"); 
+      SWIG_fail;
+    }
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Codec, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -13619,10 +13915,14 @@ SWIGINTERN PyObject *_wrap_disown_Codec(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Codec * >(argp1);
   {
-    Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
-    if (director) director->swig_disown();
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
+      if (director) director->swig_disown();
+    }
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -13703,7 +14003,11 @@ SWIGINTERN PyObject *_wrap_delete_Equatable(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Equatable" "', argument " "1"" of type '" "Equatable *""'"); 
   }
   arg1 = reinterpret_cast< Equatable * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -13721,14 +14025,18 @@ SWIGINTERN PyObject *_wrap_new_Equatable(PyObject *self, PyObject *args) {
   if (!args) SWIG_fail;
   swig_obj[0] = args;
   arg1 = swig_obj[0];
-  if ( arg1 != Py_None ) {
-    /* subclassed */
-    result = (Equatable *)new SwigDirector_Equatable(arg1); 
-  } else {
-    SWIG_SetErrorMsg(PyExc_RuntimeError,"accessing abstract class or protected constructor"); 
-    SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if ( arg1 != Py_None ) {
+      /* subclassed */
+      result = (Equatable *)new SwigDirector_Equatable(arg1); 
+    } else {
+      SWIG_SetErrorMsg(PyExc_RuntimeError,"accessing abstract class or protected constructor"); 
+      SWIG_fail;
+    }
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Equatable, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -13752,10 +14060,14 @@ SWIGINTERN PyObject *_wrap_disown_Equatable(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Equatable * >(argp1);
   {
-    Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
-    if (director) director->swig_disown();
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
+      if (director) director->swig_disown();
+    }
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
-  
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -13771,6 +14083,146 @@ SWIGINTERN PyObject *Equatable_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
 }
 
 SWIGINTERN PyObject *Equatable_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_StateChangeListener_on_state_change(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  StateChangeListener *arg1 = (StateChangeListener *) 0 ;
+  DAPState *arg2 = (DAPState *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  Swig::Director *director = 0;
+  bool upcall = false;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "StateChangeListener_on_state_change", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_StateChangeListener, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StateChangeListener_on_state_change" "', argument " "1"" of type '" "StateChangeListener *""'"); 
+  }
+  arg1 = reinterpret_cast< StateChangeListener * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_DAPState, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StateChangeListener_on_state_change" "', argument " "2"" of type '" "DAPState *""'"); 
+  }
+  arg2 = reinterpret_cast< DAPState * >(argp2);
+  director = SWIG_DIRECTOR_CAST(arg1);
+  upcall = (director && (director->swig_get_self()==swig_obj[0]));
+  try {
+    if (upcall) {
+      Swig::DirectorPureVirtualException::raise("StateChangeListener::on_state_change");
+    } else {
+      (arg1)->on_state_change(arg2);
+    }
+  } catch (Swig::DirectorException&) {
+    SWIG_fail;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_StateChangeListener(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  StateChangeListener *arg1 = (StateChangeListener *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_StateChangeListener, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_StateChangeListener" "', argument " "1"" of type '" "StateChangeListener *""'"); 
+  }
+  arg1 = reinterpret_cast< StateChangeListener * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_StateChangeListener(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  PyObject *arg1 = (PyObject *) 0 ;
+  PyObject *swig_obj[1] ;
+  StateChangeListener *result = 0 ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  arg1 = swig_obj[0];
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if ( arg1 != Py_None ) {
+      /* subclassed */
+      result = (StateChangeListener *)new SwigDirector_StateChangeListener(arg1); 
+    } else {
+      SWIG_SetErrorMsg(PyExc_RuntimeError,"accessing abstract class or protected constructor"); 
+      SWIG_fail;
+    }
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_StateChangeListener, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_disown_StateChangeListener(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  StateChangeListener *arg1 = (StateChangeListener *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_StateChangeListener, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "disown_StateChangeListener" "', argument " "1"" of type '" "StateChangeListener *""'"); 
+  }
+  arg1 = reinterpret_cast< StateChangeListener * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      Swig::Director *director = SWIG_DIRECTOR_CAST(arg1);
+      if (director) director->swig_disown();
+    }
+    
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *StateChangeListener_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj = NULL;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_StateChangeListener, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *StateChangeListener_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -13798,7 +14250,11 @@ SWIGINTERN PyObject *_wrap_register_serde_wrapper(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "register_serde_wrapper" "', argument " "2"" of type '" "Codec *""'"); 
   }
   arg2 = reinterpret_cast< Codec * >(argp2);
-  result = (int)register_serde_wrapper((char const *)arg1,arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)register_serde_wrapper((char const *)arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   return resultobj;
@@ -13832,12 +14288,105 @@ SWIGINTERN PyObject *_wrap_register_eq_wrapper(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "register_eq_wrapper" "', argument " "2"" of type '" "Equatable *""'"); 
   }
   arg2 = reinterpret_cast< Equatable * >(argp2);
-  result = (int)register_eq_wrapper((char const *)arg1,arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)register_eq_wrapper((char const *)arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   return resultobj;
 fail:
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_launch_simulation_wrapper(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  MSet_Rule *arg1 = (MSet_Rule *) 0 ;
+  DAPState *arg2 = (DAPState *) 0 ;
+  int arg3 ;
+  MSet_Neighbour *arg4 = (MSet_Neighbour *) 0 ;
+  StateChangeListener *arg5 = (StateChangeListener *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "launch_simulation_wrapper", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_MSet_Rule, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "launch_simulation_wrapper" "', argument " "1"" of type '" "MSet_Rule *""'"); 
+  }
+  arg1 = reinterpret_cast< MSet_Rule * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_DAPState, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "launch_simulation_wrapper" "', argument " "2"" of type '" "DAPState *""'"); 
+  }
+  arg2 = reinterpret_cast< DAPState * >(argp2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "launch_simulation_wrapper" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_MSet_Neighbour, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "launch_simulation_wrapper" "', argument " "4"" of type '" "MSet_Neighbour *""'"); 
+  }
+  arg4 = reinterpret_cast< MSet_Neighbour * >(argp4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_StateChangeListener, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "launch_simulation_wrapper" "', argument " "5"" of type '" "StateChangeListener *""'"); 
+  }
+  arg5 = reinterpret_cast< StateChangeListener * >(argp5);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    launch_simulation_wrapper(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_token_impl_equals_wrapper(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  void *arg1 = (void *) 0 ;
+  void *arg2 = (void *) 0 ;
+  int res1 ;
+  int res2 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "token_impl_equals_wrapper", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0],SWIG_as_voidptrptr(&arg1), 0, 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "token_impl_equals_wrapper" "', argument " "1"" of type '" "void *""'"); 
+  }
+  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "token_impl_equals_wrapper" "', argument " "2"" of type '" "void *""'"); 
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)token_impl_equals_wrapper(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -13858,7 +14407,11 @@ SWIGINTERN PyObject *_wrap_new_UInt8Array(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_UInt8Array" "', argument " "1"" of type '" "size_t""'");
   } 
   arg1 = static_cast< size_t >(val1);
-  result = (UInt8Array *)new_UInt8Array(SWIG_STD_MOVE(arg1));
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (UInt8Array *)new_UInt8Array(SWIG_STD_MOVE(arg1));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_UInt8Array, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -13881,7 +14434,11 @@ SWIGINTERN PyObject *_wrap_delete_UInt8Array(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_UInt8Array" "', argument " "1"" of type '" "UInt8Array *""'"); 
   }
   arg1 = reinterpret_cast< UInt8Array * >(argp1);
-  delete_UInt8Array(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete_UInt8Array(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -13912,7 +14469,11 @@ SWIGINTERN PyObject *_wrap_UInt8Array___getitem__(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "UInt8Array___getitem__" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = static_cast< size_t >(val2);
-  result = (uint8_t)UInt8Array___getitem__(arg1,SWIG_STD_MOVE(arg2));
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (uint8_t)UInt8Array___getitem__(arg1,SWIG_STD_MOVE(arg2));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_char(static_cast< unsigned char >(result));
   return resultobj;
 fail:
@@ -13950,7 +14511,11 @@ SWIGINTERN PyObject *_wrap_UInt8Array___setitem__(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "UInt8Array___setitem__" "', argument " "3"" of type '" "uint8_t""'");
   } 
   arg3 = static_cast< uint8_t >(val3);
-  UInt8Array___setitem__(arg1,SWIG_STD_MOVE(arg2),arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    UInt8Array___setitem__(arg1,SWIG_STD_MOVE(arg2),arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -13974,7 +14539,11 @@ SWIGINTERN PyObject *_wrap_UInt8Array_cast(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Array_cast" "', argument " "1"" of type '" "UInt8Array *""'"); 
   }
   arg1 = reinterpret_cast< UInt8Array * >(argp1);
-  result = (uint8_t *)UInt8Array_cast(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (uint8_t *)UInt8Array_cast(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   return resultobj;
 fail:
@@ -13998,8 +14567,40 @@ SWIGINTERN PyObject *_wrap_UInt8Array_frompointer(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Array_frompointer" "', argument " "1"" of type '" "uint8_t *""'"); 
   }
   arg1 = reinterpret_cast< uint8_t * >(argp1);
-  result = (UInt8Array *)UInt8Array_frompointer(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (UInt8Array *)UInt8Array_frompointer(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_UInt8Array, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_UInt8Array_data(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  UInt8Array *arg1 = (UInt8Array *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  uint8_t *result = 0 ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_UInt8Array, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Array_data" "', argument " "1"" of type '" "UInt8Array *""'"); 
+  }
+  arg1 = reinterpret_cast< UInt8Array * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (uint8_t *)UInt8Array_data(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -14039,7 +14640,11 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_elements_set(PyObject *self, PyObject 
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "MSet_Neighbour_elements_set" "', argument " "2"" of type '" "Neighbour *""'"); 
   }
   arg2 = reinterpret_cast< Neighbour * >(argp2);
-  if (arg1) (arg1)->elements = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->elements = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14063,7 +14668,11 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_elements_get(PyObject *self, PyObject 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Neighbour_elements_get" "', argument " "1"" of type '" "MSet_Neighbour *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Neighbour * >(argp1);
-  result = (Neighbour *) ((arg1)->elements);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Neighbour *) ((arg1)->elements);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_char, 0 |  0 );
   return resultobj;
 fail:
@@ -14093,7 +14702,11 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_size_set(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MSet_Neighbour_size_set" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = static_cast< size_t >(val2);
-  if (arg1) (arg1)->size = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->size = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14117,7 +14730,11 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_size_get(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Neighbour_size_get" "', argument " "1"" of type '" "MSet_Neighbour *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Neighbour * >(argp1);
-  result =  ((arg1)->size);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->size);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_size_t(static_cast< size_t >(result));
   return resultobj;
 fail:
@@ -14131,7 +14748,11 @@ SWIGINTERN PyObject *_wrap_new_MSet_Neighbour(PyObject *self, PyObject *args) {
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "new_MSet_Neighbour", 0, 0, 0)) SWIG_fail;
-  result = (MSet_Neighbour *)new MSet_Neighbour();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Neighbour *)new MSet_Neighbour();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Neighbour, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -14154,7 +14775,11 @@ SWIGINTERN PyObject *_wrap_delete_MSet_Neighbour(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MSet_Neighbour" "', argument " "1"" of type '" "MSet_Neighbour *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Neighbour * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14189,7 +14814,11 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_create(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "MSet_Neighbour_create" "', argument " "1"" of type '" "size_t""'");
   } 
   arg1 = static_cast< size_t >(val1);
-  result = (MSet_Neighbour *)MSet_Neighbour_create(SWIG_STD_MOVE(arg1));
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Neighbour *)MSet_Neighbour_create(SWIG_STD_MOVE(arg1));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Neighbour, 0 |  0 );
   return resultobj;
 fail:
@@ -14212,7 +14841,11 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_destroy(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Neighbour_destroy" "', argument " "1"" of type '" "MSet_Neighbour *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Neighbour * >(argp1);
-  MSet_Neighbour_destroy(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    MSet_Neighbour_destroy(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14251,12 +14884,51 @@ SWIGINTERN PyObject *_wrap_MSet_Neighbour_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "MSet_Neighbour_set" "', argument " "3"" of type '" "Neighbour""'");
   }
   arg3 = reinterpret_cast< Neighbour >(buf3);
-  MSet_Neighbour_set(arg1,SWIG_STD_MOVE(arg2),arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    MSet_Neighbour_set(arg1,SWIG_STD_MOVE(arg2),arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
   return resultobj;
 fail:
   if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MSet_Neighbour_get(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  MSet_Neighbour *arg1 = (MSet_Neighbour *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  Neighbour result;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "MSet_Neighbour_get", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_MSet_Neighbour, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Neighbour_get" "', argument " "1"" of type '" "MSet_Neighbour *""'"); 
+  }
+  arg1 = reinterpret_cast< MSet_Neighbour * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MSet_Neighbour_get" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Neighbour)MSet_Neighbour_get(arg1,SWIG_STD_MOVE(arg2));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -14283,7 +14955,11 @@ SWIGINTERN PyObject *_wrap_MSet_Token_elements_set(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "MSet_Token_elements_set" "', argument " "2"" of type '" "Token *""'"); 
   }
   arg2 = reinterpret_cast< Token * >(argp2);
-  if (arg1) (arg1)->elements = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->elements = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14307,7 +14983,11 @@ SWIGINTERN PyObject *_wrap_MSet_Token_elements_get(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Token_elements_get" "', argument " "1"" of type '" "MSet_Token *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Token * >(argp1);
-  result = (Token *) ((arg1)->elements);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Token *) ((arg1)->elements);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_TokenImpl, 0 |  0 );
   return resultobj;
 fail:
@@ -14337,7 +15017,11 @@ SWIGINTERN PyObject *_wrap_MSet_Token_size_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MSet_Token_size_set" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = static_cast< size_t >(val2);
-  if (arg1) (arg1)->size = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->size = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14361,7 +15045,11 @@ SWIGINTERN PyObject *_wrap_MSet_Token_size_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Token_size_get" "', argument " "1"" of type '" "MSet_Token *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Token * >(argp1);
-  result =  ((arg1)->size);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->size);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_size_t(static_cast< size_t >(result));
   return resultobj;
 fail:
@@ -14375,7 +15063,11 @@ SWIGINTERN PyObject *_wrap_new_MSet_Token(PyObject *self, PyObject *args) {
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "new_MSet_Token", 0, 0, 0)) SWIG_fail;
-  result = (MSet_Token *)new MSet_Token();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Token *)new MSet_Token();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Token, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -14398,7 +15090,11 @@ SWIGINTERN PyObject *_wrap_delete_MSet_Token(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MSet_Token" "', argument " "1"" of type '" "MSet_Token *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Token * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14433,7 +15129,11 @@ SWIGINTERN PyObject *_wrap_MSet_Token_create(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "MSet_Token_create" "', argument " "1"" of type '" "size_t""'");
   } 
   arg1 = static_cast< size_t >(val1);
-  result = (MSet_Token *)MSet_Token_create(SWIG_STD_MOVE(arg1));
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Token *)MSet_Token_create(SWIG_STD_MOVE(arg1));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Token, 0 |  0 );
   return resultobj;
 fail:
@@ -14456,7 +15156,11 @@ SWIGINTERN PyObject *_wrap_MSet_Token_destroy(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Token_destroy" "', argument " "1"" of type '" "MSet_Token *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Token * >(argp1);
-  MSet_Token_destroy(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    MSet_Token_destroy(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14494,8 +15198,47 @@ SWIGINTERN PyObject *_wrap_MSet_Token_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "MSet_Token_set" "', argument " "3"" of type '" "Token""'"); 
   }
   arg3 = reinterpret_cast< Token >(argp3);
-  MSet_Token_set(arg1,SWIG_STD_MOVE(arg2),arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    MSet_Token_set(arg1,SWIG_STD_MOVE(arg2),arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MSet_Token_get(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  MSet_Token *arg1 = (MSet_Token *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  Token result;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "MSet_Token_get", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_MSet_Token, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Token_get" "', argument " "1"" of type '" "MSet_Token *""'"); 
+  }
+  arg1 = reinterpret_cast< MSet_Token * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MSet_Token_get" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Token)MSet_Token_get(arg1,SWIG_STD_MOVE(arg2));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TokenImpl, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -14524,7 +15267,11 @@ SWIGINTERN PyObject *_wrap_DAPState_tokens_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DAPState_tokens_set" "', argument " "2"" of type '" "MSet_Token *""'"); 
   }
   arg2 = reinterpret_cast< MSet_Token * >(argp2);
-  if (arg1) (arg1)->tokens = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->tokens = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14548,7 +15295,11 @@ SWIGINTERN PyObject *_wrap_DAPState_tokens_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DAPState_tokens_get" "', argument " "1"" of type '" "DAPState *""'"); 
   }
   arg1 = reinterpret_cast< DAPState * >(argp1);
-  result = (MSet_Token *) ((arg1)->tokens);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Token *) ((arg1)->tokens);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Token, 0 |  0 );
   return resultobj;
 fail:
@@ -14578,7 +15329,11 @@ SWIGINTERN PyObject *_wrap_DAPState_msg_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DAPState_msg_set" "', argument " "2"" of type '" "Token""'"); 
   }
   arg2 = reinterpret_cast< Token >(argp2);
-  if (arg1) (arg1)->msg = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->msg = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14602,7 +15357,11 @@ SWIGINTERN PyObject *_wrap_DAPState_msg_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DAPState_msg_get" "', argument " "1"" of type '" "DAPState *""'"); 
   }
   arg1 = reinterpret_cast< DAPState * >(argp1);
-  result = (Token) ((arg1)->msg);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Token) ((arg1)->msg);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TokenImpl, 0 |  0 );
   return resultobj;
 fail:
@@ -14616,7 +15375,11 @@ SWIGINTERN PyObject *_wrap_new_DAPState(PyObject *self, PyObject *args) {
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "new_DAPState", 0, 0, 0)) SWIG_fail;
-  result = (DAPState *)new DAPState();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DAPState *)new DAPState();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_DAPState, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -14639,7 +15402,11 @@ SWIGINTERN PyObject *_wrap_delete_DAPState(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_DAPState" "', argument " "1"" of type '" "DAPState *""'"); 
   }
   arg1 = reinterpret_cast< DAPState * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14680,7 +15447,11 @@ SWIGINTERN PyObject *_wrap_Rule_preconditions_set(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Rule_preconditions_set" "', argument " "2"" of type '" "MSet_Token const *""'"); 
   }
   arg2 = reinterpret_cast< MSet_Token * >(argp2);
-  if (arg1) (arg1)->preconditions = (MSet_Token const *)arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->preconditions = (MSet_Token const *)arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14704,7 +15475,11 @@ SWIGINTERN PyObject *_wrap_Rule_preconditions_get(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rule_preconditions_get" "', argument " "1"" of type '" "Rule *""'"); 
   }
   arg1 = reinterpret_cast< Rule * >(argp1);
-  result = (MSet_Token *) ((arg1)->preconditions);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Token *) ((arg1)->preconditions);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Token, 0 |  0 );
   return resultobj;
 fail:
@@ -14734,7 +15509,11 @@ SWIGINTERN PyObject *_wrap_Rule_rate_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Rule_rate_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
-  if (arg1) (arg1)->rate = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->rate = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14758,7 +15537,11 @@ SWIGINTERN PyObject *_wrap_Rule_rate_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rule_rate_get" "', argument " "1"" of type '" "Rule *""'"); 
   }
   arg1 = reinterpret_cast< Rule * >(argp1);
-  result = (double) ((arg1)->rate);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (double) ((arg1)->rate);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_double(static_cast< double >(result));
   return resultobj;
 fail:
@@ -14788,7 +15571,11 @@ SWIGINTERN PyObject *_wrap_Rule_effects_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Rule_effects_set" "', argument " "2"" of type '" "MSet_Token const *""'"); 
   }
   arg2 = reinterpret_cast< MSet_Token * >(argp2);
-  if (arg1) (arg1)->effects = (MSet_Token const *)arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->effects = (MSet_Token const *)arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14812,7 +15599,11 @@ SWIGINTERN PyObject *_wrap_Rule_effects_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rule_effects_get" "', argument " "1"" of type '" "Rule *""'"); 
   }
   arg1 = reinterpret_cast< Rule * >(argp1);
-  result = (MSet_Token *) ((arg1)->effects);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Token *) ((arg1)->effects);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Token, 0 |  0 );
   return resultobj;
 fail:
@@ -14842,7 +15633,11 @@ SWIGINTERN PyObject *_wrap_Rule_msg_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Rule_msg_set" "', argument " "2"" of type '" "Token""'"); 
   }
   arg2 = reinterpret_cast< Token >(argp2);
-  if (arg1) (arg1)->msg = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->msg = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14866,7 +15661,11 @@ SWIGINTERN PyObject *_wrap_Rule_msg_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Rule_msg_get" "', argument " "1"" of type '" "Rule *""'"); 
   }
   arg1 = reinterpret_cast< Rule * >(argp1);
-  result = (Token) ((arg1)->msg);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Token) ((arg1)->msg);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TokenImpl, 0 |  0 );
   return resultobj;
 fail:
@@ -14880,7 +15679,11 @@ SWIGINTERN PyObject *_wrap_new_Rule(PyObject *self, PyObject *args) {
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "new_Rule", 0, 0, 0)) SWIG_fail;
-  result = (Rule *)new Rule();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Rule *)new Rule();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Rule, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -14903,7 +15706,11 @@ SWIGINTERN PyObject *_wrap_delete_Rule(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Rule" "', argument " "1"" of type '" "Rule *""'"); 
   }
   arg1 = reinterpret_cast< Rule * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14944,7 +15751,11 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_elements_set(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "MSet_Rule_elements_set" "', argument " "2"" of type '" "Rule *""'"); 
   }
   arg2 = reinterpret_cast< Rule * >(argp2);
-  if (arg1) (arg1)->elements = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->elements = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -14968,7 +15779,11 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_elements_get(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Rule_elements_get" "', argument " "1"" of type '" "MSet_Rule *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Rule * >(argp1);
-  result = (Rule *) ((arg1)->elements);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Rule *) ((arg1)->elements);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Rule, 0 |  0 );
   return resultobj;
 fail:
@@ -14998,7 +15813,11 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_size_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MSet_Rule_size_set" "', argument " "2"" of type '" "size_t""'");
   } 
   arg2 = static_cast< size_t >(val2);
-  if (arg1) (arg1)->size = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->size = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15022,7 +15841,11 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_size_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Rule_size_get" "', argument " "1"" of type '" "MSet_Rule *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Rule * >(argp1);
-  result =  ((arg1)->size);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->size);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_size_t(static_cast< size_t >(result));
   return resultobj;
 fail:
@@ -15036,7 +15859,11 @@ SWIGINTERN PyObject *_wrap_new_MSet_Rule(PyObject *self, PyObject *args) {
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "new_MSet_Rule", 0, 0, 0)) SWIG_fail;
-  result = (MSet_Rule *)new MSet_Rule();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Rule *)new MSet_Rule();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Rule, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -15059,7 +15886,11 @@ SWIGINTERN PyObject *_wrap_delete_MSet_Rule(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MSet_Rule" "', argument " "1"" of type '" "MSet_Rule *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Rule * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15094,7 +15925,11 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_create(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "MSet_Rule_create" "', argument " "1"" of type '" "size_t""'");
   } 
   arg1 = static_cast< size_t >(val1);
-  result = (MSet_Rule *)MSet_Rule_create(SWIG_STD_MOVE(arg1));
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (MSet_Rule *)MSet_Rule_create(SWIG_STD_MOVE(arg1));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MSet_Rule, 0 |  0 );
   return resultobj;
 fail:
@@ -15117,7 +15952,11 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_destroy(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Rule_destroy" "', argument " "1"" of type '" "MSet_Rule *""'"); 
   }
   arg1 = reinterpret_cast< MSet_Rule * >(argp1);
-  MSet_Rule_destroy(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    MSet_Rule_destroy(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15163,8 +16002,47 @@ SWIGINTERN PyObject *_wrap_MSet_Rule_set(PyObject *self, PyObject *args) {
       if (SWIG_IsNewObj(res3)) delete temp;
     }
   }
-  MSet_Rule_set(arg1,SWIG_STD_MOVE(arg2),SWIG_STD_MOVE(arg3));
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    MSet_Rule_set(arg1,SWIG_STD_MOVE(arg2),SWIG_STD_MOVE(arg3));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MSet_Rule_get(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  MSet_Rule *arg1 = (MSet_Rule *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  Rule result;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "MSet_Rule_get", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_MSet_Rule, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MSet_Rule_get" "', argument " "1"" of type '" "MSet_Rule *""'"); 
+  }
+  arg1 = reinterpret_cast< MSet_Rule * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MSet_Rule_get" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = MSet_Rule_get(arg1,SWIG_STD_MOVE(arg2));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj((new Rule(result)), SWIGTYPE_p_Rule, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -15216,7 +16094,11 @@ SWIGINTERN PyObject *_wrap_launch_simulation(PyObject *self, PyObject *args) {
       SWIG_exception_fail(SWIG_ArgError(res), "in method '" "launch_simulation" "', argument " "5"" of type '" "void (*)(DAPState *)""'"); 
     }
   }
-  launch_simulation(arg1,arg2,arg3,arg4,arg5);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    launch_simulation(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15254,7 +16136,11 @@ SWIGINTERN PyObject *_wrap_register_serde(PyObject *self, PyObject *args) {
       SWIG_exception_fail(SWIG_ArgError(res), "in method '" "register_serde" "', argument " "3"" of type '" "void *(*)(uint8_t *,int)""'"); 
     }
   }
-  result = (int)register_serde((char const *)arg1,arg2,arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)register_serde((char const *)arg1,arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   return resultobj;
@@ -15287,7 +16173,11 @@ SWIGINTERN PyObject *_wrap_register_equatable(PyObject *self, PyObject *args) {
       SWIG_exception_fail(SWIG_ArgError(res), "in method '" "register_equatable" "', argument " "2"" of type '" "int (*)(void *,void *)""'"); 
     }
   }
-  result = (int)register_equatable((char const *)arg1,arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)register_equatable((char const *)arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   return resultobj;
@@ -15327,7 +16217,11 @@ SWIGINTERN PyObject *_wrap_TokenImpl_base_set(PyObject *self, PyObject *args) {
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->base = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->base = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15351,7 +16245,11 @@ SWIGINTERN PyObject *_wrap_TokenImpl_base_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TokenImpl_base_get" "', argument " "1"" of type '" "TokenImpl *""'"); 
   }
   arg1 = reinterpret_cast< TokenImpl * >(argp1);
-  result =  ((arg1)->base);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->base);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new ProtobufCMessage(result)), SWIGTYPE_p_ProtobufCMessage, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -15381,7 +16279,11 @@ SWIGINTERN PyObject *_wrap_TokenImpl_device_id_set(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TokenImpl_device_id_set" "', argument " "2"" of type '" "int64_t""'");
   } 
   arg2 = static_cast< int64_t >(val2);
-  if (arg1) (arg1)->device_id = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->device_id = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15405,7 +16307,11 @@ SWIGINTERN PyObject *_wrap_TokenImpl_device_id_get(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TokenImpl_device_id_get" "', argument " "1"" of type '" "TokenImpl *""'"); 
   }
   arg1 = reinterpret_cast< TokenImpl * >(argp1);
-  result = (int64_t) ((arg1)->device_id);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int64_t) ((arg1)->device_id);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
@@ -15437,10 +16343,14 @@ SWIGINTERN PyObject *_wrap_TokenImpl_name_set(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
-    if (arg1->name != NULL && arg1->name != protobuf_c_empty_string) {
-      free(arg1->name);
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      if (arg1->name != NULL && arg1->name != protobuf_c_empty_string) {
+        free(arg1->name);
+      }
+      arg1->name = strdup(arg2);
     }
-    arg1->name = strdup(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -15467,7 +16377,11 @@ SWIGINTERN PyObject *_wrap_TokenImpl_name_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TokenImpl_name_get" "', argument " "1"" of type '" "TokenImpl *""'"); 
   }
   arg1 = reinterpret_cast< TokenImpl * >(argp1);
-  result = (char *) ((arg1)->name);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *) ((arg1)->name);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
@@ -15481,7 +16395,11 @@ SWIGINTERN PyObject *_wrap_new_TokenImpl(PyObject *self, PyObject *args) {
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "new_TokenImpl", 0, 0, 0)) SWIG_fail;
-  result = (TokenImpl *)new TokenImpl();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (TokenImpl *)new TokenImpl();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TokenImpl, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
@@ -15504,7 +16422,11 @@ SWIGINTERN PyObject *_wrap_delete_TokenImpl(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_TokenImpl" "', argument " "1"" of type '" "TokenImpl *""'"); 
   }
   arg1 = reinterpret_cast< TokenImpl * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15538,7 +16460,11 @@ SWIGINTERN PyObject *_wrap_token_impl__init(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "token_impl__init" "', argument " "1"" of type '" "TokenImpl *""'"); 
   }
   arg1 = reinterpret_cast< TokenImpl * >(argp1);
-  token_impl__init(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    token_impl__init(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15562,7 +16488,11 @@ SWIGINTERN PyObject *_wrap_token_impl__get_packed_size(PyObject *self, PyObject 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "token_impl__get_packed_size" "', argument " "1"" of type '" "TokenImpl const *""'"); 
   }
   arg1 = reinterpret_cast< TokenImpl * >(argp1);
-  result = token_impl__get_packed_size((TokenImpl const *)arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = token_impl__get_packed_size((TokenImpl const *)arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_size_t(static_cast< size_t >(result));
   return resultobj;
 fail:
@@ -15593,7 +16523,11 @@ SWIGINTERN PyObject *_wrap_token_impl__pack(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "token_impl__pack" "', argument " "2"" of type '" "uint8_t *""'"); 
   }
   arg2 = reinterpret_cast< uint8_t * >(argp2);
-  result = token_impl__pack((TokenImpl const *)arg1,arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = token_impl__pack((TokenImpl const *)arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_size_t(static_cast< size_t >(result));
   return resultobj;
 fail:
@@ -15624,7 +16558,11 @@ SWIGINTERN PyObject *_wrap_token_impl__pack_to_buffer(PyObject *self, PyObject *
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "token_impl__pack_to_buffer" "', argument " "2"" of type '" "ProtobufCBuffer *""'"); 
   }
   arg2 = reinterpret_cast< ProtobufCBuffer * >(argp2);
-  result = token_impl__pack_to_buffer((TokenImpl const *)arg1,arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = token_impl__pack_to_buffer((TokenImpl const *)arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_size_t(static_cast< size_t >(result));
   return resultobj;
 fail:
@@ -15663,7 +16601,11 @@ SWIGINTERN PyObject *_wrap_token_impl__unpack(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "token_impl__unpack" "', argument " "3"" of type '" "uint8_t const *""'"); 
   }
   arg3 = reinterpret_cast< uint8_t * >(argp3);
-  result = (TokenImpl *)token_impl__unpack(arg1,SWIG_STD_MOVE(arg2),(unsigned char const *)arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (TokenImpl *)token_impl__unpack(arg1,SWIG_STD_MOVE(arg2),(unsigned char const *)arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TokenImpl, 0 |  0 );
   return resultobj;
 fail:
@@ -15693,7 +16635,11 @@ SWIGINTERN PyObject *_wrap_token_impl__free_unpacked(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "token_impl__free_unpacked" "', argument " "2"" of type '" "ProtobufCAllocator *""'"); 
   }
   arg2 = reinterpret_cast< ProtobufCAllocator * >(argp2);
-  token_impl__free_unpacked(arg1,arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    token_impl__free_unpacked(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -15716,6 +16662,14 @@ SWIGINTERN PyObject *Swig_var_token_impl__descriptor_get(void) {
 
 
 static PyMethodDef SwigMethods[] = {
+	 { "new_SizeTPtr", _wrap_new_SizeTPtr, METH_NOARGS, NULL},
+	 { "delete_SizeTPtr", _wrap_delete_SizeTPtr, METH_O, NULL},
+	 { "SizeTPtr_assign", _wrap_SizeTPtr_assign, METH_VARARGS, NULL},
+	 { "SizeTPtr_value", _wrap_SizeTPtr_value, METH_O, NULL},
+	 { "SizeTPtr_cast", _wrap_SizeTPtr_cast, METH_O, NULL},
+	 { "SizeTPtr_frompointer", _wrap_SizeTPtr_frompointer, METH_O, NULL},
+	 { "SizeTPtr_swigregister", SizeTPtr_swigregister, METH_O, NULL},
+	 { "SizeTPtr_swiginit", SizeTPtr_swiginit, METH_VARARGS, NULL},
 	 { "Codec_serialize", _wrap_Codec_serialize, METH_VARARGS, NULL},
 	 { "Codec_deserialize", _wrap_Codec_deserialize, METH_VARARGS, NULL},
 	 { "delete_Codec", _wrap_delete_Codec, METH_O, NULL},
@@ -15729,14 +16683,23 @@ static PyMethodDef SwigMethods[] = {
 	 { "disown_Equatable", _wrap_disown_Equatable, METH_O, NULL},
 	 { "Equatable_swigregister", Equatable_swigregister, METH_O, NULL},
 	 { "Equatable_swiginit", Equatable_swiginit, METH_VARARGS, NULL},
+	 { "StateChangeListener_on_state_change", _wrap_StateChangeListener_on_state_change, METH_VARARGS, NULL},
+	 { "delete_StateChangeListener", _wrap_delete_StateChangeListener, METH_O, NULL},
+	 { "new_StateChangeListener", _wrap_new_StateChangeListener, METH_O, NULL},
+	 { "disown_StateChangeListener", _wrap_disown_StateChangeListener, METH_O, NULL},
+	 { "StateChangeListener_swigregister", StateChangeListener_swigregister, METH_O, NULL},
+	 { "StateChangeListener_swiginit", StateChangeListener_swiginit, METH_VARARGS, NULL},
 	 { "register_serde_wrapper", _wrap_register_serde_wrapper, METH_VARARGS, NULL},
 	 { "register_eq_wrapper", _wrap_register_eq_wrapper, METH_VARARGS, NULL},
+	 { "launch_simulation_wrapper", _wrap_launch_simulation_wrapper, METH_VARARGS, NULL},
+	 { "token_impl_equals_wrapper", _wrap_token_impl_equals_wrapper, METH_VARARGS, NULL},
 	 { "new_UInt8Array", _wrap_new_UInt8Array, METH_O, NULL},
 	 { "delete_UInt8Array", _wrap_delete_UInt8Array, METH_O, NULL},
 	 { "UInt8Array___getitem__", _wrap_UInt8Array___getitem__, METH_VARARGS, NULL},
 	 { "UInt8Array___setitem__", _wrap_UInt8Array___setitem__, METH_VARARGS, NULL},
 	 { "UInt8Array_cast", _wrap_UInt8Array_cast, METH_O, NULL},
 	 { "UInt8Array_frompointer", _wrap_UInt8Array_frompointer, METH_O, NULL},
+	 { "UInt8Array_data", _wrap_UInt8Array_data, METH_O, NULL},
 	 { "UInt8Array_swigregister", UInt8Array_swigregister, METH_O, NULL},
 	 { "UInt8Array_swiginit", UInt8Array_swiginit, METH_VARARGS, NULL},
 	 { "MSet_Neighbour_elements_set", _wrap_MSet_Neighbour_elements_set, METH_VARARGS, NULL},
@@ -15750,6 +16713,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "MSet_Neighbour_create", _wrap_MSet_Neighbour_create, METH_O, NULL},
 	 { "MSet_Neighbour_destroy", _wrap_MSet_Neighbour_destroy, METH_O, NULL},
 	 { "MSet_Neighbour_set", _wrap_MSet_Neighbour_set, METH_VARARGS, NULL},
+	 { "MSet_Neighbour_get", _wrap_MSet_Neighbour_get, METH_VARARGS, NULL},
 	 { "MSet_Token_elements_set", _wrap_MSet_Token_elements_set, METH_VARARGS, NULL},
 	 { "MSet_Token_elements_get", _wrap_MSet_Token_elements_get, METH_O, NULL},
 	 { "MSet_Token_size_set", _wrap_MSet_Token_size_set, METH_VARARGS, NULL},
@@ -15761,6 +16725,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "MSet_Token_create", _wrap_MSet_Token_create, METH_O, NULL},
 	 { "MSet_Token_destroy", _wrap_MSet_Token_destroy, METH_O, NULL},
 	 { "MSet_Token_set", _wrap_MSet_Token_set, METH_VARARGS, NULL},
+	 { "MSet_Token_get", _wrap_MSet_Token_get, METH_VARARGS, NULL},
 	 { "DAPState_tokens_set", _wrap_DAPState_tokens_set, METH_VARARGS, NULL},
 	 { "DAPState_tokens_get", _wrap_DAPState_tokens_get, METH_O, NULL},
 	 { "DAPState_msg_set", _wrap_DAPState_msg_set, METH_VARARGS, NULL},
@@ -15792,6 +16757,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "MSet_Rule_create", _wrap_MSet_Rule_create, METH_O, NULL},
 	 { "MSet_Rule_destroy", _wrap_MSet_Rule_destroy, METH_O, NULL},
 	 { "MSet_Rule_set", _wrap_MSet_Rule_set, METH_VARARGS, NULL},
+	 { "MSet_Rule_get", _wrap_MSet_Rule_get, METH_VARARGS, NULL},
 	 { "launch_simulation", _wrap_launch_simulation, METH_VARARGS, NULL},
 	 { "register_serde", _wrap_register_serde, METH_VARARGS, NULL},
 	 { "register_equatable", _wrap_register_equatable, METH_VARARGS, NULL},
@@ -15817,6 +16783,9 @@ static PyMethodDef SwigMethods[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
+static void *_p_SizeTPtrTo_p_size_t(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((size_t *)  ((SizeTPtr *) x));
+}
 static swig_type_info _swigt__p_Codec = {"_p_Codec", "Codec *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DAPState = {"_p_DAPState", "DAPState *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Equatable = {"_p_Equatable", "Equatable *", 0, 0, (void*)0, 0};
@@ -15828,6 +16797,8 @@ static swig_type_info _swigt__p_ProtobufCBuffer = {"_p_ProtobufCBuffer", "Protob
 static swig_type_info _swigt__p_ProtobufCMessage = {"_p_ProtobufCMessage", "ProtobufCMessage *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ProtobufCMessageDescriptor = {"_p_ProtobufCMessageDescriptor", "ProtobufCMessageDescriptor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Rule = {"_p_Rule", "Rule *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_SizeTPtr = {"_p_SizeTPtr", "SizeTPtr *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_StateChangeListener = {"_p_StateChangeListener", "StateChangeListener *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TokenImpl = {"_p_TokenImpl", "Token|TokenImpl *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_UInt8Array = {"_p_UInt8Array", "UInt8Array *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
@@ -15860,6 +16831,8 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ProtobufCMessage,
   &_swigt__p_ProtobufCMessageDescriptor,
   &_swigt__p_Rule,
+  &_swigt__p_SizeTPtr,
+  &_swigt__p_StateChangeListener,
   &_swigt__p_TokenImpl,
   &_swigt__p_UInt8Array,
   &_swigt__p_char,
@@ -15892,6 +16865,8 @@ static swig_cast_info _swigc__p_ProtobufCBuffer[] = {  {&_swigt__p_ProtobufCBuff
 static swig_cast_info _swigc__p_ProtobufCMessage[] = {  {&_swigt__p_ProtobufCMessage, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ProtobufCMessageDescriptor[] = {  {&_swigt__p_ProtobufCMessageDescriptor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Rule[] = {  {&_swigt__p_Rule, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_SizeTPtr[] = {  {&_swigt__p_SizeTPtr, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_StateChangeListener[] = {  {&_swigt__p_StateChangeListener, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TokenImpl[] = {  {&_swigt__p_TokenImpl, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_UInt8Array[] = {  {&_swigt__p_UInt8Array, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
@@ -15905,7 +16880,7 @@ static swig_cast_info _swigc__p_p_TokenImpl[] = {  {&_swigt__p_p_TokenImpl, 0, 0
 static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_short[] = {  {&_swigt__p_short, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_signed_char[] = {  {&_swigt__p_signed_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_size_t[] = {  {&_swigt__p_size_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_size_t[] = {  {&_swigt__p_size_t, 0, 0, 0},  {&_swigt__p_SizeTPtr, _p_SizeTPtrTo_p_size_t, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_char[] = {  {&_swigt__p_unsigned_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_unsigned_long_long[] = {  {&_swigt__p_unsigned_long_long, 0, 0, 0},{0, 0, 0, 0}};
@@ -15924,6 +16899,8 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ProtobufCMessage,
   _swigc__p_ProtobufCMessageDescriptor,
   _swigc__p_Rule,
+  _swigc__p_SizeTPtr,
+  _swigc__p_StateChangeListener,
   _swigc__p_TokenImpl,
   _swigc__p_UInt8Array,
   _swigc__p_char,
@@ -16419,7 +17396,14 @@ SWIG_init(void) {
 #endif
   }
   PyDict_SetItemString(md, "cvar", globals);
+<<<<<<< HEAD
 >>>>>>> 7f3b6d6 (feat: add py swig interface)
+||||||| parent of 476ba79 (fix: correct py serialization codec)
+=======
+  
+  /* Initialize threading */
+  SWIG_PYTHON_INITIALIZE_THREADS;
+>>>>>>> 476ba79 (fix: correct py serialization codec)
   SWIG_addvarlink(globals, "token_impl__descriptor", Swig_var_token_impl__descriptor_get, Swig_var_token_impl__descriptor_set);
 #if PY_VERSION_HEX >= 0x03000000
   return m;
