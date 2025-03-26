@@ -12684,6 +12684,9 @@ namespace swig {
 #include <stdint.h>		// Use the C99 official header
 
 
+#include <cstdio>
+#include <cstdlib>
+
 #include "dap.h"
 #include "gossip.pb-c.h"
 
@@ -12864,42 +12867,58 @@ SWIGINTERNINLINE PyObject*
 }
 
 
-    static Codec *codec = NULL;
-    static Equatable *equatable = NULL;
+    struct DirectorManager {
+        static Codec* current_codec;
+        static Equatable* current_equatable;
+        
+        static void reset() {
+            current_codec = nullptr;
+            current_equatable = nullptr;
+        }
+    };
+
+    Codec* DirectorManager::current_codec = nullptr;
+    Equatable* DirectorManager::current_equatable = nullptr;
+
     static uint8_t* serialize_helper(void *data, size_t *out_size) {
         printf("[Swig] Serializing token\n");
-        if (codec == NULL) {
-            perror("Codec is NULL");
-            exit(1);
+        if (DirectorManager::current_codec == nullptr) {
+            fprintf(stderr, "Codec is NULL\n");
+            return nullptr;
         }
-        return codec->serialize(data, out_size);
+        return DirectorManager::current_codec->serialize(data, out_size);
     }
+
     static void* deserialize_helper(uint8_t *bytes, int size) {
         printf("[Swig] Deserializing token\n");
-        if (codec == NULL) {
-            perror("Codec is NULL");
-            exit(1);
+        if (DirectorManager::current_codec == nullptr) {
+            fprintf(stderr, "Codec is NULL\n");
+            return nullptr;
         }
-        return codec->deserialize(bytes, size);
+        return DirectorManager::current_codec->deserialize(bytes, size);
     }
+
     static int equals_helper(void *a, void *b) {
-        if (equatable == NULL) {
-            perror("Equatable is NULL");
-            exit(1);
+        printf("[Swig] Equals helper\n");
+        if (DirectorManager::current_equatable == nullptr) {
+            fprintf(stderr, "Equatable is NULL\n");
+            return 0;
         }
-        return equatable->equals(a, b);
+        printf("[Swig] before calling the equals on equatable\n");
+        return DirectorManager::current_equatable->equals(a, b);
     }
 
 
-    void register_serde_wrapper(const char *name, Codec *c) {
+    int register_serde_wrapper(const char *name, Codec *c) {
         printf("[Swig] Registering codec\n");
-        codec = c;
-        register_serde(name, serialize_helper, deserialize_helper);
+        DirectorManager::current_codec = c;
+        return register_serde(name, serialize_helper, deserialize_helper);
     }
-    void register_eq_wrapper(const char *name, Equatable *e) {
+    
+    int register_eq_wrapper(const char *name, Equatable *e) {
         printf("[Swig] Registering equatable\n");
-        equatable = e;
-        register_equatable(name, equals_helper);
+        DirectorManager::current_equatable = e;
+        return register_equatable(name, equals_helper);
     }
 
 
@@ -13765,6 +13784,7 @@ SWIGINTERN PyObject *_wrap_register_serde_wrapper(PyObject *self, PyObject *args
   void *argp2 = 0 ;
   int res2 = 0 ;
   PyObject *swig_obj[2] ;
+  int result;
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "register_serde_wrapper", 2, 2, swig_obj)) SWIG_fail;
@@ -13778,8 +13798,8 @@ SWIGINTERN PyObject *_wrap_register_serde_wrapper(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "register_serde_wrapper" "', argument " "2"" of type '" "Codec *""'"); 
   }
   arg2 = reinterpret_cast< Codec * >(argp2);
-  register_serde_wrapper((char const *)arg1,arg2);
-  resultobj = SWIG_Py_Void();
+  result = (int)register_serde_wrapper((char const *)arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   return resultobj;
 fail:
@@ -13798,6 +13818,7 @@ SWIGINTERN PyObject *_wrap_register_eq_wrapper(PyObject *self, PyObject *args) {
   void *argp2 = 0 ;
   int res2 = 0 ;
   PyObject *swig_obj[2] ;
+  int result;
   
   (void)self;
   if (!SWIG_Python_UnpackTuple(args, "register_eq_wrapper", 2, 2, swig_obj)) SWIG_fail;
@@ -13811,8 +13832,8 @@ SWIGINTERN PyObject *_wrap_register_eq_wrapper(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "register_eq_wrapper" "', argument " "2"" of type '" "Equatable *""'"); 
   }
   arg2 = reinterpret_cast< Equatable * >(argp2);
-  register_eq_wrapper((char const *)arg1,arg2);
-  resultobj = SWIG_Py_Void();
+  result = (int)register_eq_wrapper((char const *)arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   return resultobj;
 fail:
