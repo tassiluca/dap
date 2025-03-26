@@ -1,52 +1,85 @@
-import faulthandler
 from dap import *
-
-faulthandler.enable()
+import os
 
 token = TokenImpl()
 token_impl__init(token)
 token.name = "a"
 token.device_id = 1
 
+print(token)
+print(token.name)
+print(token.device_id)
+
 net = MSet_Neighbour_create(1)
 MSet_Neighbour_set(net, 0, "localhost:2551")
 
 print(net)
 
+_global_codec_instance = None
+_global_eq_instance = None
+
 class PyCodec(Codec):
     def __init__(self):
-        Codec.__init__(self)
+        global _global_codec_instance
+        super().__init__()
+        _global_codec_instance = self
 
     def serialize(self, data, out_size):
         print("PyCodec::serialize")
         try:
             size = token_impl__get_packed_size(data)
+            out_size[0] = size
             bytes = UInt8Array(size)
-            return token_impl__pack(data, bytes)
+            if token_impl__pack(data, bytes) > 0:
+                return bytes
+            return None
         except Exception as e:
             print(f"Exception in serialize: {e}")
             import traceback
             traceback.print_exc()
-            return
+            return None
 
     def deserialize(self, bytes, size):
-        ...
+        print("PyCodec::deserialize")
+        try:
+            result = TokenImpl()
+            token_impl__init(result)
+            status = token_impl__unpack(result, bytes, size)
+            if status is None or status == 0:
+                print("token_impl__unpack failed")
+                return None   
+            return result
+        except Exception as e:
+            print(f"Exception in deserialize: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
         
 class PyEq(Equatable):
     def __init__(self):
-        Equatable.__init__(self)
+        global _global_eq_instance
+        super().__init__()
+        _global_eq_instance = self
         
     def equals(self, a, b):
         print("PyEq::equals")
-        try:
-            if not isinstance(a, TokenImpl) or not isinstance(b, TokenImpl):
-                return False
-            return a.device_id == b.device_id and a.name == b.name
-        except Exception as e:
-            print(f"Exception in equals: {e}")
-            import traceback
-            traceback.print_exc()
-            return
+        return 0
+        # try:
+        #     time.sleep(5)
+        #     if not isinstance(a, TokenImpl) or not isinstance(b, TokenImpl):
+        #         return 0
+        #     if a.device_id == None or b.device_id == None or a.name == None or b.name == None or a.device_id == 0 or b.device_id == 0:
+        #         return 0
+        #     print("-----------------------")
+        #     if a.device_id == b.device_id and a.name == b.name:
+        #         return 1
+        #     else:
+        #         return 0
+        # except Exception as e:
+        #     print(f"Exception in equals: {e}")
+        #     import traceback
+        #     traceback.print_exc()
+        #     return 0
 
 # 1) a --1--> a|^a
 rule = Rule()
@@ -61,9 +94,10 @@ rule2 = Rule()
 rule2.preconditions = MSet_Token_create(2)
 MSet_Token_set(rule2.preconditions, 0, token)
 MSet_Token_set(rule2.preconditions, 1, token)
-rule2.rate = 1_000.0
+rule2.rate = 1000.0
 rule2.effects = MSet_Token_create(1)
 MSet_Token_set(rule2.effects, 0, token)
+rule2.msg = None
 
 # Initial state
 initial_tokens = MSet_Token_create(1)
@@ -71,6 +105,7 @@ MSet_Token_set(initial_tokens, 0, token)
 initial_state = DAPState()
 initial_state.tokens = initial_tokens
 initial_state.msg = None
+print(initial_state)
 
 all_rules = MSet_Rule_create(2)
 MSet_Rule_set(all_rules, 0, rule)
@@ -79,4 +114,8 @@ MSet_Rule_set(all_rules, 1, rule2)
 register_eq_wrapper("Token", PyEq())
 register_serde_wrapper("Token", PyCodec())
 
-launch_simulation(all_rules, initial_state, 2550, net, None)
+try:
+    launch_simulation(all_rules, initial_state, 2550, net, None)
+except KeyboardInterrupt:
+    print("KeyboardInterrupt")
+    os._exit(0)

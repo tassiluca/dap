@@ -35,6 +35,7 @@ object Implementations extends libdap.ExportedFunctions:
 
   override def register_equatable(name: CString, equals_fn: CFuncPtr2[Ptr[CSignedChar], Ptr[CSignedChar], CInt]): CInt =
     val eq: (AnyRef, AnyRef) => Boolean = (a, b) =>
+      scribe.info("Calling equals_fn")
       val res = equals_fn(a.asInstanceOf[Ptr[CSignedChar]], b.asInstanceOf[Ptr[CSignedChar]])
       res != 0
     NativeProductApi.interface.registerEquatable(fromCString(name), eq)
@@ -51,7 +52,9 @@ object Implementations extends libdap.ExportedFunctions:
     allRules.foreach: r =>
       scribe.info("Rule: " + r)
     scribe.info(s"Neighborhood: ${neighborhood: Set[NativeProductApi.NativeInterface.Neighbour]}")
-    scribe.info(s"Initial state: ${(!s0).toState}")
+    val initialState = (!s0).toState
+    scribe.info(s"Initial state: $initialState")
+    scribe.info(initialState.tokens.elems.mkString)
     val simulation =
       NativeProductApi.interface.simulate(allRules, (!s0).toState, s => Zone(n_state_change(s.toDAPState)))
     simulation(port, neighborhood)

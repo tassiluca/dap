@@ -14,7 +14,7 @@ fi
 popd
 
 # 2. Build swig wrappers
-swig -python -c++ dap.i
+swig -python -c++ -threads dap.i
 
 # 3. Setup
 python setup.py build_ext --inplace

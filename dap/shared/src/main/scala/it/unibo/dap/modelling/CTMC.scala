@@ -36,13 +36,9 @@ object CTMC:
       override def simulate(initialState: S)(using rnd: Random): Trace[S] =
         LazyList.iterate(Event(0.0, initialState)):
           case Event(t, s) =>
-            scribe.info("[Sim] before event transitions")
             if self.transitions(s).isEmpty
-            then
-              scribe.info("[Sim] no transitions")
-              Event(t, s)
+            then Event(t, s)
             else
-              scribe.info("[Sim] before transitions")
               val choices = self.transitions(s) map (t => (t.rate, t.state))
               val next = Stochastics.cumulative(choices.toList)
               val sumR = next.last._1
