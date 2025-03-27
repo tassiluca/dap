@@ -265,4 +265,4 @@ pyrightconfig.json
 *.pb-h.*
 
 # Swig C TBA in a separate folder
-*wrap*
+*_wrap.*
