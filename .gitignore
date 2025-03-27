@@ -263,3 +263,6 @@ pyrightconfig.json
 # Proto C
 *.pb-c.*
 *.pb-h.*
+
+# Swig C TBA in a separate folder
+*wrap*

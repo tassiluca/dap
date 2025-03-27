@@ -83,6 +83,29 @@ class SizeTPtr(object):
 
 # Register SizeTPtr in _dap:
 _dap.SizeTPtr_swigregister(SizeTPtr)
+class UInt8Ptr(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        _dap.UInt8Ptr_swiginit(self, _dap.new_UInt8Ptr())
+    __swig_destroy__ = _dap.delete_UInt8Ptr
+
+    def assign(self, value):
+        return _dap.UInt8Ptr_assign(self, value)
+
+    def value(self):
+        return _dap.UInt8Ptr_value(self)
+
+    def cast(self):
+        return _dap.UInt8Ptr_cast(self)
+
+    @staticmethod
+    def frompointer(t):
+        return _dap.UInt8Ptr_frompointer(t)
+
+# Register UInt8Ptr in _dap:
+_dap.UInt8Ptr_swigregister(UInt8Ptr)
 class Codec(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr

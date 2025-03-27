@@ -26,8 +26,13 @@ typedef struct {                                                            \
 /* Constructor */                                                           \
 static inline MSet_##Type* MSet_##Type##_create(size_t initial_size) {      \
     MSet_##Type* set = (MSet_##Type*)malloc(sizeof(MSet_##Type));           \
-    set->elements = (Type*)malloc(sizeof(Type) * initial_size);             \
-    set->size = initial_size;                                               \
+    if (initial_size > 0) {                                                 \
+        set->elements = (Type*)malloc(sizeof(Type) * initial_size);         \
+        set->size = initial_size;                                           \
+    } else {                                                                \
+        set->elements = NULL;                                               \
+        set->size = 0;                                                      \
+    }                                                                       \
     return set;                                                             \
 }                                                                           \
                                                                             \
