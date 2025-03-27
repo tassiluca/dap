@@ -3745,6 +3745,7 @@ namespace Swig {
 #define SWIGTYPE_p_void swig_types[32]
 static swig_type_info *swig_types[34];
 static swig_module_info swig_module = {swig_types, 33, 0, 0, 0, 0};
+<<<<<<< HEAD
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -12542,6 +12543,28 @@ namespace Swig {
 #define SWIGTYPE_p_void swig_types[31]
 static swig_type_info *swig_types[33];
 static swig_module_info swig_module = {swig_types, 32, 0, 0, 0, 0};
+||||||| parent of f4090ab (fix: memory leakes python gc)
+#define SWIGTYPE_p_char swig_types[15]
+#define SWIGTYPE_p_f_p_DAPState__void swig_types[16]
+#define SWIGTYPE_p_f_p_unsigned_char_int__p_void swig_types[17]
+#define SWIGTYPE_p_f_p_void_p_size_t__p_unsigned_char swig_types[18]
+#define SWIGTYPE_p_f_p_void_p_void__int swig_types[19]
+#define SWIGTYPE_p_int swig_types[20]
+#define SWIGTYPE_p_long_long swig_types[21]
+#define SWIGTYPE_p_p_TokenImpl swig_types[22]
+#define SWIGTYPE_p_p_char swig_types[23]
+#define SWIGTYPE_p_short swig_types[24]
+#define SWIGTYPE_p_signed_char swig_types[25]
+#define SWIGTYPE_p_size_t swig_types[26]
+#define SWIGTYPE_p_unsigned_char swig_types[27]
+#define SWIGTYPE_p_unsigned_int swig_types[28]
+#define SWIGTYPE_p_unsigned_long_long swig_types[29]
+#define SWIGTYPE_p_unsigned_short swig_types[30]
+#define SWIGTYPE_p_void swig_types[31]
+static swig_type_info *swig_types[33];
+static swig_module_info swig_module = {swig_types, 32, 0, 0, 0, 0};
+=======
+>>>>>>> f4090ab (fix: memory leakes python gc)
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -12962,6 +12985,50 @@ SWIGINTERN SizeTPtr *SizeTPtr_frompointer(size_t *t){
     return (SizeTPtr *) t;
   }
 
+typedef uint8_t UInt8Ptr;
+
+SWIGINTERN UInt8Ptr *new_UInt8Ptr(){
+    return (new uint8_t());
+  }
+SWIGINTERN void delete_UInt8Ptr(UInt8Ptr *self){
+    delete self;
+  }
+
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_char (PyObject * obj, unsigned char *val)
+{
+  unsigned long v;
+  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
+  if (SWIG_IsOK(res)) {
+    if ((v > UCHAR_MAX)) {
+      return SWIG_OverflowError;
+    } else {
+      if (val) *val = static_cast< unsigned char >(v);
+    }
+  }  
+  return res;
+}
+
+SWIGINTERN void UInt8Ptr_assign(UInt8Ptr *self,uint8_t value){
+    *self = value;
+  }
+SWIGINTERN uint8_t UInt8Ptr_value(UInt8Ptr *self){
+    return *self;
+  }
+
+SWIGINTERNINLINE PyObject *
+SWIG_From_unsigned_SS_char  (unsigned char value)
+{    
+  return SWIG_From_unsigned_SS_long  (value);
+}
+
+SWIGINTERN uint8_t *UInt8Ptr_cast(UInt8Ptr *self){
+    return self;
+  }
+SWIGINTERN UInt8Ptr *UInt8Ptr_frompointer(uint8_t *t){
+    return (UInt8Ptr *) t;
+  }
+
 #include "dap.h"
 #include "gossip.pb-c.h"
 
@@ -13077,7 +13144,6 @@ SWIGINTERNINLINE PyObject*
     }
 
     static void* deserialize_helper(uint8_t *bytes, int size) {
-        printf("[Swig] Deserializing token\n");
         if (DirectorManager::current_codec == nullptr) {
             fprintf(stderr, "Codec is NULL\n");
             return nullptr;
@@ -13119,19 +13185,16 @@ SWIGINTERNINLINE PyObject*
         MSet_Neighbour *neighborhood,
         StateChangeListener *listener
     ) {
-        printf("[Swig] Registering state change listener\n");
         DirectorManager::current_state_listener = listener;
         launch_simulation(rules, s0, port, neighborhood, state_change_helper);
     }
     
+    // ! TBA
     int token_impl_equals_wrapper(void *a, void *b) {
-        if (a == NULL || b == NULL) return 0;
+        if (!a || !b) return 0;
         TokenImpl *ta = (TokenImpl*)a;
         TokenImpl *tb = (TokenImpl*)b;
-        if (ta->device_id != tb->device_id) return 0;
-        if ((ta->name == NULL && tb->name != NULL) || (ta->name != NULL && tb->name == NULL)) return 0;
-        if (ta->name != NULL && strcmp(ta->name, tb->name) != 0) return 0;
-        return 1;
+        return (ta->name && tb->name && strcmp(ta->name, tb->name) == 0);
     }
 
 
@@ -13247,29 +13310,6 @@ SWIGINTERN void delete_UInt8Array(UInt8Array *self){
 SWIGINTERN uint8_t UInt8Array___getitem__(UInt8Array *self,size_t index){
     return self[index];
   }
-
-SWIGINTERNINLINE PyObject *
-SWIG_From_unsigned_SS_char  (unsigned char value)
-{    
-  return SWIG_From_unsigned_SS_long  (value);
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_char (PyObject * obj, unsigned char *val)
-{
-  unsigned long v;
-  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
-  if (SWIG_IsOK(res)) {
-    if ((v > UCHAR_MAX)) {
-      return SWIG_OverflowError;
-    } else {
-      if (val) *val = static_cast< unsigned char >(v);
-    }
-  }  
-  return res;
-}
-
 SWIGINTERN void UInt8Array___setitem__(UInt8Array *self,size_t index,uint8_t value){
     self[index] = value;
   }
@@ -13732,6 +13772,180 @@ SWIGINTERN PyObject *SizeTPtr_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObj
 }
 
 SWIGINTERN PyObject *SizeTPtr_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_new_UInt8Ptr(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  UInt8Ptr *result = 0 ;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "new_UInt8Ptr", 0, 0, 0)) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (UInt8Ptr *)new_UInt8Ptr();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_UInt8Ptr, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_UInt8Ptr(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  UInt8Ptr *arg1 = (UInt8Ptr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_UInt8Ptr, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_UInt8Ptr" "', argument " "1"" of type '" "UInt8Ptr *""'"); 
+  }
+  arg1 = reinterpret_cast< UInt8Ptr * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete_UInt8Ptr(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_UInt8Ptr_assign(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  UInt8Ptr *arg1 = (UInt8Ptr *) 0 ;
+  uint8_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  (void)self;
+  if (!SWIG_Python_UnpackTuple(args, "UInt8Ptr_assign", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_UInt8Ptr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Ptr_assign" "', argument " "1"" of type '" "UInt8Ptr *""'"); 
+  }
+  arg1 = reinterpret_cast< UInt8Ptr * >(argp1);
+  ecode2 = SWIG_AsVal_unsigned_SS_char(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "UInt8Ptr_assign" "', argument " "2"" of type '" "uint8_t""'");
+  } 
+  arg2 = static_cast< uint8_t >(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    UInt8Ptr_assign(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_UInt8Ptr_value(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  UInt8Ptr *arg1 = (UInt8Ptr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  uint8_t result;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_UInt8Ptr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Ptr_value" "', argument " "1"" of type '" "UInt8Ptr *""'"); 
+  }
+  arg1 = reinterpret_cast< UInt8Ptr * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (uint8_t)UInt8Ptr_value(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_char(static_cast< unsigned char >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_UInt8Ptr_cast(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  UInt8Ptr *arg1 = (UInt8Ptr *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  uint8_t *result = 0 ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_UInt8Ptr, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Ptr_cast" "', argument " "1"" of type '" "UInt8Ptr *""'"); 
+  }
+  arg1 = reinterpret_cast< UInt8Ptr * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (uint8_t *)UInt8Ptr_cast(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_UInt8Ptr_frompointer(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  uint8_t *arg1 = (uint8_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  UInt8Ptr *result = 0 ;
+  
+  (void)self;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "UInt8Ptr_frompointer" "', argument " "1"" of type '" "uint8_t *""'"); 
+  }
+  arg1 = reinterpret_cast< uint8_t * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (UInt8Ptr *)UInt8Ptr_frompointer(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_UInt8Ptr, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *UInt8Ptr_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj = NULL;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_UInt8Ptr, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *UInt8Ptr_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -16670,6 +16884,14 @@ static PyMethodDef SwigMethods[] = {
 	 { "SizeTPtr_frompointer", _wrap_SizeTPtr_frompointer, METH_O, NULL},
 	 { "SizeTPtr_swigregister", SizeTPtr_swigregister, METH_O, NULL},
 	 { "SizeTPtr_swiginit", SizeTPtr_swiginit, METH_VARARGS, NULL},
+	 { "new_UInt8Ptr", _wrap_new_UInt8Ptr, METH_NOARGS, NULL},
+	 { "delete_UInt8Ptr", _wrap_delete_UInt8Ptr, METH_O, NULL},
+	 { "UInt8Ptr_assign", _wrap_UInt8Ptr_assign, METH_VARARGS, NULL},
+	 { "UInt8Ptr_value", _wrap_UInt8Ptr_value, METH_O, NULL},
+	 { "UInt8Ptr_cast", _wrap_UInt8Ptr_cast, METH_O, NULL},
+	 { "UInt8Ptr_frompointer", _wrap_UInt8Ptr_frompointer, METH_O, NULL},
+	 { "UInt8Ptr_swigregister", UInt8Ptr_swigregister, METH_O, NULL},
+	 { "UInt8Ptr_swiginit", UInt8Ptr_swiginit, METH_VARARGS, NULL},
 	 { "Codec_serialize", _wrap_Codec_serialize, METH_VARARGS, NULL},
 	 { "Codec_deserialize", _wrap_Codec_deserialize, METH_VARARGS, NULL},
 	 { "delete_Codec", _wrap_delete_Codec, METH_O, NULL},
@@ -16801,6 +17023,7 @@ static swig_type_info _swigt__p_SizeTPtr = {"_p_SizeTPtr", "SizeTPtr *", 0, 0, (
 static swig_type_info _swigt__p_StateChangeListener = {"_p_StateChangeListener", "StateChangeListener *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TokenImpl = {"_p_TokenImpl", "Token|TokenImpl *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_UInt8Array = {"_p_UInt8Array", "UInt8Array *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_UInt8Ptr = {"_p_UInt8Ptr", "UInt8Ptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_DAPState__void = {"_p_f_p_DAPState__void", "void (*)(DAPState *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_unsigned_char_int__p_void = {"_p_f_p_unsigned_char_int__p_void", "void *(*)(uint8_t *,int)|void *(*)(unsigned char *,int)", 0, 0, (void*)0, 0};
@@ -16835,6 +17058,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_StateChangeListener,
   &_swigt__p_TokenImpl,
   &_swigt__p_UInt8Array,
+  &_swigt__p_UInt8Ptr,
   &_swigt__p_char,
   &_swigt__p_f_p_DAPState__void,
   &_swigt__p_f_p_unsigned_char_int__p_void,
@@ -16869,6 +17093,7 @@ static swig_cast_info _swigc__p_SizeTPtr[] = {  {&_swigt__p_SizeTPtr, 0, 0, 0},{
 static swig_cast_info _swigc__p_StateChangeListener[] = {  {&_swigt__p_StateChangeListener, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TokenImpl[] = {  {&_swigt__p_TokenImpl, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_UInt8Array[] = {  {&_swigt__p_UInt8Array, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_UInt8Ptr[] = {  {&_swigt__p_UInt8Ptr, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_DAPState__void[] = {  {&_swigt__p_f_p_DAPState__void, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_unsigned_char_int__p_void[] = {  {&_swigt__p_f_p_unsigned_char_int__p_void, 0, 0, 0},{0, 0, 0, 0}};
@@ -16903,6 +17128,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_StateChangeListener,
   _swigc__p_TokenImpl,
   _swigc__p_UInt8Array,
+  _swigc__p_UInt8Ptr,
   _swigc__p_char,
   _swigc__p_f_p_DAPState__void,
   _swigc__p_f_p_unsigned_char_int__p_void,
