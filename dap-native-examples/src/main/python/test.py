@@ -15,6 +15,10 @@ a = TokenImpl()
 token_impl__init(a)
 a.name = "a"
 a.device_id = 1
+b = TokenImpl()
+token_impl__init(b)
+b.name = "b"
+b.device_id = 2
 
 # === Neighbours net ===
 print("Port: ", port)
@@ -108,15 +112,39 @@ rule2.rate = 1000.0
 rule2.effects = MSet_Token_create(1)
 MSet_Token_set(rule2.effects, 0, a)
 rule2.msg = None
+# 3) a|b --2--> a|b|^b
+rule3 = Rule()
+rule3.preconditions = MSet_Token_create(2)
+MSet_Token_set(rule3.preconditions, 0, a)
+MSet_Token_set(rule3.preconditions, 1, b)
+rule3.rate = 2.0
+rule3.effects = MSet_Token_create(2)
+MSet_Token_set(rule3.effects, 0, a)
+MSet_Token_set(rule3.effects, 1, b)
+rule3.msg = b
+# 4) b|b --1_000--> b
+rule4 = Rule()
+rule4.preconditions = MSet_Token_create(2)
+MSet_Token_set(rule4.preconditions, 0, b)
+MSet_Token_set(rule4.preconditions, 1, b)
+rule4.rate = 1000.0
+rule4.effects = MSet_Token_create(1)
+MSet_Token_set(rule4.effects, 0, b)
+rule4.msg = None
 # All rules 
-all_rules = MSet_Rule_create(2)
+all_rules = MSet_Rule_create(4)
 MSet_Rule_set(all_rules, 0, rule)
 MSet_Rule_set(all_rules, 1, rule2)
+MSet_Rule_set(all_rules, 2, rule3)
+MSet_Rule_set(all_rules, 3, rule4)
 
 # === Initial state ===
 if port == 2550:
     initial_tokens = MSet_Token_create(1)
     MSet_Token_set(initial_tokens, 0, a)
+elif port == 2553:
+    initial_tokens = MSet_Token_create(1)
+    MSet_Token_set(initial_tokens, 0, b)
 else:
     initial_tokens = MSet_Token_create(0)
 initial_state = DAPState()
