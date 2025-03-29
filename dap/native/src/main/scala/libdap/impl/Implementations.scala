@@ -38,13 +38,11 @@ object Implementations extends libdap.ExportedFunctions:
 
   private def setup(): Unit =
     val ser = (obj: AnyRef) =>
-      scribe.info("Serializing Token")
       val data = !obj.asInstanceOf[Token].value
       val arr = new Array[Byte](data.size.toInt)
       for i <- 0 until data.size.toInt do arr(i) = data.data(i).toByte
       arr
     val de = (buff: Array[Byte]) =>
-      scribe.info("Deserializing Token")
       val size = buff.length
       val deserializedData = stdlib.malloc(sizeOf[SerializedData]).asInstanceOf[Ptr[SerializedData]]
       (!deserializedData).size = size.toCSize

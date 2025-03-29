@@ -35,15 +35,13 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       outChannel.read() match
         case Left(_) => ()
         case Right(message) =>
-          scribe.info(s"[Sim exch] Sending message $message to neighbours")
-          val bytes = serialize(message)
           val newConnections =
             for
               (n, s) <- ctx
                 .neighbourhoodResolver()
                 .map(n => n -> connections.get(n).filterNot(_.isClosed).orElse(establishConnection(n)))
                 .collect { case (e, Some(s)) => e -> s }
-              c <- Try(s.getOutputStream.write(bytes)) match
+              c <- Try(s.getOutputStream.write(serialize(message))) match
                 case Failure(e) => scribe.error(e); None
                 case Success(_) => Some(n -> s)
             yield c
@@ -65,10 +63,8 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       continually(in.read(buffer))
         .takeWhile(_ > 0)
         .foreach: readBytes =>
-          scribe.info("[Sim exch] Received message from neighbour")
           val message = deserialize(buffer.take(readBytes))
           inChannel.send(message)
-      scribe.info("[Sim exch] Closing connection")
       client.close()
   end SocketExchange
 
