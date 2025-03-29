@@ -3,60 +3,23 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include "gossip.pb-c.h"
+#include <assert.h>
 #include "dap.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-uint8_t* serialize_fn(void *data, size_t *out_size) {
-    TokenImpl *token = data;
-    *out_size = token_impl__get_packed_size(token);
-    if (*out_size == 0) {
-        perror("Error during serialization. Size = 0!");
-        return NULL;
-    }
-    uint8_t *bytes = malloc(*out_size);
-    if (!bytes) {
-        perror("Error during serialization.");
-        return NULL;
-    }
-    token_impl__pack(token, bytes);
-    return bytes;
-}
-
-void* deserialize_fn(uint8_t *bytes, int size) {
-    if (!bytes || size <= 0) return NULL;
-    TokenImpl *token = token_impl__unpack(NULL, size, bytes);
-    if (!token) {
-        perror("Error during deserialization. Token is NULL");
-        return NULL;
-    }
-    return token;
-}
-
-int equals_fn(void *a, void *b) {
-    if (a == NULL || b == NULL) return 0;
-    Token token_a = (Token)a;
-    Token token_b = (Token)b;
-    if (token_a->name == NULL || token_b->name == NULL) {
-        return 0;
-    }
-    return strcmp(token_a->name, token_b->name) == 0;
-}
-
-// double fixed_rate_1000(MSet_Token *set) {
-//   return set == NULL ? 0.0 : 1000.0;
-// }
-
-// double fixed_rate_1(MSet_Token *set) {
-//   return set == NULL ? 0.0 : 1.0;
-// }
+typedef struct {
+    char* name;
+    int device_id;
+} TokenImpl;
 
 void on_state_change(struct DAPState *state);
 
 struct DAPState *createDAPState(Token *initial_tokens, size_t token_count);
 
-Token createToken(const char* token);
+Token createToken(const char* token, int port);
+
+int are_equals(SerializedData* d1, SerializedData* d2);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -68,9 +31,10 @@ int main(int argc, char *argv[]) {
         );
         return 1;
     }
+    int port = atoi(argv[1]);
     printf("Gossip simulation\n");
-    Token a = createToken("a");
-    Token b = createToken("b");
+    Token a = createToken("a", port);
+    Token b = createToken("b", port);
     /* 1) a|a --1_000--> a */
     Token in_tokens1[] = { a, a };
     MSet_Token preconditions1 = { in_tokens1, ARRAY_LEN(in_tokens1) };
@@ -118,7 +82,6 @@ int main(int argc, char *argv[]) {
     Rule rules[] = { rule, rule2, rule3, rule4 };
     MSet_Rule all_rules = { rules, ARRAY_LEN(rules) };
     /* State */
-    int port = atoi(argv[1]);
     struct DAPState *initial_state;
     if (port == 2550) {
         Token initial_tokens[] = { a };
@@ -137,30 +100,62 @@ int main(int argc, char *argv[]) {
     }
     MSet_Neighbour neighborhood = { neighbours, ARRAY_LEN(neighbours) };
     /* Capabilities */
-    register_serde("Token", serialize_fn, deserialize_fn);
-    register_equatable("Token", equals_fn);
+    // register_serde("Token", serialize_fn, deserialize_fn);
+    register_equatable(are_equals);
     /* Simulation */
     printf("Starting gossip simulation\n");
-    launch_simulation(&all_rules, initial_state, atoi(argv[1]), &neighborhood, &on_state_change);
+    launch_simulation(&all_rules, initial_state, port, &neighborhood, &on_state_change);
     free(initial_state);
     return 0;
 }
 
-Token createToken(const char* token) {
-    TokenImpl *t = malloc(sizeof(TokenImpl));
-    if (!t) return NULL;
-    *t = (TokenImpl) TOKEN_IMPL__INIT;
-    t->name = strdup(token);
-    t->timestamp = malloc(sizeof(Google__Protobuf__Timestamp));
-    if (!t->timestamp) {
-        free(t->name);
-        free(t);
+uint8_t* serialize(TokenImpl *token, size_t *out_size) {
+    if (!token) return NULL;
+    size_t name_len = strlen(token->name) + 1;
+    *out_size = name_len + sizeof(int);
+    uint8_t *buffer = (uint8_t*)malloc(*out_size);
+    if (!buffer) return NULL;
+    memcpy(buffer, &token->device_id, sizeof(int));
+    memcpy(buffer + sizeof(int), token->name, name_len);
+    return buffer;
+}
+
+TokenImpl* deserialize(const uint8_t* buffer, size_t size) {
+    if (!buffer) return NULL;
+    TokenImpl* token = (TokenImpl*)malloc(sizeof(TokenImpl));
+    if (!token) return NULL;
+    memcpy(&token->device_id, buffer, sizeof(int));
+    token->name = strdup((char*)(buffer + sizeof(int)));
+    if (!token->name) {
+        perror("strdup");
+        free(token);
         return NULL;
     }
-    *t->timestamp = (Google__Protobuf__Timestamp) GOOGLE__PROTOBUF__TIMESTAMP__INIT;
-    t->timestamp->seconds = time(NULL);
-    t->timestamp->nanos = 0;
-    return t;
+    return token;
+}
+
+int are_equals(SerializedData* d1, SerializedData* d2) {
+    if (d1->size != d2->size) {
+        return 0;  // False (sizes are different)
+    }
+    TokenImpl* t1 = deserialize(d1->data, d1->size);
+    TokenImpl* t2 = deserialize(d2->data, d2->size);
+    return /*t1->device_id == t2->device_id &&*/ strcmp(t1->name, t2->name) == 0;
+}
+
+Token createToken(const char* token, int id) {
+    TokenImpl *t = malloc(sizeof(TokenImpl));
+    if (!t) return NULL;
+    t->name = strdup(token);
+    t->device_id = id;
+    size_t out_size = 0;
+    uint8_t *buffer = serialize(t, &out_size);
+    if (!buffer) return NULL;
+    SerializedData *sd = malloc(sizeof(SerializedData));
+    if (!sd) return NULL;
+    sd->data = buffer;
+    sd->size = out_size;
+    return sd;
 }
 
 struct DAPState *createDAPState(Token *initial_tokens, size_t token_count) {
@@ -197,7 +192,8 @@ void on_state_change(struct DAPState *state) {
     if (state->tokens->size > 0) {
         printf(COLOR_YELLOW "{ ");
         for (size_t i = 0; i < state->tokens->size; i++) {
-            printf("%s", state->tokens->elements[i]->name);
+            TokenImpl *token = deserialize(state->tokens->elements[i]->data, state->tokens->size);
+            printf("%s - %d", token->name, token->device_id);
             if (i < state->tokens->size - 1) {
                 printf(COLOR_MAGENTA " | " COLOR_YELLOW);
             }
@@ -207,7 +203,8 @@ void on_state_change(struct DAPState *state) {
         printf(COLOR_YELLOW "{ }" COLOR_RESET "\n");
     }
     if (state->msg != NULL) {
-        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "\"%s\"\n", state->msg->name);
+        TokenImpl *msg = deserialize(state->msg->data, state->msg->size);
+        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "\"%s - %d\"\n", msg->name, msg->device_id);
     } else {
         printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "No message.\n");
     }

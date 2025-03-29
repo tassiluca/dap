@@ -13,6 +13,14 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+typedef struct {
+    uint8_t* data;
+    size_t size;
+} SerializedData;
+
+/* An opaque data structure representing a token in a DAP model. */
+typedef SerializedData *Token;
+
 /*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
  * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
@@ -21,40 +29,12 @@ extern "C" {
 typedef struct {                                                            \
     Type* elements;                                                         \
     size_t size;                                                            \
-} MSet_##Type;                                                              \
-                                                                            \
-/* Constructor */                                                           \
-static inline MSet_##Type* MSet_##Type##_create(size_t initial_size) {      \
-    MSet_##Type* set = (MSet_##Type*)malloc(sizeof(MSet_##Type));           \
-    set->elements = (Type*)malloc(sizeof(Type) * initial_size);             \
-    set->size = initial_size;                                               \
-    return set;                                                             \
-}                                                                           \
-                                                                            \
-/* Destructor */                                                            \
-static inline void MSet_##Type##_destroy(MSet_##Type* set) {                \
-    if (set) {                                                              \
-        if (set->elements) {                                                \
-            free(set->elements);                                            \
-        }                                                                   \
-        free(set);                                                          \
-    }                                                                       \
-}                                                                           \
-                                                                            \
-/* Setter */                                                                \
-static inline void MSet_##Type##_set(MSet_##Type* set, size_t index, Type value) { \
-    if (index < set->size) {                                                \
-        set->elements[index] = value;                                       \
-    }                                                                       \
-}
+} MSet_##Type;
 
 typedef char* Neighbour;
 
 /* The data structure keeping track of the neighbors of a place in a DAP model. */
 DEFINE_MSET(Neighbour)
-
-/* An opaque data structure representing a token in a DAP model. */
-typedef struct TokenImpl *Token;
 
 /** A multi-set of tokens. */
 DEFINE_MSET(Token)
@@ -95,15 +75,8 @@ void launch_simulation(
 
 /*===================================== UTILS =====================================*/
 
-int register_serde(
-    const char* name,
-    uint8_t* (*serialize_fn)(void *data, size_t *out_size),
-    void* (*deserialize_fn)(uint8_t *bytes, int size)
-);
-
 int register_equatable(
-    const char* name,
-    int (*equals_fn)(void *a, void *b)
+    int (*equals_fn)(SerializedData *a, SerializedData *b)
 );
 
 #ifdef __cplusplus

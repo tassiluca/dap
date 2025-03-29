@@ -68,6 +68,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
           scribe.info("[Sim exch] Received message from neighbour")
           val message = deserialize(buffer.take(readBytes))
           inChannel.send(message)
+      scribe.info("[Sim exch] Closing connection")
       client.close()
   end SocketExchange
 

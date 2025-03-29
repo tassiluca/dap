@@ -1,5 +1,6 @@
 package it.unibo.dap.utils
 
+import scala.reflect.ClassTag
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.{ sizeOf, Ptr }
 
