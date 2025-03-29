@@ -106,30 +106,6 @@ class UInt8Ptr(object):
 
 # Register UInt8Ptr in _dap:
 _dap.UInt8Ptr_swigregister(UInt8Ptr)
-class Codec(object):
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
-    __repr__ = _swig_repr
-
-    def serialize(self, data, out_size):
-        return _dap.Codec_serialize(self, data, out_size)
-
-    def deserialize(self, bytes, size):
-        return _dap.Codec_deserialize(self, bytes, size)
-    __swig_destroy__ = _dap.delete_Codec
-
-    def __init__(self):
-        if self.__class__ == Codec:
-            _self = None
-        else:
-            _self = self
-        _dap.Codec_swiginit(self, _dap.new_Codec(_self, ))
-    def __disown__(self):
-        self.this.disown()
-        _dap.disown_Codec(self)
-        return weakref.proxy(self)
-
-# Register Codec in _dap:
-_dap.Codec_swigregister(Codec)
 class Equatable(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -173,17 +149,11 @@ class StateChangeListener(object):
 # Register StateChangeListener in _dap:
 _dap.StateChangeListener_swigregister(StateChangeListener)
 
-def register_serde_wrapper(name, c):
-    return _dap.register_serde_wrapper(name, c)
-
-def register_eq_wrapper(name, e):
-    return _dap.register_eq_wrapper(name, e)
+def register_eq_wrapper(e):
+    return _dap.register_eq_wrapper(e)
 
 def launch_simulation_wrapper(rules, s0, port, neighborhood, listener):
     return _dap.launch_simulation_wrapper(rules, s0, port, neighborhood, listener)
-
-def token_impl_equals_wrapper(a, b):
-    return _dap.token_impl_equals_wrapper(a, b)
 class UInt8Array(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -210,6 +180,27 @@ class UInt8Array(object):
 
 # Register UInt8Array in _dap:
 _dap.UInt8Array_swigregister(UInt8Array)
+class SerializedData(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def to_bytes(self):
+        return _dap.SerializedData_to_bytes(self)
+
+    def get_size(self):
+        return _dap.SerializedData_get_size(self)
+    data = property(_dap.SerializedData_data_get, _dap.SerializedData_data_set)
+    size = property(_dap.SerializedData_size_get, _dap.SerializedData_size_set)
+
+    def __init__(self):
+        _dap.SerializedData_swiginit(self, _dap.new_SerializedData())
+    __swig_destroy__ = _dap.delete_SerializedData
+
+# Register SerializedData in _dap:
+_dap.SerializedData_swigregister(SerializedData)
+
+def pack(data):
+    return _dap.pack(data)
 class MSet_Neighbour(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -312,43 +303,6 @@ def MSet_Rule_get(set, index):
 def launch_simulation(rules, s0, port, neighborhood, on_state_change):
     return _dap.launch_simulation(rules, s0, port, neighborhood, on_state_change)
 
-def register_serde(name, serialize_fn, deserialize_fn):
-    return _dap.register_serde(name, serialize_fn, deserialize_fn)
-
-def register_equatable(name, equals_fn):
-    return _dap.register_equatable(name, equals_fn)
-class TokenImpl(object):
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
-    __repr__ = _swig_repr
-    base = property(_dap.TokenImpl_base_get, _dap.TokenImpl_base_set)
-    device_id = property(_dap.TokenImpl_device_id_get, _dap.TokenImpl_device_id_set)
-    name = property(_dap.TokenImpl_name_get, _dap.TokenImpl_name_set)
-
-    def __init__(self):
-        _dap.TokenImpl_swiginit(self, _dap.new_TokenImpl())
-    __swig_destroy__ = _dap.delete_TokenImpl
-
-# Register TokenImpl in _dap:
-_dap.TokenImpl_swigregister(TokenImpl)
-
-def token_impl__init(message):
-    return _dap.token_impl__init(message)
-
-def token_impl__get_packed_size(message):
-    return _dap.token_impl__get_packed_size(message)
-
-def token_impl__pack(message, out):
-    return _dap.token_impl__pack(message, out)
-
-def token_impl__pack_to_buffer(message, buffer):
-    return _dap.token_impl__pack_to_buffer(message, buffer)
-
-def token_impl__unpack(allocator, len, data):
-    return _dap.token_impl__unpack(allocator, len, data)
-
-def token_impl__free_unpacked(message, allocator):
-    return _dap.token_impl__free_unpacked(message, allocator)
-
-cvar = _dap.cvar
-token_impl__descriptor = cvar.token_impl__descriptor
+def register_equatable(equals_fn):
+    return _dap.register_equatable(equals_fn)
 

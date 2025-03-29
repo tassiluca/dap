@@ -136,7 +136,7 @@ TokenImpl* deserialize(const uint8_t* buffer, size_t size) {
 
 int are_equals(SerializedData* d1, SerializedData* d2) {
     if (d1->size != d2->size) {
-        return 0;  // False (sizes are different)
+        return 0;
     }
     TokenImpl* t1 = deserialize(d1->data, d1->size);
     TokenImpl* t2 = deserialize(d2->data, d2->size);

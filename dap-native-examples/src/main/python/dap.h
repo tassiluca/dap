@@ -13,6 +13,27 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+typedef struct {
+    uint8_t* data;
+    size_t size;
+} SerializedData;
+
+/* An opaque data structure representing a token in a DAP model. */
+typedef SerializedData *Token;
+
+Token pack(uint8_t *data, size_t size) {
+    SerializedData *sd = (SerializedData*)malloc(sizeof(SerializedData));
+    if (!sd) return NULL;
+    sd->data = (uint8_t*)malloc(size);
+    if (!sd->data) {
+        free(sd);
+        return NULL;
+    }
+    memcpy(sd->data, data, size);
+    sd->size = size;
+    return sd;
+}
+
 /*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
  * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
@@ -63,9 +84,6 @@ typedef char* Neighbour;
 /* The data structure keeping track of the neighbors of a place in a DAP model. */
 DEFINE_MSET(Neighbour)
 
-/* An opaque data structure representing a token in a DAP model. */
-typedef struct TokenImpl *Token;
-
 /** A multi-set of tokens. */
 DEFINE_MSET(Token)
 
@@ -105,15 +123,8 @@ void launch_simulation(
 
 /*===================================== UTILS =====================================*/
 
-int register_serde(
-    const char* name,
-    uint8_t* (*serialize_fn)(void *data, size_t *out_size),
-    void* (*deserialize_fn)(uint8_t *bytes, int size)
-);
-
 int register_equatable(
-    const char* name,
-    int (*equals_fn)(void *a, void *b)
+    int (*equals_fn)(SerializedData *a, SerializedData *b)
 );
 
 #ifdef __cplusplus

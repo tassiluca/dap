@@ -1,7 +1,7 @@
 from dap import *
 import argparse
 from datetime import datetime
-import time
+import msgpack
 
 parser = argparse.ArgumentParser(description="Distributed Asynchronous Petri Nets simulation.")
 parser.add_argument("--port", type=int, required=True, help="Service port")
@@ -10,15 +10,27 @@ args = parser.parse_args()
 port = args.port
 neighbors = [n for n in args.neighbors]
 
+class TokenImpl():
+    def __init__(self, name: str, device_id: int):
+        self.name = name
+        self.device_id = device_id
+        
+    def serialize(self) -> bytes:
+        return msgpack.packb({"name": self.name, "device_id": self.device_id})
+        
+    @classmethod
+    def deserialize(cls, data: bytes):
+        obj = msgpack.unpackb(data, raw=False)
+        return cls(obj["name"], obj["device_id"])
+
+    def __str__(self):
+        return "Token[Name: {}, Device ID: {}]".format(self.name, self.device_id)
+
 # === Token ===
-a = TokenImpl()
-token_impl__init(a)
-a.name = "a"
-a.device_id = 1
-b = TokenImpl()
-token_impl__init(b)
-b.name = "b"
-b.device_id = 2
+token_a = TokenImpl("a", port)
+token_b = TokenImpl("b", port)
+a = pack(token_a.serialize())
+b = pack(token_b.serialize())
 
 # === Neighbours net ===
 print("Port: ", port)
@@ -27,51 +39,20 @@ for i in range(len(neighbors)):
     MSet_Neighbour_set(net, i, neighbors[i])
 
 # === Global instances ===
-_global_codec_instance = None
 _global_eq_instance = None
 _global_state_change_listener = None
 
-class PyCodec(Codec):
-    def __init__(self):
-        global _global_codec_instance
-        super().__init__()
-        _global_codec_instance = self
-
-    def serialize(self, data, out_size):
-        try:
-            size = token_impl__get_packed_size(data)
-            out_size.assign(size)
-            self._last_buffer = UInt8Array(size)  
-            if token_impl__pack(data, self._last_buffer.data()) > 0:
-                return self._last_buffer.data()
-            print("token_impl__pack failed")
-            return None
-        except Exception as e:
-            print(f"Exception in serialize: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-
-    def deserialize(self, bytes, size):
-        try:
-            return token_impl__unpack(None, size, bytes)
-        except Exception as e:
-            print(f"Exception in deserialize: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-        
 class PyEq(Equatable):
     def __init__(self):
         global _global_eq_instance
         super().__init__()
         _global_eq_instance = self
-        
+
     def equals(self, a, b):
         try:
-            print(a)
-            #return a is not None and b is not None and a.name == b.name
-            return token_impl_equals_wrapper(a, b)
+            t1 = TokenImpl.deserialize(a.to_bytes())
+            t2 = TokenImpl.deserialize(b.to_bytes())
+            return t1.name == t2.name
         except Exception as e:
             print(f"Exception in equals: {e}")
             import traceback
@@ -83,16 +64,17 @@ class PyStateChangeListener(StateChangeListener):
         global _global_state_change_listener
         super().__init__()
         _global_state_change_listener = self
-        
+
     def on_state_change(self, state):
         tokens = state.tokens
         msg = state.msg
         print(f"[🐍] {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
         for i in range(tokens.size):
-            token = MSet_Token_get(tokens, i)
-            print(f"[🐍] State: [token={token.name}, id={token.device_id}]")
+            token = TokenImpl.deserialize(MSet_Token_get(tokens, i).to_bytes())
+            print(f"[🐍] State: {token}]")
         if msg is not None:
-            print(f"[🐍] Msg: [token={msg.name}, id={msg.device_id}]")
+            token = TokenImpl.deserialize(msg.to_bytes())
+            print(f"[🐍] Msg: {token}]")
         else:
             print("[🐍] Msg: None")
 
@@ -133,7 +115,7 @@ rule4.rate = 1000.0
 rule4.effects = MSet_Token_create(1)
 MSet_Token_set(rule4.effects, 0, b)
 rule4.msg = None
-# All rules 
+# All rules
 all_rules = MSet_Rule_create(4)
 MSet_Rule_set(all_rules, 0, rule)
 MSet_Rule_set(all_rules, 1, rule2)
@@ -154,6 +136,5 @@ initial_state.tokens = initial_tokens
 initial_state.msg = None
 
 # === Launch simulation ===
-register_eq_wrapper("Token", PyEq())
-register_serde_wrapper("Token", PyCodec())
+register_eq_wrapper(PyEq())
 launch_simulation_wrapper(all_rules, initial_state, port, net, PyStateChangeListener())
