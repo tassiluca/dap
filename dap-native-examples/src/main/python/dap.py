@@ -186,9 +186,6 @@ class SerializedData(object):
 
     def to_bytes(self):
         return _dap.SerializedData_to_bytes(self)
-
-    def get_size(self):
-        return _dap.SerializedData_get_size(self)
     data = property(_dap.SerializedData_data_get, _dap.SerializedData_data_set)
     size = property(_dap.SerializedData_size_get, _dap.SerializedData_size_set)
 

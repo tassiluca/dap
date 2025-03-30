@@ -36,7 +36,7 @@ metals.sbt
 *.d
 
 # Prepocessed C source
-*.i
+# *.i # THIS IS ALSO THE EXTENSION OF SWIG INTERFACE FILES!
 
 # Object files
 *.o
