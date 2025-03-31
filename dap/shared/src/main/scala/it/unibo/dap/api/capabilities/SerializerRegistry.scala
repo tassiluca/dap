@@ -1,29 +1,34 @@
 package it.unibo.dap.api.capabilities
 
 import it.unibo.dap.boundary.Serializable
+import scala.reflect.ClassTag
 
-trait SerializersRegistry:
-  def register(typeName: String, serializer: AnyRef => Array[Byte], deserializer: Array[Byte] => AnyRef): Unit
-  def get(typeName: String): Option[(AnyRef => Array[Byte], Array[Byte] => AnyRef)]
+case class SerDe[T](serialize: T => Array[Byte], deserialize: Array[Byte] => T)
 
-  def of[T](typeName: String): Option[Serializable[T]] =
-    get(typeName).map: (s, d) =>
+trait SerDeRegistry:
+
+  def register[T: ClassTag](serialize: T => Array[Byte], deserialize: Array[Byte] => T): Unit =
+    register(SerDe(serialize, deserialize))
+
+  def register[T: ClassTag](serde: SerDe[T]): Unit
+
+  def get[T: ClassTag]: Option[SerDe[T]]
+
+  def of[T: ClassTag]: Option[Serializable[T]] =
+    get[T].map: serde =>
       new Serializable[T]:
-        override def serialize(t: T): Array[Byte] = s(t.asInstanceOf[AnyRef])
-        override def deserialize(bytes: Array[Byte]): T = d(bytes).asInstanceOf[T]
+        override def serialize(t: T): Array[Byte] = serde.serialize(t)
+        override def deserialize(bytes: Array[Byte]): T = serde.deserialize(bytes)
 
 object SerializerRegistry:
 
-  def apply(): SerializersRegistry = SerializerRegistryImpl()
+  def apply(): SerDeRegistry = SerializerRegistryImpl()
 
-  private class SerializerRegistryImpl extends SerializersRegistry:
-    private var serializers = Map.empty[String, (AnyRef => Array[Byte], Array[Byte] => AnyRef)]
+  private class SerializerRegistryImpl extends SerDeRegistry:
+    private var serializers = Map.empty[Class[?], SerDe[?]]
 
-    override def register(
-        typeName: String,
-        serializer: AnyRef => Array[Byte],
-        deserializer: Array[Byte] => AnyRef,
-    ): Unit = serializers = serializers + (typeName -> (serializer, deserializer))
+    override def get[T: ClassTag]: Option[SerDe[T]] =
+      serializers.get(summon[ClassTag[T]].runtimeClass).map(_.asInstanceOf[SerDe[T]])
 
-    override def get(typeName: String): Option[(AnyRef => Array[Byte], Array[Byte] => AnyRef)] =
-      serializers.get(typeName)
+    override def register[T: ClassTag](serde: SerDe[T]): Unit =
+      serializers += summon[ClassTag[T]].runtimeClass -> serde
