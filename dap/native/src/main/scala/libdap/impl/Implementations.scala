@@ -2,7 +2,7 @@ package libdap.impl
 
 import it.unibo.dap.api.NativeProductApi
 import it.unibo.dap.utils.CUtils.{ freshPointer, withLogging }
-import libdap.aliases.{ size_t, uint8_t, Token }
+import libdap.aliases.{ uint8_t, Token }
 import libdap.structs.*
 
 import scala.scalanative.libc
@@ -16,14 +16,6 @@ object Implementations extends libdap.ExportedFunctions:
 
   setup()
 
-  override def register_equatable(equals_fn: CFuncPtr2[Ptr[SerializedData], Ptr[SerializedData], CInt]): CInt =
-    val eq = (d1: AnyRef, d2: AnyRef) =>
-      val data1 = d1.asInstanceOf[Token].value
-      val data2 = d2.asInstanceOf[Token].value
-      equals_fn(data1, data2) == 1
-    NativeProductApi.interface.registerEquatable(typeName = "Token", equalizer = eq)
-    0
-
   override def launch_simulation(
       rules: Ptr[MSet_Rule],
       s0: Ptr[DAPState],
@@ -36,9 +28,14 @@ object Implementations extends libdap.ExportedFunctions:
     val simulate = NativeProductApi.interface.simulate(allRules, initialState, s => Zone(n_state_change(s.toDAPState)))
     simulate(port, neighborhood)
 
+  override def register_equatable(equals_fn: CFuncPtr2[Ptr[SerializedData], Ptr[SerializedData], CInt]): CInt =
+    val eq = (t1: Token, t2: Token) => equals_fn(t1.value, t2.value) == 1
+    NativeProductApi.interface.registerEquatable[Token](eq)
+    0
+
   private def setup(): Unit =
-    val ser = (obj: AnyRef) =>
-      val data = !obj.asInstanceOf[Token].value
+    val ser = (token: Token) =>
+      val data = !token.value
       val arr = new Array[Byte](data.size.toInt)
       for i <- 0 until data.size.toInt do arr(i) = data.data(i).toByte
       arr
@@ -48,8 +45,8 @@ object Implementations extends libdap.ExportedFunctions:
       (!deserializedData).size = size.toCSize
       (!deserializedData).data = freshPointer[uint8_t](size)
       for i <- 0 until size do (!deserializedData).data(i) = UByte.valueOf(buff(i))
-      deserializedData
-    NativeProductApi.interface.registerSerDe(typeName = "Token", serializer = ser, deserializer = de)
+      Token(deserializedData)
+    NativeProductApi.interface.registerSerDe[Token](ser, de)
   end setup
 
 end Implementations

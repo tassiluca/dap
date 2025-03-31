@@ -2,23 +2,27 @@ package it.unibo.dap.api.capabilities
 
 import it.unibo.dap.modelling.Equatable
 
-trait EquatablesRegistry:
-  def register(typeName: String, equalizer: (AnyRef, AnyRef) => Boolean): Unit
-  def get(typeName: String): Option[(AnyRef, AnyRef) => Boolean]
+import scala.reflect.ClassTag
 
-  def of[T](typeName: String): Option[Equatable[T]] =
-    get(typeName).map: e =>
-      (self: T, that: T) => e(self.asInstanceOf[AnyRef], that.asInstanceOf[AnyRef])
+/** This registry allows registering and retrieve equatables for different types.
+  * It uses reflection to store the equatables in a map, using the runtime class of the type as the key.
+  */
+trait EquatablesRegistry:
+  def register[T: ClassTag](equals: (T, T) => Boolean): Unit
+
+  def get[T: ClassTag]: Option[(T, T) => Boolean]
+
+  def of[T: ClassTag]: Option[Equatable[T]] = get[T].map(e => e(_, _))
 
 object EquatablesRegistry:
-  
+
   def apply(): EquatablesRegistry = EquatablesRegistryImpl()
-  
+
   private class EquatablesRegistryImpl extends EquatablesRegistry:
-    private var equatables = Map.empty[String, (AnyRef, AnyRef) => Boolean]
+    private var equatables = Map.empty[Class[?], (?, ?) => Boolean]
 
-    override def register(typeName: String, equalizer: (AnyRef, AnyRef) => Boolean): Unit = 
-      equatables += typeName -> equalizer
+    override def register[T: ClassTag](equals: (T, T) => Boolean): Unit =
+      equatables += summon[ClassTag[T]].runtimeClass -> equals
 
-    override def get(typeName: String): Option[(AnyRef, AnyRef) => Boolean] = 
-      equatables.get(typeName)
+    override def get[T: ClassTag]: Option[(T, T) => Boolean] =
+      equatables.get(summon[ClassTag[T]].runtimeClass).collect { case e: ((T, T) => Boolean) => e }
