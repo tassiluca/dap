@@ -1,7 +1,6 @@
 from dap import *
 import argparse
 from datetime import datetime
-import time
 
 parser = argparse.ArgumentParser(description="Distributed Asynchronous Petri Nets simulation.")
 parser.add_argument("--port", type=int, required=True, help="Service port")
@@ -60,17 +59,15 @@ class PyCodec(Codec):
             import traceback
             traceback.print_exc()
             return None
-        
+
 class PyEq(Equatable):
     def __init__(self):
         global _global_eq_instance
         super().__init__()
         _global_eq_instance = self
-        
+
     def equals(self, a, b):
         try:
-            print(a)
-            #return a is not None and b is not None and a.name == b.name
             return token_impl_equals_wrapper(a, b)
         except Exception as e:
             print(f"Exception in equals: {e}")
@@ -83,7 +80,7 @@ class PyStateChangeListener(StateChangeListener):
         global _global_state_change_listener
         super().__init__()
         _global_state_change_listener = self
-        
+
     def on_state_change(self, state):
         tokens = state.tokens
         msg = state.msg

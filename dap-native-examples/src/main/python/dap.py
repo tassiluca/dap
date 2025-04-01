@@ -173,8 +173,8 @@ class StateChangeListener(object):
 # Register StateChangeListener in _dap:
 _dap.StateChangeListener_swigregister(StateChangeListener)
 
-def register_serde_wrapper(name, c):
-    return _dap.register_serde_wrapper(name, c)
+def register_serde_wrapper(name, codec):
+    return _dap.register_serde_wrapper(name, codec)
 
 def register_eq_wrapper(name, e):
     return _dap.register_eq_wrapper(name, e)
