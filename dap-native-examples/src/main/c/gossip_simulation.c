@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
     register_equatable(are_equals);
     /* Launch simulation. */
     launch_simulation(&all_rules, initial_state, port, &neighborhood, &on_state_change);
+    sleep(30);
     free(initial_state);
     return 0;
 }

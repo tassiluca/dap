@@ -1,7 +1,5 @@
 package it.unibo.dap.api
 
-import scala.reflect.ClassTag
-
 /** The library entry-point language- and platform-agnostic API. */
 trait Api:
 
@@ -20,11 +18,9 @@ trait Api:
   trait Interface:
     ctx: ADTs =>
 
-    def simulate(
-        rules: Set[Rule],
-        initial: State,
-        updateFn: State => Unit,
-    )(port: Int, neighbours: Set[Neighbour]): Unit
+    import scala.reflect.ClassTag
+
+    def simulate(rules: Set[Rule], initial: State, updateFn: State => Unit)(port: Int, neighbours: Set[Neighbour]): Unit
 
     def registerSerDe[T: ClassTag](serializer: T => Array[Byte], deserializer: Array[Byte] => T): Unit
 

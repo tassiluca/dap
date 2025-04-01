@@ -1,6 +1,6 @@
 package it.unibo.dap.utils
 
-import gears.async.{ Async, AsyncOperations }
+import scala.concurrent.ExecutionContext
 
 trait Spawnable:
-  def start(using Async, AsyncOperations): Unit
+  def spawn(using ExecutionContext): Task[Unit]

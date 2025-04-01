@@ -2,14 +2,13 @@ package it.unibo.dap.controller
 
 import java.util.{ Deque, Random }
 import java.util.concurrent.ConcurrentLinkedDeque
-
 import scala.annotation.tailrec
 import scala.concurrent.duration.DurationDouble
-
 import it.unibo.dap.modelling.Simulatable
+import it.unibo.dap.utils.Task
 
-import gears.async.TaskSchedule.RepeatUntilFailure
-import gears.async.*
+import scala.collection.Iterator.continually
+import scala.concurrent.{ ExecutionContext, Future }
 
 /** A distributed simulation.
   * @tparam B the [[Simulatable]] behaviour to simulate
@@ -25,22 +24,21 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   /** The behaviour to simulate. */
   def behavior: B[S]
 
-  def launch(updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
+  def launch(updateFn: S => Unit)(using ExecutionContext): Task[Unit] = () =>
     val queue = ConcurrentLinkedDeque[T]()
-    (
-      Task(boundary.exchange.inputs.read().foreach(queue.add)).schedule(RepeatUntilFailure()).start() ::
-        Future(boundary.exchange.start) ::
-        Future(loop(queue, initial, updateFn)) ::
-        Nil
-    ).awaitAll
+    val all = Future(continually(boundary.exchange.inputs.take()).foreach(queue.add)) ::
+      Future(loop(queue, initial, updateFn)) ::
+      boundary.exchange.spawn() ::
+      Nil
+    Future.sequence(all).map(_ => ())
 
   @tailrec
-  private final def loop(queue: Deque[T], state: S, updateFn: S => Unit)(using Async.Spawn, AsyncOperations): Unit =
+  private final def loop(queue: Deque[T], state: S, updateFn: S => Unit): Unit =
     scribe.info(s"[Sim] Simulating step for state: $state")
     val event = behavior.simulateStep(state)(using Random())
-    AsyncOperations.sleep(event.time.seconds)
+    Thread.sleep(event.time.seconds.toMillis)
     updateFn(event.state)
-    event.state.msg.foreach(boundary.exchange.outputs.send)
+    event.state.msg.foreach(boundary.exchange.outputs.offer)
     val in = Option(queue.poll())
     val newState = in.fold(event.state)(event.state.updated)
     loop(queue, newState, updateFn)

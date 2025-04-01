@@ -41,7 +41,9 @@ object MSet:
     def this(list: List[A]) = this(list.groupBy(a => a).map { case (a, n) => (a, n.size) })
 
     override val asList: List[A] = asMap.toList.flatMap { case (a, n) => immutable.List.fill(n)(a) }
+
     override def apply(v1: A): Int = asMap.getOrElse(v1, 0)
+
     override def union(m: MSet[A]) = new MSetImpl[A](asList ++ m.asList)
 
     override def diff(m: MSet[A])(using Equatable[A]) = new MSetImpl[A](
@@ -56,11 +58,17 @@ object MSet:
       Some(this.diff(m)).filter(_.size == size - m.size)
 
     override def iterator: Iterator[A] = asMap.keysIterator
+
     override def map[B](f: A => B) = new MSetImpl[B](asList.map(f))
+
     override def flatMap[B](f: A => MSet[B]) = new MSetImpl[B](asList.flatMap(f(_).asList))
+
     override def filter(f: A => Boolean) = new MSetImpl[A](asList.filter(f))
+
     override def collect[B](f: PartialFunction[A, B]) = new MSetImpl[B](asList.collect(f))
+
     override def size: Int = asList.size
+
     override def toString = s"{${asList.mkString("|")}}"
   end MSetImpl
 

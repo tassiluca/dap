@@ -5,14 +5,10 @@ import scala.language.postfixOps
 import scala.scalanative.unsafe.*
 import it.unibo.dap.utils.CUtils.freshPointer
 import libdap.aliases.Token as CToken
-import libdap.structs.{
-  DAPState as CDAPState,
-  MSet_Neighbour as CMSetNeighbour,
-  MSet_Rule as CMSetRule,
-  MSet_Token as CMSetToken,
-  Rule as CRule,
-}
+import libdap.structs.{DAPState as CDAPState, MSet_Neighbour as CMSetNeighbour, MSet_Rule as CMSetRule, MSet_Token as CMSetToken, Rule as CRule}
 
+import java.util.concurrent.ForkJoinPool
+import scala.concurrent.ExecutionContext
 import scala.scalanative.libc
 
 /** Bindings from / to Scala Native <==> Product API types.
@@ -23,7 +19,8 @@ object NativeProductApi extends ProductAPI:
 
   override val interface: NativeInterface.type = NativeInterface
 
-  object NativeInterface extends ProductInterface with NativeADTs
+  object NativeInterface extends ProductInterface with NativeADTs:
+    override given ExecutionContext = ExecutionContext.fromExecutor(ForkJoinPool())
 
   trait NativeADTs extends ADTs:
     override type Token = CToken

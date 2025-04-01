@@ -43,8 +43,7 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
     name := "dap",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % "3.2.19",
-      "ch.epfl.lamp" %%% "gears" % "0.2.0",
-      "com.outr" %%% "scribe" % "3.16.1",
+      "com.outr" %%% "scribe" % "3.16.0",
     )
   )
 

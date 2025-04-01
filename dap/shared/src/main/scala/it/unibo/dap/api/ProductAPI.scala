@@ -1,22 +1,20 @@
 package it.unibo.dap.api
 
-import it.unibo.dap.modelling.Equatable
-
-import scala.reflect.ClassTag
-
 trait ProductAPI extends Api:
 
   trait ProductInterface extends Interface:
     ctx: ADTs =>
 
+    import scala.concurrent.ExecutionContext
+    import scala.reflect.ClassTag
     import ProductADTsConversions.given
-    import gears.async.Async
-    import gears.async.default.given
     import it.unibo.dap.utils.as
     import it.unibo.dap.api.capabilities.{ EquatablesRegistry, SerializerRegistry }
+    import it.unibo.dap.modelling.Equatable
     import it.unibo.dap.boundary.Serializable
 
     given ClassTag[Token] = compiletime.deferred
+    given ExecutionContext = compiletime.deferred
 
     private val serializerRegistry = SerializerRegistry()
     private val equatablesRegistry = EquatablesRegistry()
@@ -24,14 +22,14 @@ trait ProductAPI extends Api:
     override def simulate(rules: Set[Rule], s0: State, updateFn: State => Unit)(
         port: Int,
         neighbors: Set[Neighbour],
-    ): Unit = Async.blocking:
+    ): Unit =
       given Serializable[Token] = serializerRegistry
         .of[Token]
         .getOrElse(throw IllegalArgumentException("Token serializer not found"))
       given Equatable[Token] = equatablesRegistry
         .of[Token]
         .getOrElse(throw IllegalArgumentException("Token equalizer not found"))
-      DAPSimulation(s0.as, rules.map(rCvt))(port, neighbors).launch(updateFn)
+      DAPSimulation(s0.as, rules.map(rCvt))(port, neighbors).launch(updateFn)()
 
     override def registerSerDe[T: ClassTag](serialize: T => Array[Byte], deserialize: Array[Byte] => T): Unit =
       serializerRegistry.register[T](serialize, deserialize)

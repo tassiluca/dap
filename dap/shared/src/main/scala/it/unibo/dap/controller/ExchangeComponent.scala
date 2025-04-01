@@ -2,8 +2,6 @@ package it.unibo.dap.controller
 
 import it.unibo.dap.utils.Spawnable
 
-import gears.async.{ ReadableChannel, SendableChannel }
-
 /** The component providing the [[Exchange]] of messages between neighbours.
   * @tparam T the type of the messages to exchange
   */
@@ -14,8 +12,10 @@ trait ExchangeComponent[T]:
   val exchange: Exchange
 
   trait Exchange extends Spawnable:
+    import java.util.concurrent.BlockingQueue
+
     /** The readable channel on which to receive messages from neighbours. */
-    def inputs: ReadableChannel[T]
+    def inputs: BlockingQueue[T]
 
     /** The sendable source channel to send messages to neighbours. */
-    def outputs: SendableChannel[T]
+    def outputs: BlockingQueue[T]
