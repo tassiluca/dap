@@ -1,7 +1,6 @@
 package it.unibo.dap.modelling
 
-trait Equatable[T]:
-  def equals(self: T, that: T): Boolean
+trait Equatable[T] extends ((T, T) => Boolean)
 
 object Equatable:
   def apply[T](using Equatable[T]): Equatable[T] = summon[Equatable[T]]

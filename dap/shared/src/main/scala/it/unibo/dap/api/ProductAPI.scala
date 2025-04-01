@@ -35,7 +35,7 @@ trait ProductAPI extends Api:
       serializerRegistry.register[T](serialize, deserialize)
 
     override def registerEquatable[T: ClassTag](equals: (T, T) => Boolean): Unit =
-      equatablesRegistry.register[T](equals)
+      equatablesRegistry.register[T](equals(_, _))
 
     private object ProductADTsConversions:
 

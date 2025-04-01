@@ -8,9 +8,9 @@ import scala.reflect.ClassTag
   * It uses reflection to store the equatables in a map, using the runtime class of the type as the key.
   */
 trait EquatablesRegistry:
-  def register[T: ClassTag](equals: (T, T) => Boolean): Unit
+  def register[T: ClassTag](equatable: Equatable[T]): Unit
 
-  def get[T: ClassTag]: Option[(T, T) => Boolean]
+  def get[T: ClassTag]: Option[Equatable[T]]
 
   def of[T: ClassTag]: Option[Equatable[T]] = get[T].map(e => e(_, _))
 
@@ -19,10 +19,10 @@ object EquatablesRegistry:
   def apply(): EquatablesRegistry = EquatablesRegistryImpl()
 
   private class EquatablesRegistryImpl extends EquatablesRegistry:
-    private var equatables = Map.empty[Class[?], (?, ?) => Boolean]
+    private var equatables = Map.empty[Class[?], Equatable[?]]
 
-    override def register[T: ClassTag](equals: (T, T) => Boolean): Unit =
-      equatables += summon[ClassTag[T]].runtimeClass -> equals
+    override def register[T: ClassTag](equatable: Equatable[T]): Unit =
+      equatables += summon[ClassTag[T]].runtimeClass -> equatable
 
-    override def get[T: ClassTag]: Option[(T, T) => Boolean] =
-      equatables.get(summon[ClassTag[T]].runtimeClass).collect { case e: ((T, T) => Boolean) => e }
+    override def get[T: ClassTag]: Option[Equatable[T]] =
+      equatables.get(summon[ClassTag[T]].runtimeClass).map(_.asInstanceOf[Equatable[T]])

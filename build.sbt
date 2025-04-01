@@ -34,8 +34,7 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
           .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
       },
       bindgenBindings := Seq(
-        Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName = "libdap")
-          .withExport(true),
+        Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName = "libdap").withExport(true),
       )
     ).enablePlugins(BindgenPlugin)
   )
