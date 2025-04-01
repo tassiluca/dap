@@ -70,7 +70,7 @@ void launch_simulation(
     struct DAPState *s0,
     int port,
     MSet_Neighbour *neighborhood,
-    void (*on_state_change)(struct DAPState *state)
+    void (*on_state_change)(const struct DAPState *state)
 );
 
 /*===================================== UTILS =====================================*/

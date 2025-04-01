@@ -11,7 +11,7 @@ LIBRARY := dap
 CFLAGS += -Wpedantic        	# Enforce strict ISO compliance
 CFLAGS += -Wall             	# Enable all common warnings
 CFLAGS += -Wextra           	# Enable extra warnings
-#CFLAGS += -Werror           	# Treat warnings as errors
+CFLAGS += -Werror           	# Treat warnings as errors
 CFLAGS += -fsanitize=address,undefined,null  # Enable address/undefined/null sanitizers
 ifneq ($(OS), macOS 15)
 	CFLAGS += -fsanitize=leak  	# Enable leak sanitizer (not supported on macOS >= 15.x)
@@ -21,11 +21,11 @@ CFLAGS += -g                	# Include debug symbols
 all:	mains
 	@echo "Detected OS: ${OS}"
 
-mains: 	libdap gossip.o
-	${CC} ${CFLAGS} -o ${BINARIES_DIR}/gossip.exe gossip.o -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
+mains: 	libdap gossip_simulation.o gossip_model.o
+	${CC} ${CFLAGS} -o ${BINARIES_DIR}/gossip_simulation.exe gossip_simulation.o gossip_model.o -L${BINARIES_DIR} -Wl,-rpath,${BINARIES_DIR} -l${LIBRARY}
 
-gossip.o: gossip.c dap.h
-	${CC} ${CFLAGS} -c gossip.c
+gossip.o: gossip_simulation.c dap.h
+	${CC} ${CFLAGS} -c gossip_simulation.c gossip_model.c
 
 .PHONY: clean libdap
 

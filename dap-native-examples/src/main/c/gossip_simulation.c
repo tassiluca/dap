@@ -1,25 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <assert.h>
 #include "dap.h"
+#include "gossip_model.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-typedef struct {
-    char* name;
-    int device_id;
-} TokenImpl;
-
-void on_state_change(struct DAPState *state);
+void on_state_change(const struct DAPState *state);
 
 struct DAPState *createDAPState(Token *initial_tokens, size_t token_count);
-
-Token createToken(const char* token, int port);
-
-int are_equals(SerializedData* d1, SerializedData* d2);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -32,7 +22,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     int port = atoi(argv[1]);
-    printf("Gossip simulation\n");
+    printf("===================================\n");
+    printf("== C Program - Gossip simulation ==\n");
+    printf("===================================\n");
+    /* The tokens used in the simulation */
     Token a = createToken("a", port);
     Token b = createToken("b", port);
     /* 1) a|a --1_000--> a */
@@ -92,70 +85,19 @@ int main(int argc, char *argv[]) {
     } else {
         initial_state = createDAPState(NULL, 0);
     }
-    /* Neighborhood */
+    /* Neighborhood. */
     int neighbours_size = argc - 2;
     Neighbour neighbours[neighbours_size];
     for (int i = 0; i < neighbours_size; i++) {
         neighbours[i] = argv[i + 2];
     }
     MSet_Neighbour neighborhood = { neighbours, ARRAY_LEN(neighbours) };
-    /* Capabilities */
-    // register_serde("Token", serialize_fn, deserialize_fn);
+    /* Register Capabilities. */
     register_equatable(are_equals);
-    /* Simulation */
-    printf("Starting gossip simulation\n");
+    /* Launch simulation. */
     launch_simulation(&all_rules, initial_state, port, &neighborhood, &on_state_change);
     free(initial_state);
     return 0;
-}
-
-uint8_t* serialize(TokenImpl *token, size_t *out_size) {
-    if (!token) return NULL;
-    size_t name_len = strlen(token->name) + 1;
-    *out_size = name_len + sizeof(int);
-    uint8_t *buffer = (uint8_t*)malloc(*out_size);
-    if (!buffer) return NULL;
-    memcpy(buffer, &token->device_id, sizeof(int));
-    memcpy(buffer + sizeof(int), token->name, name_len);
-    return buffer;
-}
-
-TokenImpl* deserialize(const uint8_t* buffer, size_t size) {
-    if (!buffer) return NULL;
-    TokenImpl* token = (TokenImpl*)malloc(sizeof(TokenImpl));
-    if (!token) return NULL;
-    memcpy(&token->device_id, buffer, sizeof(int));
-    token->name = strdup((char*)(buffer + sizeof(int)));
-    if (!token->name) {
-        perror("strdup");
-        free(token);
-        return NULL;
-    }
-    return token;
-}
-
-int are_equals(SerializedData* d1, SerializedData* d2) {
-    if (d1->size != d2->size) {
-        return 0;
-    }
-    TokenImpl* t1 = deserialize(d1->data, d1->size);
-    TokenImpl* t2 = deserialize(d2->data, d2->size);
-    return /*t1->device_id == t2->device_id &&*/ strcmp(t1->name, t2->name) == 0;
-}
-
-Token createToken(const char* token, int id) {
-    TokenImpl *t = malloc(sizeof(TokenImpl));
-    if (!t) return NULL;
-    t->name = strdup(token);
-    t->device_id = id;
-    size_t out_size = 0;
-    uint8_t *buffer = serialize(t, &out_size);
-    if (!buffer) return NULL;
-    SerializedData *sd = malloc(sizeof(SerializedData));
-    if (!sd) return NULL;
-    sd->data = buffer;
-    sd->size = out_size;
-    return sd;
 }
 
 struct DAPState *createDAPState(Token *initial_tokens, size_t token_count) {
@@ -176,37 +118,22 @@ struct DAPState *createDAPState(Token *initial_tokens, size_t token_count) {
   return state;
 }
 
-#define COLOR_RESET   "\033[0m"
-#define COLOR_GREEN   "\033[32m"
-#define COLOR_YELLOW  "\033[33m"
-#define COLOR_CYAN    "\033[36m"
-#define COLOR_MAGENTA "\033[35m"
-
-void on_state_change(struct DAPState *state) {
+void on_state_change(const struct DAPState *state) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    struct tm *lt = localtime(&tv.tv_sec);
-    printf(COLOR_CYAN "[C][⏰] %02d:%02d:%02d.%03d" COLOR_RESET "\n",
-      lt->tm_hour, lt->tm_min, lt->tm_sec, tv.tv_usec / 1000);
-    printf(COLOR_GREEN "[C][📦] State Tokens: " COLOR_RESET);
-    if (state->tokens->size > 0) {
-        printf(COLOR_YELLOW "{ ");
-        for (size_t i = 0; i < state->tokens->size; i++) {
-            TokenImpl *token = deserialize(state->tokens->elements[i]->data, state->tokens->size);
-            printf("%s - %d", token->name, token->device_id);
-            if (i < state->tokens->size - 1) {
-                printf(COLOR_MAGENTA " | " COLOR_YELLOW);
-            }
+    const struct tm *lt = localtime(&tv.tv_sec);
+    printf("\n----------------------------------------\n");
+    printf("[C] %02d:%02d:%02d.%03d \n", lt->tm_hour, lt->tm_min, lt->tm_sec, tv.tv_usec / 1000);
+    printf("[C] State Tokens: ");
+    printf("{ ");
+    for (size_t i = 0; i < state->tokens->size; i++) {
+        print_token(state->tokens->elements[i]);
+        if (i < state->tokens->size - 1) {
+            printf(" | ");
         }
-        printf(" }" COLOR_RESET "\n");
-    } else {
-        printf(COLOR_YELLOW "{ }" COLOR_RESET "\n");
     }
-    if (state->msg != NULL) {
-        TokenImpl *msg = deserialize(state->msg->data, state->msg->size);
-        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "\"%s - %d\"\n", msg->name, msg->device_id);
-    } else {
-        printf(COLOR_GREEN "[C][💬] Message: " COLOR_RESET "No message.\n");
-    }
-    printf(COLOR_CYAN "----------------------------------------" COLOR_RESET "\n");
+    printf("}\n");
+    printf("[C] Message: ");
+    print_token(state->msg);
+    printf("\n----------------------------------------\n");
 }
