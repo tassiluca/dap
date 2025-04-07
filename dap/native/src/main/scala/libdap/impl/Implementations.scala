@@ -21,11 +21,11 @@ object Implementations extends libdap.ExportedFunctions:
       s0: Ptr[DAPState],
       port: CInt,
       neighborhood: Ptr[MSet_Neighbour],
-      n_state_change: CFuncPtr1[Ptr[DAPState], Unit],
+      on_state_change: CFuncPtr1[Ptr[DAPState], Unit],
   ): Unit = withLogging:
     val allRules = crulesCvt(rules)
     val initialState = (!s0).toState
-    val simulate = NativeProductApi.interface.simulate(allRules, initialState, s => Zone(n_state_change(s.toDAPState)))
+    val simulate = NativeProductApi.interface.simulate(allRules, initialState, s => Zone(on_state_change(s.toDAPState)))
     simulate(port, neighborhood)
 
   override def register_equatable(equals_fn: CFuncPtr2[Ptr[SerializedData], Ptr[SerializedData], CInt]): CInt =
@@ -46,7 +46,7 @@ object Implementations extends libdap.ExportedFunctions:
       (!deserializedData).data = freshPointer[uint8_t](size)
       for i <- 0 until size do (!deserializedData).data(i) = UByte.valueOf(buff(i))
       Token(deserializedData)
-    NativeProductApi.interface.registerSerDe[Token](ser, de)
+    NativeProductApi.interface.registerSerDe(ser, de)
   end setup
 
 end Implementations

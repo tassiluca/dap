@@ -1,4 +1,5 @@
 import bindgen.interface.Binding
+import org.scalajs.linker.interface.OutputPatterns
 
 import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
 
@@ -21,7 +22,7 @@ ThisBuild / scalacOptions ++= Seq(
 )
 
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
-lazy val dap = crossProject(JVMPlatform, NativePlatform)
+lazy val dap = crossProject(JVMPlatform, NativePlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("dap"))
   .nativeConfigure(
@@ -38,12 +39,20 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform)
       )
     ).enablePlugins(BindgenPlugin)
   )
+  .jsConfigure(
+    _.settings(
+      scalaJSLinkerConfig ~= {
+        _.withModuleKind(ModuleKind.ESModule)
+          .withOutputPatterns(OutputPatterns.fromJSFile("%s.mjs"))
+      },
+    )
+  )
   .settings(
     name := "dap",
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % "3.2.19",
       "com.outr" %%% "scribe" % "3.16.0",
-    )
+    ),
   )
 
 /* Subprojects for DAP library's client with some example using JVM platform. */
@@ -63,3 +72,8 @@ lazy val dapNativeExamples = project.in(file("dap-native-examples"))
     name := "dap-native-examples",
   )
   .dependsOn(dap.native)
+
+lazy val dapJSExamples = project.in(file("dap-js-examples"))
+  .settings(
+    name := "dap-js-examples",
+  )

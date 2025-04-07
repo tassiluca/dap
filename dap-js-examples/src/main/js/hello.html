@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Scala.js Example</title>
+        <script src="../../../../dap/js/target/scala-3.6.4/dap-fastopt/main.js"></script>
+    </head>
+    <body>
+        <button onclick="foo()">Click Me</button>
+    </body>
+    <script>
+        function foo() {
+            HelloWorld.sayHello();
+            const foo = new Foo(3);
+            console.log(foo);
+            console.log(foo.toString());
+            const foo2 = foo.squared.toString();
+            console.log(foo2.toString());
+            const foo3 = foo.bar(4);
+            console.log(foo3.toString());
+        }
+    </script>
+</html>
