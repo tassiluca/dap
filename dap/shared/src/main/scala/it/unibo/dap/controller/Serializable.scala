@@ -1,6 +1,8 @@
 package it.unibo.dap.controller
 
-/** A type class for serialization and deserialization capabilities.
+case class SerDe[T](serialize: T => Array[Byte], deserialize: Array[Byte] => T)
+
+/** A type class encoding the serialization and deserialization capabilities.
   * @tparam T the type to serialize and deserialize
   */
 trait Serializable[T]:
@@ -10,6 +12,12 @@ trait Serializable[T]:
 object Serializable:
   def serialize[T](t: T)(using s: Serializable[T]): Array[Byte] = s.serialize(t)
   def deserialize[T](t: Array[Byte])(using s: Serializable[T]): T = s.deserialize(t)
+
+  extension [T](serde: SerDe[T])
+
+    def asSerializable: Serializable[T] = new Serializable[T]:
+      override def serialize(t: T): Array[Byte] = serde.serialize(t)
+      override def deserialize(bytes: Array[Byte]): T = serde.deserialize(bytes)
 
 object SerializableInstances:
 

@@ -7,15 +7,15 @@ trait ProductAPI extends Api:
 
     import scala.concurrent.ExecutionContext
     import scala.reflect.ClassTag
-    import it.unibo.dap.api.resolvers.{ EquatablesRegistry, SerializerRegistry }
+    import it.unibo.dap.api.resolvers.{ EquatablesResolver, SerDeResolver }
     import it.unibo.dap.modelling.Equatable
     export ProductADTsConversions.given
 
     given ClassTag[Token] = compiletime.deferred
     given ExecutionContext = compiletime.deferred
 
-    protected val serializerRegistry = SerializerRegistry()
-    protected val equatablesRegistry = EquatablesRegistry()
+    protected val serializerRegistry = SerDeResolver()
+    protected val equatablesRegistry = EquatablesResolver()
 
     override def registerSerDe[T: ClassTag](serialize: T => Array[Byte], deserialize: Array[Byte] => T): Unit =
       serializerRegistry.register[T](serialize, deserialize)
@@ -28,7 +28,6 @@ trait ProductAPI extends Api:
       import it.unibo.dap.utils.{ as, back, Iso }
       import it.unibo.dap.modelling
       import it.unibo.dap.modelling.DAP
-      import it.unibo.dap.utils
 
       given [T] => Iso[MSet[T], modelling.MSet[T]] = Iso(m => modelling.MSet(m.elems*), m => MSet(m.asList*))
 

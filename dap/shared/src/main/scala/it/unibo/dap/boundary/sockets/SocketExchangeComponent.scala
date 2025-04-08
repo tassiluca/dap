@@ -25,7 +25,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
 
     override def outputs: BlockingQueue[T] = outChannel
 
-    override def spawn(using ExecutionContext): Task[Unit] = () =>
+    override def spawn(using ExecutionContext): Future[Unit] =
       Future.sequence(Future(client()) :: Future(serveClients) :: Nil).map(_ => ())
 
     @tailrec

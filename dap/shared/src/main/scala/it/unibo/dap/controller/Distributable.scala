@@ -14,7 +14,6 @@ trait Distributable[State, Message]:
     def updated(msg: Message): State
 
 object DistributableInstances:
-
   import it.unibo.dap.modelling.{ DAP, MSet }
 
   given [T: Serializable] => Distributable[DAP.State[T], T] =

@@ -19,5 +19,5 @@ trait JVMNativeAPI extends ProductAPI:
       given Equatable[Token] = equatablesRegistry
         .of[Token]
         .getOrElse(throw IllegalArgumentException("Token equalizer not found"))
-      DAPSimulation(initial.as, rules.map(rCvt))(port, neighbours).launch(updateFn)()
+      DAPSimulation(initial.as, rules.map(rCvt))(port, neighbours).launch(updateFn)
 end JVMNativeAPI

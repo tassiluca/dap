@@ -1,11 +1,11 @@
 package it.unibo.dap.api.resolvers
 
-import it.unibo.dap.controller.Serializable
+import it.unibo.dap.controller.{ SerDe, Serializable }
+import it.unibo.dap.controller.Serializable.asSerializable
+
 import scala.reflect.ClassTag
 
-case class SerDe[T](serialize: T => Array[Byte], deserialize: Array[Byte] => T)
-
-trait SerDeRegistry:
+trait SerDeResolver:
 
   def register[T: ClassTag](serialize: T => Array[Byte], deserialize: Array[Byte] => T): Unit =
     register(SerDe(serialize, deserialize))
@@ -14,17 +14,13 @@ trait SerDeRegistry:
 
   def get[T: ClassTag]: Option[SerDe[T]]
 
-  def of[T: ClassTag]: Option[Serializable[T]] =
-    get[T].map: serde =>
-      new Serializable[T]:
-        override def serialize(t: T): Array[Byte] = serde.serialize(t)
-        override def deserialize(bytes: Array[Byte]): T = serde.deserialize(bytes)
+  def of[T: ClassTag]: Option[Serializable[T]] = get[T].map(_.asSerializable)
 
-object SerializerRegistry:
+object SerDeResolver:
 
-  def apply(): SerDeRegistry = SerializerRegistryImpl()
+  def apply(): SerDeResolver = SerializerRegistryImpl()
 
-  private class SerializerRegistryImpl extends SerDeRegistry:
+  private class SerializerRegistryImpl extends SerDeResolver:
     private var serializers = Map.empty[Class[?], SerDe[?]]
 
     override def get[T: ClassTag]: Option[SerDe[T]] =

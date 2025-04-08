@@ -4,26 +4,23 @@ import it.unibo.dap.modelling.Equatable
 
 import scala.reflect.ClassTag
 
-/** This registry allows registering and retrieve equatables for different types.
-  * It uses reflection to store the equatables in a map, using the runtime class of the type as the key.
-  */
-trait EquatablesRegistry:
+/** An [[Equatable]] capabilities resolver allowing register and retrieve equatables for different types. */
+trait EquatablesResolver:
   def register[T: ClassTag](equatable: Equatable[T]): Unit
 
   def get[T: ClassTag]: Option[Equatable[T]]
 
   def of[T: ClassTag]: Option[Equatable[T]] = get[T].map(e => e(_, _))
 
-object EquatablesRegistry:
+object EquatablesResolver:
 
-  def apply(): EquatablesRegistry = EquatablesRegistryImpl()
+  def apply(): EquatablesResolver = EquatablesRegistryImpl()
 
-  private class EquatablesRegistryImpl extends EquatablesRegistry:
+  private class EquatablesRegistryImpl extends EquatablesResolver:
     private var equatables = Map.empty[Class[?], Equatable[?]]
 
     override def register[T: ClassTag](equatable: Equatable[T]): Unit =
       equatables += summon[ClassTag[T]].runtimeClass -> equatable
 
     override def get[T: ClassTag]: Option[Equatable[T]] =
-      scribe.info(s"Get equatable of ${summon[ClassTag[T]].runtimeClass}")
       equatables.get(summon[ClassTag[T]].runtimeClass).map(_.asInstanceOf[Equatable[T]])
