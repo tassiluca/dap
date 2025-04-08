@@ -1,6 +1,6 @@
-package it.unibo.dap.api.capabilities
+package it.unibo.dap.api.resolvers
 
-import it.unibo.dap.boundary.Serializable
+import it.unibo.dap.controller.Serializable
 import scala.reflect.ClassTag
 
 case class SerDe[T](serialize: T => Array[Byte], deserialize: Array[Byte] => T)

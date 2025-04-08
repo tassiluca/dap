@@ -1,4 +1,4 @@
-package it.unibo.dap.api.capabilities
+package it.unibo.dap.api.resolvers
 
 import it.unibo.dap.modelling.Equatable
 
@@ -25,4 +25,5 @@ object EquatablesRegistry:
       equatables += summon[ClassTag[T]].runtimeClass -> equatable
 
     override def get[T: ClassTag]: Option[Equatable[T]] =
+      scribe.info(s"Get equatable of ${summon[ClassTag[T]].runtimeClass}")
       equatables.get(summon[ClassTag[T]].runtimeClass).map(_.asInstanceOf[Equatable[T]])
