@@ -1,12 +1,12 @@
 package it.unibo.dap.controller
 
-import java.util.{ Deque, Random }
-import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.Random
 import scala.annotation.tailrec
-import scala.concurrent.duration.DurationDouble
 import it.unibo.dap.modelling.Simulatable
+import it.unibo.dap.utils.PlatformSleep
 
-import scala.collection.Iterator.continually
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
 import scala.concurrent.{ ExecutionContext, Future }
 
 /** A distributed simulation.
@@ -23,22 +23,19 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   /** The behaviour to simulate. */
   def behavior: B[S]
 
+  /** Launches the simulation. */
   def launch(updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
-    val queue = ConcurrentLinkedDeque[T]()
-    val tasks = Future(continually(ctx.exchange.inputs.take()).foreach(queue.add)) ::
-      Future(loop(queue, initial, updateFn)) ::
-      ctx.exchange.spawn ::
-      Nil
+    val tasks = Future(loop(initial, updateFn)) :: ctx.exchange.spawn :: Nil
     Future.sequence(tasks).map(_ => ())
 
   @tailrec
-  private final def loop(queue: Deque[T], state: S, updateFn: S => Unit): Unit =
+  private final def loop(state: S, updateFn: S => Unit): Unit =
     scribe.info(s"[Sim] Simulating step for state: $state")
     val event = behavior.simulateStep(state)(using Random())
-    Thread.sleep(event.time.seconds.toMillis)
+    PlatformSleep().sleep(Duration(event.time, TimeUnit.SECONDS))
     updateFn(event.state)
-    event.state.msg.foreach(ctx.exchange.outputs.offer)
-    val in = Option(queue.poll())
+    event.state.msg.foreach(ctx.exchange.outputs.push)
+    val in = ctx.exchange.inputs.poll()
     val newState = in.fold(event.state)(event.state.updated)
-    loop(queue, newState, updateFn)
+    loop(newState, updateFn)
 end Simulation
