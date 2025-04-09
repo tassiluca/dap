@@ -1,7 +1,7 @@
 from dap import *
 import argparse
 from datetime import datetime
-import msgpack
+import struct
 
 parser = argparse.ArgumentParser(description="Distributed Asynchronous Petri Nets simulation.")
 parser.add_argument("--port", type=int, required=True, help="Service port")
@@ -10,18 +10,20 @@ args = parser.parse_args()
 port = args.port
 neighbors = [n for n in args.neighbors]
 
-class TokenImpl():
+class TokenImpl:
     def __init__(self, name: str, device_id: int):
         self.name = name
         self.device_id = device_id
         
     def serialize(self) -> bytes:
-        return msgpack.packb({"name": self.name, "device_id": self.device_id})
+        name_bytes = self.name.encode('utf-8') + b'\x00'
+        return struct.pack(f'I{len(name_bytes)}s', self.device_id, name_bytes)
         
     @classmethod
     def deserialize(cls, data: bytes):
-        obj = msgpack.unpackb(data, raw=False)
-        return cls(obj["name"], obj["device_id"])
+        device_id, name_bytes = struct.unpack(f'I{len(data) - 4}s', data)
+        name = name_bytes.decode('utf-8').rstrip('\x00')
+        return cls(name, device_id)
 
     def __str__(self):
         return "Token[Name: {}, Device ID: {}]".format(self.name, self.device_id)

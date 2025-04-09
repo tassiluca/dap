@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-message TokenImpl {
-    int64 device_id = 1;
-    string name = 2;
-}

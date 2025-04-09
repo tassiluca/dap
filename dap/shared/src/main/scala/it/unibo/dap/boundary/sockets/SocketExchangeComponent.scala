@@ -1,8 +1,8 @@
 package it.unibo.dap.boundary.sockets
 
 import gears.async.*
-import it.unibo.dap.boundary.Serializable
-import it.unibo.dap.boundary.Serializable.*
+import it.unibo.dap.controller.Serializable
+import it.unibo.dap.controller.Serializable.*
 import it.unibo.dap.controller.ExchangeComponent
 
 import java.net.{ ServerSocket, Socket }

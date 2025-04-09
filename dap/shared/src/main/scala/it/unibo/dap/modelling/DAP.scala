@@ -5,7 +5,13 @@ import it.unibo.dap.modelling.CTMC.*
 /** Modules defining the concept of Distributed Asynchronous stochastic Petri net. */
 object DAP:
 
-  /** Rule of the net: `pre --rateExp--> eff | ^msg`. */
+  /** Net rule guiding the evolution of the net: `pre --rateExp--> eff | ^msg`.
+    * @param pre the preconditions to be met for this rule to be fired
+    * @param rateExp the markovian rate of this transition
+    * @param eff the effects applied to the net state when this rule is selected for execution
+    * @param msg the messages sent to the node neighbours when this rule is selected for execution
+    * @tparam T the token type
+    */
   case class Rule[T](pre: MSet[T], rateExp: MSet[T] => Double, eff: MSet[T], msg: Option[T])
 
   /** Whole net's type. */

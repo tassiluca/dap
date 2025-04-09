@@ -20,13 +20,7 @@ trait Api:
   trait Interface:
     ctx: ADTs =>
 
-    def simulate(
-        rules: Set[Rule],
-        initial: State,
-        updateFn: State => Unit,
-    )(port: Int, neighbours: Set[Neighbour]): Unit
-
+    def simulate(rules: Set[Rule], initial: State, updateFn: State => Unit)(port: Int, neighbours: Set[Neighbour]): Unit
     def registerSerDe[T: ClassTag](serializer: T => Array[Byte], deserializer: Array[Byte] => T): Unit
-
     def registerEquatable[T: ClassTag](equalizer: (T, T) => Boolean): Unit
 end Api
