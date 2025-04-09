@@ -1,12 +1,11 @@
 package it.unibo.dap.controller
 
 import java.util.Random
-import scala.annotation.tailrec
 import it.unibo.dap.modelling.Simulatable
-import it.unibo.dap.utils.PlatformSleep
+import it.unibo.dap.modelling.Simulatable.Event
+import it.unibo.dap.utils.Async
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationDouble
 import scala.concurrent.{ ExecutionContext, Future }
 
 /** A distributed simulation.
@@ -25,14 +24,17 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
 
   /** Launches the simulation. */
   def launch(updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
-    val tasks = Future(loop(initial, updateFn)) :: ctx.exchange.spawn :: Nil
+    val tasks = loop(initial, updateFn) :: ctx.exchange.spawn :: Nil
     Future.sequence(tasks).map(_ => ())
 
-  @tailrec
-  private final def loop(state: S, updateFn: S => Unit): Unit =
-    scribe.info(s"[Sim] Simulating step for state: $state")
-    val event = behavior.simulateStep(state)(using Random())
-    PlatformSleep().sleep(Duration(event.time, TimeUnit.SECONDS))
+  private final def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
+    for
+      event = behavior.simulateStep(state)(using Random())
+      _ <- Async.operations.sleep(event.time.seconds)
+      _ <- updateLogic(event, updateFn)
+    yield ()
+
+  private final def updateLogic(event: Event[S], updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     updateFn(event.state)
     event.state.msg.foreach(ctx.exchange.outputs.push)
     val in = ctx.exchange.inputs.poll()

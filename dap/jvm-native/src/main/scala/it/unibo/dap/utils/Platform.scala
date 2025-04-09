@@ -1,5 +1,12 @@
 package it.unibo.dap.utils
 
+import scala.concurrent.{ blocking, ExecutionContext, Future }
+import scala.concurrent.duration.FiniteDuration
+
 object Platform:
 
-  def select: PlatformSleep = duration => Thread.sleep(duration.toMillis)
+  def asyncOps: AsyncOperations = new AsyncOperations:
+    given ExecutionContext = ExecutionContext.global
+
+    override def sleep(duration: FiniteDuration): Future[Unit] =
+      Future(blocking(Thread.sleep(duration.toMillis)))

@@ -1,5 +1,17 @@
 import { ProductAPI } from "../../../../dap/js/target/scala-3.6.4/dap-fastopt/main.mjs";
 
+const args = process.argv.slice(2); // Skip first 2 args: node and script name
+if (args.length < 2) {
+    console.error("Usage: node main.js <port> <net1> [<net2> ...]");
+    process.exit(1);
+}
+
+const port = parseInt(args[0], 10);
+const net = args.slice(1);
+
+console.log("Port:", port);
+console.log("Net:", net);
+
 // Two simply stringified token values
 const a = "a";
 const b = "b";
@@ -21,9 +33,7 @@ const rule2 = ProductAPI.JSInterface.Rule(
 const allRules = [rule1, rule2];
 // Initial state
 const s0 = ProductAPI.JSInterface.State([a], null);
-// Neighborhoods
-const net = ["localhost:2551", "localhost:2552"]
-ProductAPI.JSInterface.launchSimulation(allRules, s0, 2550, net, state => {
+ProductAPI.JSInterface.launchSimulation(allRules, s0, port, net, state => {
     console.log("Hello from the simulation!");
     console.log(state.tokens);
     console.log(state.msg)

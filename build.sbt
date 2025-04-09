@@ -18,7 +18,8 @@ ThisBuild / scalacOptions ++= Seq(
   "-unchecked",
   "-explain",
   "-feature",
-  "-language:implicitConversions"
+  "-language:implicitConversions",
+  "-language:experimental.betterFors",
 )
 
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
