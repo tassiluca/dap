@@ -11,7 +11,7 @@ trait NeighbourhoodResolverComponent:
   /** The neighbourhood resolver instance. */
   val neighbourhoodResolver: NeighbourhoodResolver
 
-  /** A neighbourhood resolver encoded as a simple function returning the current set of neighbours. */
+  /** A neighbourhood resolver, namely a function returning the current set of neighbours at any given time. */
   trait NeighbourhoodResolver extends (() => Set[Neighbour])
 
   object NeighbourhoodResolver:

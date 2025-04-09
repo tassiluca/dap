@@ -2,7 +2,7 @@ package it.unibo.dap.boundary.sockets
 
 import it.unibo.dap.controller.Serializable
 import it.unibo.dap.controller.ExchangeComponent
-import it.unibo.dap.utils.AsyncQueue
+import it.unibo.dap.utils.{ Channel, ReadableChannel, SendableChannel }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
@@ -16,12 +16,12 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
   override val exchange: Exchange = SocketExchange(port)
 
   private class SocketExchange(port: Int) extends Exchange:
-    private lazy val inChannel = AsyncQueue[T]()
-    private lazy val outChannel = AsyncQueue[T]()
+    private lazy val inChannel = Channel[T]()
+    private lazy val outChannel = Channel[T]()
 
-    override def inputs: AsyncQueue[T] = inChannel
+    override def inputs: ReadableChannel[T] = inChannel.asReadable
 
-    override def outputs: AsyncQueue[T] = outChannel
+    override def outputs: SendableChannel[T] = outChannel.asSendable
 
     override def spawn(using ExecutionContext): Future[Unit] =
       Future.sequence(Future(client()) :: Future(serveClients) :: Nil).map(_ => ())

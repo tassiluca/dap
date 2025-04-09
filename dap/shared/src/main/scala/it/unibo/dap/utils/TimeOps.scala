@@ -1,6 +1,6 @@
 package it.unibo.dap.utils
 
-object Time:
+object TimeOps:
 
   /** Facility to track time. Just embed the computation in the [[input]]. */
   def timed[A](input: => A): A =

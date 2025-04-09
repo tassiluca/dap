@@ -27,7 +27,6 @@ object CTMC:
 
   given Simulatable[CTMC] with
 
-    import it.unibo.dap.utils.Stochastics
     import java.util.Random
 
     extension [S](self: CTMC[S])

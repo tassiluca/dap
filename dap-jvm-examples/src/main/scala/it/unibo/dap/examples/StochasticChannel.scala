@@ -1,6 +1,7 @@
 package it.unibo.dap.examples
 
 import it.unibo.dap.modelling.dsl.CTMCDsl
+import it.unibo.dap.utils.TimeOps
 
 object StochasticChannel:
 
@@ -26,8 +27,8 @@ object StochasticChannel:
 @main def mainStochasticChannelSimulation(): Unit =
   import java.util.Random
   import StochasticChannel.*
-  import it.unibo.dap.utils.Time
-  Time.timed:
+  import it.unibo.dap.utils.TimeOps.*
+  timed:
     println:
       stocChannel
         .simulate(IDLE)(using Random())
