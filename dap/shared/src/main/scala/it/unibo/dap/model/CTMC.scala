@@ -1,4 +1,4 @@
-package it.unibo.dap.modelling
+package it.unibo.dap.model
 
 /** A Continuous Time Markov Chain. */
 trait CTMC[S]:

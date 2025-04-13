@@ -1,6 +1,6 @@
-package it.unibo.dap.modelling
+package it.unibo.dap.model
 
-import it.unibo.dap.modelling.CTMC.*
+import it.unibo.dap.model.CTMC.*
 
 /** Module defining the concept of Distributed Asynchronous stochastic Petri net. */
 object DAP:

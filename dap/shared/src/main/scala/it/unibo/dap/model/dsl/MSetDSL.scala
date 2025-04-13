@@ -1,8 +1,8 @@
-package it.unibo.dap.modelling.dsl
+package it.unibo.dap.model.dsl
 
 object MSetDSL:
 
-  export it.unibo.dap.modelling.MSet
+  export it.unibo.dap.model.MSet
   export MSetDSL.given
 
   extension [T](a: T) def |(b: T): List[T] = List[T](a, b)

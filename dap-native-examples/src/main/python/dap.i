@@ -16,7 +16,7 @@
 // For input parameters (Python bytes → C uint8_t*)
 %pybuffer_binary(uint8_t *data, size_t size);
 // For output parameters (C uint8_t* → Python bytes)
-%extend SerializedData {
+%extend RawData {
     PyObject* to_bytes() {
         SWIG_PYTHON_THREAD_BEGIN_BLOCK; // important!!!
         PyObject* result = PyBytes_FromStringAndSize((const char*)$self->data, $self->size);
@@ -38,7 +38,7 @@
 
 %inline %{
     struct Equatable {
-        virtual int equals(SerializedData *a, SerializedData *b) = 0;
+        virtual int equals(RawData *a, RawData *b) = 0;
         virtual ~Equatable() {}
     };
     struct StateChangeListener {
@@ -61,7 +61,7 @@
     Equatable* DirectorManager::current_equatable = nullptr;
     StateChangeListener* DirectorManager::current_state_listener = nullptr;
 
-    static int equals_helper(SerializedData *a, SerializedData *b) {
+    static int equals_helper(RawData *a, RawData *b) {
         if (DirectorManager::current_equatable == nullptr) {
             fprintf(stderr, "Equatable is NULL\n");
             return 0;

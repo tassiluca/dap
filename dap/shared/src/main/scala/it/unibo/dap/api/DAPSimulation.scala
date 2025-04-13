@@ -1,10 +1,10 @@
 package it.unibo.dap.api
 
-import it.unibo.dap.boundary.sockets.{ InetNeighbourhoodResolver, PlainSocketCommunicator, SocketExchangeComponent }
-import it.unibo.dap.controller.{ DAPSimulation, Serializable }
+import it.unibo.dap.boundary.sockets.{InetNeighbourhoodResolver, SocketExchangeComponent, SocketNetworking}
 import it.unibo.dap.controller.DistributableInstances.given
-import it.unibo.dap.modelling.{ CTMC, DAP, Equatable }
-import it.unibo.dap.modelling.DAP.*
+import it.unibo.dap.controller.{DAPSimulation, Serializable}
+import it.unibo.dap.model.DAP.*
+import it.unibo.dap.model.{CTMC, DAP, Equatable}
 
 import scala.concurrent.ExecutionContext
 
@@ -22,7 +22,7 @@ object DAPSimulation:
       extends DAPSimulation
       with SocketExchangeComponent
       with InetNeighbourhoodResolver
-      with PlainSocketCommunicator[Token]:
+      with SocketNetworking[Token]:
 
     override def initial: State[Token] = s0
     override def behavior: CTMC[State[Token]] = DAP(rules)

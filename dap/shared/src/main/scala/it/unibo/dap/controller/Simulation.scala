@@ -1,8 +1,8 @@
 package it.unibo.dap.controller
 
 import java.util.Random
-import it.unibo.dap.modelling.Simulatable
-import it.unibo.dap.modelling.Simulatable.Event
+import it.unibo.dap.model.Simulatable
+import it.unibo.dap.model.Simulatable.Event
 import it.unibo.dap.utils.Async
 
 import scala.concurrent.duration.DurationDouble

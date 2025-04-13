@@ -1,6 +1,6 @@
 package it.unibo.dap.examples
 
-import it.unibo.dap.modelling.dsl.CTMCDsl
+import it.unibo.dap.model.dsl.CTMCDsl
 import it.unibo.dap.utils.TimeOps
 
 object StochasticChannel:

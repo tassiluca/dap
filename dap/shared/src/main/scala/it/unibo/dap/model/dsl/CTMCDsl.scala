@@ -1,8 +1,8 @@
-package it.unibo.dap.modelling.dsl
+package it.unibo.dap.model.dsl
 
 object CTMCDsl:
 
-  export it.unibo.dap.modelling.CTMC
+  export it.unibo.dap.model.CTMC
   export CTMC.*
 
   extension [S](state: S) def --(rate: Double): (S, Double) = (state, rate)

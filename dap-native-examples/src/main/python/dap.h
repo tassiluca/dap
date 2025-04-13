@@ -13,26 +13,14 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+/*
+ * RawData is a structure that holds raw data and its size.
+ * It is used to represent a block of serialized data.
+ */
 typedef struct {
     uint8_t* data;
     size_t size;
-} SerializedData;
-
-/* An opaque data structure representing a token in a DAP model. */
-typedef SerializedData *Token;
-
-Token pack(uint8_t *data, size_t size) {
-    SerializedData *sd = (SerializedData*)malloc(sizeof(SerializedData));
-    if (!sd) return NULL;
-    sd->data = (uint8_t*)malloc(size);
-    if (!sd->data) {
-        free(sd);
-        return NULL;
-    }
-    memcpy(sd->data, data, size);
-    sd->size = size;
-    return sd;
-}
+} RawData;
 
 /*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
@@ -44,60 +32,40 @@ typedef struct {                                                            \
     size_t size;                                                            \
 } MSet_##Type;                                                              \
                                                                             \
-/* Constructor */                                                           \
-static inline MSet_##Type* MSet_##Type##_create(size_t initial_size) {      \
-    MSet_##Type* set = (MSet_##Type*)malloc(sizeof(MSet_##Type));           \
-    if (initial_size > 0) {                                                 \
-        set->elements = (Type*)malloc(sizeof(Type) * initial_size);         \
-        set->size = initial_size;                                           \
-    } else {                                                                \
-        set->elements = NULL;                                               \
-        set->size = 0;                                                      \
-    }                                                                       \
-    return set;                                                             \
-}                                                                           \
+/*
+ * Creates a new multi-set with the given elements and size.
+ */                                                                         \
+MSet_##Type* MSet_##Type##_of(Type* elements, size_t size);                 \
                                                                             \
-/* Destructor */                                                            \
-static inline void MSet_##Type##_destroy(MSet_##Type* set) {                \
-    if (set) {                                                              \
-        if (set->elements) {                                                \
-            free(set->elements);                                            \
-        }                                                                   \
-        free(set);                                                          \
-    }                                                                       \
-}                                                                           \
-                                                                            \
-/* Setter */                                                                \
-static inline void MSet_##Type##_set(MSet_##Type* set, size_t index, Type value) { \
-    if (index < set->size) {                                                \
-        set->elements[index] = value;                                       \
-    }                                                                       \
-}                                                                           \
-                                                                            \
-/* Getter */                                                                \
-static inline Type MSet_##Type##_get(MSet_##Type* set, size_t index) {      \
-    return set->elements[index];                                            \
-}
+/*
+ * Frees the memory allocated for the multi-set.
+ */                                                                         \
+void MSet_##Type##_free(MSet_##Type* set);
 
-typedef char* Neighbour;
+/*
+ * An opaque data structure representing a token in a DAP model, i.e.,
+ * the data exchanged between places (nodes) in the Distributed Petri Net.
+ */
+typedef const RawData *Token;
 
-/* The data structure keeping track of the neighbors of a place in a DAP model. */
-DEFINE_MSET(Neighbour)
-
-/** A multi-set of tokens. */
+/*
+ * A multi-set of tokens.
+ */
 DEFINE_MSET(Token)
 
-/* The overall state of a DAP model. */
+/*
+ * A snapshot of the state of the current place (node).
+ */
 struct DAPState {
-    MSet_Token *tokens;
+    const MSet_Token *tokens;
     Token msg;
 };
 
 /*
- * The rule guiding the evolution of a DAP model.
+ * The rule guiding the evolution of the Distributed Petri Net.
  * A rule is defined by its preconditions, rate, effects, and messages and
  * is fired whenever its preconditions are satisfied, producing the effects
- * in the same place and sending messages to the neighbors, according to its rate.
+ * in the same place (node) and sending messages to the neighbors, according to its rate.
  */
 typedef struct {
     const MSet_Token *preconditions;
@@ -106,7 +74,11 @@ typedef struct {
     Token msg;
 } Rule;
 
-DEFINE_MSET(Rule)
+/*
+ * A neighbor place (node) in the Distributed Petri Net.
+ * It is represented as string in the form of <hostname>:<port>.
+ */
+typedef const char* Neighbour;
 
 /*
  * Launches the distributed simulation of a DAP model.
@@ -114,17 +86,12 @@ DEFINE_MSET(Rule)
  * and is guided by the given `rules`, which are applied to the initial state `s0`.
  */
 void launch_simulation(
-    MSet_Rule* rules,
-    struct DAPState *s0,
+    const Rule* rules, size_t rules_size,
+    const struct DAPState *s0,
     int port,
-    MSet_Neighbour *neighborhood,
-    void (*on_state_change)(struct DAPState *state)
-);
-
-/*===================================== UTILS =====================================*/
-
-int register_equatable(
-    int (*equals_fn)(SerializedData *a, SerializedData *b)
+    const Neighbour *neighbors, size_t neighbors_size,
+    void (*on_state_change)(const struct DAPState *state),
+    int (*equals_fn)(const RawData *a, const RawData *b)
 );
 
 #ifdef __cplusplus

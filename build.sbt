@@ -1,7 +1,6 @@
 import bindgen.interface.Binding
 import org.scalajs.linker.interface.OutputPatterns
-
-import scala.scalanative.build.{BuildTarget, GC, LTO, Mode}
+import scala.scalanative.build.{BuildTarget, GC, LTO, Mode, Sanitizer}
 
 ThisBuild / scalaVersion := "3.6.4"
 ThisBuild / semanticdbEnabled := true
@@ -32,8 +31,10 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform, JSPlatform)
         conf.withGC(GC.boehm) // garbage collector
           .withLTO(LTO.full) // link-time optimization
           .withMode(Mode.releaseSize) // build mode
-          .withLinkingOptions(Seq()) // a sequence of additional linker options to be passed to clang
           .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
+          .withSanitizer(Sanitizer.ThreadSanitizer)
+          .withSanitizer(Sanitizer.AddressSanitizer)
+          .withSanitizer(Sanitizer.UndefinedBehaviourSanitizer)
       },
       bindgenBindings := Seq(
         Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName = "libdap").withExport(true),

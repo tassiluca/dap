@@ -31,6 +31,10 @@ metals.sbt
 .idea_modules
 /.worksheet/
 
+# Gradle
+.gradle/
+build/
+
 ### C ###
 # Prerequisites
 *.d

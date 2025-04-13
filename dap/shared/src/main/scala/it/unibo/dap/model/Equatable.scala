@@ -1,4 +1,4 @@
-package it.unibo.dap.modelling
+package it.unibo.dap.model
 
 /** A type class encoding the equality capability for a type `T`, i.e., the
   * ability to compare two instances of `T` for equality.

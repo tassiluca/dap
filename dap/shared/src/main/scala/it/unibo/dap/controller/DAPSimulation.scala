@@ -1,7 +1,7 @@
 package it.unibo.dap.controller
 
-import it.unibo.dap.modelling.DAP.State
-import it.unibo.dap.modelling.{ CTMC, Equatable }
+import it.unibo.dap.model.DAP.State
+import it.unibo.dap.model.{ CTMC, Equatable }
 
 /** The Distributed Asynchronous Petri Nets simulation.
   * @tparam Token the type of the tokens distributed across the network.

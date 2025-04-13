@@ -12,7 +12,7 @@ Token createToken(const char* token, const int device_id) {
     size_t out_size = 0;
     uint8_t *buffer = serialize(t, &out_size);
     if (!buffer) return NULL;
-    SerializedData *sd = malloc(sizeof(SerializedData));
+    RawData *sd = malloc(sizeof(RawData));
     if (!sd) return NULL;
     sd->data = buffer;
     sd->size = out_size;

@@ -1,4 +1,4 @@
-package it.unibo.dap.modelling
+package it.unibo.dap.model
 
 /** A multiset datatype. */
 trait MSet[A] extends (A => Int):

@@ -1,6 +1,6 @@
 package it.unibo.dap.dsl
 
-import it.unibo.dap.modelling.dsl.MSetDSL.{ *, given }
+import it.unibo.dap.model.dsl.MSetDSL.{ *, given }
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

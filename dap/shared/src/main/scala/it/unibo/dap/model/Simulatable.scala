@@ -1,4 +1,4 @@
-package it.unibo.dap.modelling
+package it.unibo.dap.model
 
 /** A type class for simulatable models.
   * @tparam M the type of the model to simulate

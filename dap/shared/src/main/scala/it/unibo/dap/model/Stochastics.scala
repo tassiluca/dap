@@ -1,4 +1,4 @@
-package it.unibo.dap.modelling
+package it.unibo.dap.model
 
 object Stochastics:
 

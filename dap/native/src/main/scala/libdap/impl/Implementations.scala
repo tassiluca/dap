@@ -1,52 +1,46 @@
 package libdap.impl
 
 import it.unibo.dap.api.NativeProductApi
+import it.unibo.dap.model.Equatable
 import it.unibo.dap.utils.CUtils.{ freshPointer, withLogging }
-import libdap.aliases.{ uint8_t, Token }
+import libdap.aliases.{ size_t, Neighbour, Token }
 import libdap.structs.*
 
 import scala.scalanative.libc
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.*
-import scala.scalanative.unsigned.UByte
-import scala.scalanative.unsafe.Size.intToSize
 
 object Implementations extends libdap.ExportedFunctions:
-  import it.unibo.dap.api.NativeProductApi.NativeInterface.{ toDAPState, toState, given }
+  import it.unibo.dap.api.NativeProductApi.NativeInterface.given
 
-  setup()
+  override def MSet_Token_free(set: Ptr[MSet_Token]): Unit =
+    stdlib.free((!set).elements)
+    stdlib.free(set)
+
+  override def MSet_Token_of(elements: Ptr[Token], size: size_t): Ptr[MSet_Token] =
+    val mset = freshPointer[MSet_Token]()
+    (!mset).size = size
+    (!mset).elements = freshPointer[Token](size.toInt)
+    for i <- 0 until size.toInt do (!mset).elements(i) = elements(i)
+    mset
 
   override def launch_simulation(
-      rules: Ptr[MSet_Rule],
+      rules: Ptr[Rule],
+      rules_size: size_t,
       s0: Ptr[DAPState],
       port: CInt,
-      neighborhood: Ptr[MSet_Neighbour],
+      neighbors: Ptr[Neighbour],
+      neighbors_size: size_t,
       on_state_change: CFuncPtr1[Ptr[DAPState], Unit],
-  ): Unit = withLogging:
-    val allRules = crulesCvt(rules)
-    val initialState = (!s0).toState
+      equals_fn: CFuncPtr2[Ptr[RawData], Ptr[RawData], CInt],
+  ): Unit =
+    given Equatable[Token] = (t1, t2) => equals_fn(t1.value, t2.value) == 1
+    val allRules = (0 until rules_size.toInt).map(rules(_)).map(given_Conversion_CRule_Rule).toSet
+    val neighbourhood =
+      (0 until neighbors_size.toInt).map(neighbors(_)).map(given_Conversion_CNeighbour_Neighbour).toSet
+    val initialState = given_Conversion_CDAPState_State(!s0)
     val simulate = NativeProductApi.interface.simulate(allRules, initialState, s => Zone(on_state_change(s.toDAPState)))
-    simulate(port, neighborhood)
-
-  override def register_equatable(equals_fn: CFuncPtr2[Ptr[SerializedData], Ptr[SerializedData], CInt]): CInt =
-    val eq = (t1: Token, t2: Token) => equals_fn(t1.value, t2.value) == 1
-    NativeProductApi.interface.registerEquatable[Token](eq)
-    0
-
-  private def setup(): Unit =
-    val ser = (token: Token) =>
-      val data = !token.value
-      val arr = new Array[Byte](data.size.toInt)
-      for i <- 0 until data.size.toInt do arr(i) = data.data(i).toByte
-      arr
-    val de = (buff: Array[Byte]) =>
-      val size = buff.length
-      val deserializedData = stdlib.malloc(sizeOf[SerializedData]).asInstanceOf[Ptr[SerializedData]]
-      (!deserializedData).size = size.toCSize
-      (!deserializedData).data = freshPointer[uint8_t](size)
-      for i <- 0 until size do (!deserializedData).data(i) = UByte.valueOf(buff(i))
-      Token(deserializedData)
-    NativeProductApi.interface.registerSerDe(ser, de)
-  end setup
+    simulate(port, neighbourhood)
+  end launch_simulation
 
 end Implementations
