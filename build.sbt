@@ -73,15 +73,3 @@ lazy val dapJVMExamples = project.in(file("dap-jvm-examples"))
     Compile / mainClass := Some("it.unibo.dap.examples.GossipSimulationApp")
   )
   .dependsOn(dap.jvm)
-
-/* Subproject for DAP library's client with some example using the Native platform. */
-lazy val dapNativeExamples = project.in(file("dap-native-examples"))
-  .settings(
-    name := "dap-native-examples",
-  )
-  .dependsOn(dap.native)
-
-lazy val dapJSExamples = project.in(file("dap-js-examples"))
-  .settings(
-    name := "dap-js-examples",
-  )

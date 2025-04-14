@@ -1,0 +1,8 @@
+[versions]
+
+[libraries]
+
+[bundles]
+
+[plugins]
+c-application = "dev.guillermo.gradle.c-application:0.5.0"

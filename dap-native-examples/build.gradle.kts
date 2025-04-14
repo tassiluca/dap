@@ -1,53 +1,63 @@
 import java.nio.file.Path
 
-plugins {
-    id("dev.guillermo.gradle.c-application") version "0.5.0"
-}
+val libFolder = rootDir.resolve("lib")
+val libDAP = DAPNativeLib()
 
-application {
-    privateHeaders.from(file("src/main/c"), libFolder)
-    dependencies {
-        implementation(files(libFolder))
-    }
-}
-
-tasks.withType<LinkExecutable>().configureEach {
-    linkerArgs.addAll(listOf("-L${libFolder.absolutePath}", "-ldap", "-Wl,-rpath,${libFolder.absolutePath}"))
-}
-
-val libFolder = file("lib").also { it.mkdir() }
 inner class DAPNativeLib {
     val name: String = "dap"
     val libraryName = "lib$name"
     val projectPath: Path = rootDir.parentFile.toPath().resolve(name)
-    fun headerFile(): File? = projectPath.toFile()
-        .walkTopDown()
-        .find { it.isFile && it.name == "$name.h" }
-    fun libFile(): File? = projectPath.toFile()
-        .walkTopDown()
-        .find { it.isFile && it.name.matches(Regex("$libraryName\\.(so|dylib|dll|lib)")) }
+
+    fun headerFile(): File? = matchingFile { it.isFile && it.name == "$name.h" }
+
+    fun libFile(): File? = matchingFile { it.isFile && it.name.matches(Regex("$libraryName\\.(so|dylib|dll|lib)")) }
+
+    private fun matchingFile(predicate: (File) -> Boolean) = projectPath.toFile().walkTopDown().find(predicate)
+
     fun build(): File? = exec {
         workingDir(rootDir.parentFile)
-        commandLine("sbt", "dapNative/nativeLink")
+        commandLine("sbt", "${name}Native/nativeLink")
     }.assertNormalExitValue().let { libFile() }
 }
-val libdap = DAPNativeLib()
 
-tasks.register("buildLibs") {
+plugins {
+    alias(libs.plugins.c.application)
+}
+
+/* C configuration. */
+application {
+    privateHeaders.from(file("src/main/c"), libFolder)
+}
+
+tasks.withType<CppCompile>().configureEach {
+    dependsOn(buildNativeLibs)
+}
+
+tasks.withType<LinkExecutable>().configureEach {
+    with(libFolder) {
+        linkerArgs.addAll(listOf("-L$absolutePath", "-l${libDAP.name}", "-Wl,-rpath,$absolutePath"))
+    }
+}
+
+/* Common configurations. */
+tasks.build {
+    dependsOn(buildNativeLibs)
+}
+
+tasks.clean {
+    doLast { libFolder.deleteRecursively() }
+}
+
+val buildNativeLibs by tasks.registering {
     group = "build"
-    description = "Build needed libraries"
+    description = "Build local native libraries"
     doLast {
         if (!libFolder.exists() || libFolder.listFiles()?.isEmpty() == true) {
             logger.quiet("Building DAP Native library...")
-            libdap.build()?.let { builtLib ->
+            libDAP.build()?.let { builtLib ->
                 builtLib.copyTo(File(libFolder, builtLib.name))
-                libdap.headerFile()?.copyTo(File(libFolder, "${libdap.name}.h"))
+                libDAP.headerFile()?.copyTo(File(libFolder, "${libDAP.name}.h"))
             }
         }
     }
-    mustRunAfter(tasks.clean)
-}
-
-tasks.clean.get().doLast {
-    libFolder.deleteRecursively()
 }
