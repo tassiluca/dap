@@ -2,7 +2,7 @@ package libdap.impl
 
 import it.unibo.dap.api.NativeProductApi
 import it.unibo.dap.model.Equatable
-import it.unibo.dap.utils.CUtils.{ freshPointer, withLogging }
+import it.unibo.dap.utils.CUtils.*
 import libdap.aliases.{ size_t, Neighbour, Token }
 import libdap.structs.*
 

@@ -1,7 +1,6 @@
 package it.unibo.dap.utils
 
-import scala.concurrent.{ Future, Promise }
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.Promise
 import scala.scalajs.js.timers.setTimeout
 
 object Platform:
