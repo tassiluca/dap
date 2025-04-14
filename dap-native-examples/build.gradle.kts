@@ -1,3 +1,4 @@
+import com.pswidersk.gradle.python.VenvTask
 import java.nio.file.Path
 
 val libFolder = rootDir.resolve("lib")
@@ -22,6 +23,7 @@ inner class DAPNativeLib {
 
 plugins {
     alias(libs.plugins.c.application)
+    alias(libs.plugins.python.application)
 }
 
 /* C configuration. */
@@ -37,6 +39,16 @@ tasks.withType<LinkExecutable>().configureEach {
     with(libFolder) {
         linkerArgs.addAll(listOf("-L$absolutePath", "-l${libDAP.name}", "-Wl,-rpath,$absolutePath"))
     }
+}
+
+/* Python configuration. */
+pythonPlugin {
+    pythonVersion = "3.13.1"
+}
+
+tasks.register<VenvTask>("runPython") {
+    workingDir = projectDir.resolve("src/main/python")
+    args = listOf("test.py")
 }
 
 /* Common configurations. */
