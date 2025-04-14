@@ -19,11 +19,10 @@ trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networki
         override def close(): Unit = socket.close()
     yield conn
 
-  override def in(port: Port): Try[ConnectionListener] =
+  override def in(port: Port)(onReceive: T => Unit): Try[ConnectionListener] =
     for
       socketServer <- Try(ServerSocket(port))
       connListener = new ConnectionListener:
-        private var messageCallback: Option[T => Unit] = None
         private val acceptLoop = Future:
           continually(Try(socketServer.accept())).filter(_.isSuccess).foreach(s => serve(s.get))
         private def serve(client: Socket) = Future:
@@ -33,11 +32,9 @@ trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networki
             .takeWhile(_ > 0)
             .foreach: readBytes =>
               val message = deserialize(buffer.take(readBytes))
-              messageCallback.foreach(_(message))
+              onReceive(message)
           client.close()
         .recover { case _: Exception => if !client.isClosed then client.close() }
-        override def onReceive(callback: T => Unit): Unit = synchronized:
-          messageCallback = Some(callback)
         override def isOpen: Boolean = socketServer.isClosed
         override def close(): Unit = socketServer.close()
     yield connListener

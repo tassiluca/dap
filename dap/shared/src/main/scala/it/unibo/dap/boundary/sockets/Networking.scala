@@ -14,7 +14,7 @@ trait Networking[+MessageIn: Serializable, -MessageOut: Serializable]:
   def out(endpoint: Endpoint): Try[Connection]
 
   /** Creates an incoming [[ConnectionListener]] on the given [[port]]. */
-  def in(port: Port): Try[ConnectionListener]
+  def in(port: Port)(onReceive: MessageIn => Unit): Try[ConnectionListener]
 
   /** A closable outbound connection to a remote endpoint through which messages flow. */
   trait Connection extends AutoCloseable:
@@ -23,5 +23,4 @@ trait Networking[+MessageIn: Serializable, -MessageOut: Serializable]:
 
   /** A closable inbound listener for incoming messages from remote endpoints. */
   trait ConnectionListener extends AutoCloseable:
-    def onReceive(callback: MessageIn => Unit): Unit
     def isOpen: Boolean

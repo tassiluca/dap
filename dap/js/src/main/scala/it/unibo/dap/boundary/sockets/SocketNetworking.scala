@@ -1,46 +1,41 @@
 package it.unibo.dap.boundary.sockets
 
-import it.unibo.dap.boundary.sockets.{ InetTypes, Networking }
 import it.unibo.dap.controller.Serializable
 import it.unibo.dap.controller.Serializable.{ deserialize, serialize }
 
+import scala.concurrent.{ Await, ExecutionContext, Promise }
 import scala.scalajs.js.typedarray.Uint8Array
 import scala.util.Try
+import scala.concurrent.duration.DurationInt
 
-trait SocketNetworking[T: Serializable] extends Networking[T, T] with InetTypes:
+trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networking[T, T] with InetTypes:
 
-  override def out(endpoint: Endpoint): Try[Connection] = ???
-//    new Connection:
-//      private val socket = SocketClient.connect(endpoint._1, endpoint._2, _ => ())
-//
-//      override def send(msg: T): Try[Unit] = Try:
-//        val bytes = serialize(msg)
-//        val data = Uint8Array(bytes.length)
-//        for i <- bytes.indices do data(i) = bytes(i)
-//        socket.write(data)
-//
-//      override def isOpen: Boolean = !socket.destroyed
-//
-//      override def close(): Unit = socket.destroy()
+  override def out(endpoint: Endpoint): Try[Connection] =
+    def createConnection(socket: Socket) = new Connection:
+      override def send(msg: T): Try[Unit] = Try:
+        val bytes = serialize(msg)
+        val data = Uint8Array(bytes.length)
+        for i <- bytes.indices do data(i) = bytes(i)
+        socket.write(data)
+      override def isOpen: Boolean = !socket.destroyed
+      override def close(): Unit = socket.destroy()
+    val promiseConn = Promise[Connection]()
+    val socket = Net.connect(endpoint._2, endpoint._1)
+    socket.on("connect", _ => promiseConn.trySuccess(createConnection(socket)))
+    socket.on("error", err => promiseConn.tryFailure(new Exception(err.toString)))
+    Try(Await.result(promiseConn.future, 5.seconds)).recover { case ex => socket.destroy(); ex }
 
-  override def in(port: Port): Try[ConnectionListener] = ???
-//    new ConnectionListener:
-//      private var msgCallback: Option[T => Unit] = None
-//      private var open = true
-//      private val server = SocketServer.start(
-//        port,
-//        data =>
-//          val bytes = new Array[Byte](data.length)
-//          for i <- 0 until data.length do bytes(i) = data(i).toByte
-//          val msg = deserialize(bytes)
-//          msgCallback.foreach(_(msg)),
-//      )
-//
-//      override def onReceive(callback: T => Unit): Unit = msgCallback = Some(callback)
-//
-//      override def isOpen: Boolean = open
-//
-//      override def close(): Unit =
-//        open = false
-//        server.close()
+  override def in(port: Port)(onReceive: T => Unit): Try[ConnectionListener] =
+    val promiseConnListener = Promise[ConnectionListener]()
+    def react(data: Uint8Array): Unit =
+      val bytes = new Array[Byte](data.length)
+      for i <- 0 until data.length do bytes(i) = data(i).toByte
+      onReceive(deserialize(bytes))
+    val server = Net.createServer(socket => socket.on("data", data => react(data.asInstanceOf[Uint8Array])))
+    val connectionListener = new ConnectionListener:
+      private var open = true
+      override def isOpen: Boolean = open
+      override def close(): Unit = open = false; server.close()
+    server.on("listening", _ => promiseConnListener.trySuccess(connectionListener))
+    Try(Await.result(promiseConnListener.future, 5.seconds)).recover { case ex => connectionListener.close(); ex }
 end SocketNetworking

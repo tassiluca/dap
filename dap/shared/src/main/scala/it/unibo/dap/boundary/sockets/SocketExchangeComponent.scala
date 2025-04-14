@@ -44,11 +44,9 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
 
     private def establishConnection(endpoint: Endpoint): Option[Connection] = ctx.out(endpoint).toOption
 
-    private def serveClients(using ExecutionContext): Unit = ctx.in(port) match
+    private def serveClients(using ExecutionContext): Unit = ctx.in(port)(inChannel.push) match
       case Failure(e) => scribe.error(s"Error while starting socket server: ${e.getMessage}")
-      case Success(listener) =>
-        scribe.info(s"Socket server bound to port $port")
-        listener.onReceive(inChannel.push)
+      case Success(_) => scribe.info(s"Socket server bound to port $port")
   end SocketExchange
 
 end SocketExchangeComponent
