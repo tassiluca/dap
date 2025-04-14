@@ -24,7 +24,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.jvm-version }}
-      - name: Setup Cpp
+      - name: Setup LLVM
         uses: aminya/setup-cpp@v1
         with:
           compiler: llvm-17
@@ -38,9 +38,7 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
       - name: Install Boehm GC on MacOS
         if: startsWith(matrix.os, 'macos')
-        run: |
-          brew install bdw-gc
-          export LIBRARY_PATH=/opt/homebrew/lib:$LIBRARY_PATH
+        run: brew install bdw-gc
       - name: Setup sbt launcher
         uses: sbt/setup-sbt@26ab4b0fa1c47fa62fc1f6e51823a658fb6c760c # v1
       - name: Build shared library
