@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "dap.h"
+#include "../../../lib/dap.h"
 
 typedef struct {
     char* name;

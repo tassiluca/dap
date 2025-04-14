@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include "dap.h"
 #include "gossip_model.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))

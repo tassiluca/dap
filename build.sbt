@@ -1,6 +1,6 @@
 import bindgen.interface.Binding
 import org.scalajs.linker.interface.OutputPatterns
-import scala.scalanative.build.{BuildTarget, GC, LTO, Mode, Sanitizer}
+import scala.scalanative.build.{ BuildTarget, GC, LTO, Mode }
 
 ThisBuild / scalaVersion := "3.6.4"
 ThisBuild / semanticdbEnabled := true
@@ -21,23 +21,29 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:experimental.betterFors",
 )
 
+lazy val os = System.getProperty("os.name").toLowerCase
+
+lazy val nativePackageName = "libdap"
+
 /* Distributed Asynchronous Petri Nets (DAP) library subproject. */
 lazy val dap = crossProject(JVMPlatform, NativePlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("dap"))
   .nativeConfigure(
     _.settings(
-      nativeConfig ~= { conf =>
-        conf.withGC(GC.boehm) // garbage collector
+      nativeConfig ~= { defaultConf =>
+        // Macos builds differently from linux,
+        // see https://stackoverflow.com/questions/66268814/dyld-library-not-loaded-how-to-correctly-tell-gcc-compiler-where-to-find/66284977#66284977]
+        val additionalLinkingOptions =
+          if (os contains "mac") Seq(s"-Wl,-install_name,'@rpath/$nativePackageName.dylib'") else Seq()
+        defaultConf.withGC(GC.boehm) // garbage collector
           .withLTO(LTO.full) // link-time optimization
           .withMode(Mode.releaseSize) // build mode
           .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
-          .withSanitizer(Sanitizer.ThreadSanitizer)
-          .withSanitizer(Sanitizer.AddressSanitizer)
-          .withSanitizer(Sanitizer.UndefinedBehaviourSanitizer)
+          .withLinkingOptions(defaultConf.linkingOptions ++ additionalLinkingOptions)
       },
       bindgenBindings := Seq(
-        Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName = "libdap").withExport(true),
+        Binding(header = (Compile / resourceDirectory).value / "dap.h", nativePackageName).withExport(true),
       )
     ).enablePlugins(BindgenPlugin)
   )
