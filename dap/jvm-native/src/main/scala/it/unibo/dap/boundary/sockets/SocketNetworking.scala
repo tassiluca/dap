@@ -10,16 +10,16 @@ import scala.util.Try
 
 trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networking[T, T] with InetTypes:
 
-  override def out(endpoint: (Address, Port)): Try[Connection] =
+  override def out(endpoint: (Address, Port)): Future[Connection] = Future.fromTry:
     for
       socket <- Try(Socket(endpoint._1, endpoint._2))
       conn = new Connection:
-        override def send(msg: T): Try[Unit] = Try(socket.getOutputStream.write(serialize(msg)))
+        override def send(msg: T): Future[Unit] = Future.fromTry(Try(socket.getOutputStream.write(serialize(msg))))
         override def isOpen: Boolean = !socket.isClosed
         override def close(): Unit = socket.close()
     yield conn
 
-  override def in(port: Port)(onReceive: T => Unit): Try[ConnectionListener] =
+  override def in(port: Port)(onReceive: T => Unit): Future[ConnectionListener] = Future.fromTry:
     for
       socketServer <- Try(ServerSocket(port))
       connListener = new ConnectionListener:

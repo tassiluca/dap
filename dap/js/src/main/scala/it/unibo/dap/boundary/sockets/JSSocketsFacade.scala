@@ -14,12 +14,11 @@ object Net extends js.Object:
 trait Server extends js.Object:
   def listen(port: Int): Unit = js.native
   def close(): Unit = js.native
-  def on(event: String, callback: js.Function1[js.Any, Unit]): Unit = js.native
+  def on(event: String)(callback: js.Function1[js.Any, Unit]): Unit = js.native
 
 @js.native
 trait Socket extends js.Object:
-  def write(data: String): Unit = js.native
-  def write(data: Uint8Array): Unit = js.native
-  def on(event: String, callback: js.Function1[js.Any, Unit]): Unit = js.native
+  def write(data: Uint8Array)(callback: js.Function1[Error | Null, Any]): Unit = js.native
+  def on(event: String)(callback: js.Function1[js.Any, Unit]): Unit = js.native
   def destroy(): Unit = js.native
   def destroyed: Boolean = js.native

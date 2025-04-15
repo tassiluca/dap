@@ -32,7 +32,7 @@ const rule2 = ProductAPI.JSInterface.Rule(
 )
 const allRules = [rule1, rule2];
 // Initial state
-const s0 = ProductAPI.JSInterface.State([a], null);
+const s0 = port === 2550 ? ProductAPI.JSInterface.State([a], null) : ProductAPI.JSInterface.State([], null);
 ProductAPI.JSInterface.launchSimulation(allRules, s0, port, net, state => {
     console.log("Hello from the simulation!");
     console.log(state.tokens);

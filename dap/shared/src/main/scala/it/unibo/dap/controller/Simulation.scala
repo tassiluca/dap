@@ -7,6 +7,7 @@ import it.unibo.dap.utils.Async
 
 import scala.concurrent.duration.DurationDouble
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.language.experimental.betterFors
 
 /** A distributed simulation.
   * @tparam B the [[Simulatable]] behaviour to simulate
