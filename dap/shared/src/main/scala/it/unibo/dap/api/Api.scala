@@ -3,6 +3,8 @@ package it.unibo.dap.api
 import it.unibo.dap.model.Equatable
 import it.unibo.dap.controller.Serializable
 
+import scala.scalajs.js.annotation.JSExport
+
 /** The library entry-point language- and platform-agnostic API. */
 trait Api:
 
@@ -11,9 +13,17 @@ trait Api:
 
   /** The API Abstract Data Types. */
   trait ADTs:
+
+    @JSExport
     type Neighbour = String
+
+    @JSExport
     case class MSet[T](elems: T*)
+
+    @JSExport
     case class Rule[Token](pre: MSet[Token], rate: Double, eff: MSet[Token], msg: Option[Token])
+
+    @JSExport
     case class State[Token](tokens: MSet[Token], msg: Option[Token])
 
   /** The API interface with which platform-specific code interacts. It needs to be mixed-in with the [[ADTs]]. */

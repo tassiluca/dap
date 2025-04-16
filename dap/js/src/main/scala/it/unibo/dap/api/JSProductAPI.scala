@@ -5,42 +5,36 @@ import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{ JSExport, JSExportAll, JSExportTopLevel }
 
-@JSExportTopLevel("ProductAPI")
 object JSProductAPI extends ProductApi:
 
   override val interface: ProductInterface = JSInterface
 
+  @JSExportTopLevel("DAPApi")
   @JSExportAll
-  @JSExport
   object JSInterface extends ProductInterface with JSADTs:
     override given ExecutionContext = JSExecutionContext.queue
 
-    def launchSimulation(
-        rules: js.Array[JSRule],
-        initial: JSState,
-        port: Int,
-        neighbourhood: js.Array[Neighbour],
-        onStateChange: js.Function1[JSState, Unit],
-    ): Unit = simulate(rules.toSet, initial, onStateChange(_))(port, neighbourhood.toSet)
+    def ruleOf[Token](pre: MSet[Token], rate: Double, eff: MSet[Token], msg: Token): Rule[Token] =
+      Rule(pre, rate, eff, Some(msg))
 
+    def ruleOf[Token](pre: MSet[Token], rate: Double, eff: MSet[Token]): Rule[Token] = Rule(pre, rate, eff, None)
+
+    def stateOf[Token](tokens: MSet[Token], msg: Token): State[Token] = State(tokens, Some(msg))
+
+    def stateOf[Token](tokens: MSet[Token]): State[Token] = State(tokens, None)
+
+    def simulate(
+        rules: js.Array[Rule[Token]],
+        initial: State[Token],
+        port: Int,
+        neighbours: js.Array[Neighbour],
+        updateFn: js.Function1[State[Token], Unit],
+    ): Unit = simulate(rules.toSet, initial, updateFn)(port, neighbours.toSet)
   end JSInterface
 
   trait JSADTs extends ADTs:
     import it.unibo.dap.model.Equatable
-
     type Token = String
-
     export it.unibo.dap.controller.SerializableInstances.given_Serializable_String
     given Equatable[String] = _ == _
-
-    @JSExport("Rule")
-    class JSRule(pre: js.Array[Token], rate: Double, eff: js.Array[Token], msg: Token)
-        extends Rule(MSet(pre.toList*), rate, MSet(eff.toList*), Option(msg))
-
-    given Conversion[State[Token], JSState] = s => JSState(js.Array(s.tokens.elems*), s.msg.getOrElse(""))
-
-    @JSExport("State")
-    class JSState(tokens: js.Array[Token], msg: Token) extends State(MSet(tokens.toList*), Option(msg)):
-      @JSExport("tokens") def jsTokens: js.Array[Token] = tokens
-      @JSExport("msg") def jsMsg: Token = msg
 end JSProductAPI

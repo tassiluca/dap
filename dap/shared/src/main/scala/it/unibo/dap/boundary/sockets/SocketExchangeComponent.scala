@@ -29,16 +29,14 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
       for
         msg <- outChannel.pop()
         neighbors <- Future.successful(ctx.neighbourhoodResolver())
-        newConnections: Set[Either[Throwable, (Endpoint, Connection)]] <- Future.traverse(neighbors): n =>
+        newConnections <- Future.traverse(neighbors): n =>
           connections
             .get(n)
             .filter(_.isOpen)
-            .map(c => Future.successful(n -> c))
-            .getOrElse(establishConnection(n).map(n -> _))
-            .flatMap((nc: (Endpoint, Connection)) => nc._2.send(msg).map(_ => nc))
-            .map(Right(_))
+            .fold(establishConnection(n))(Future.successful)
+            .flatMap(c => c.send(msg).map(_ => Right(n -> c)))
             .recover { case e => Left(e) }
-        _ <- client(newConnections.collect { case Right((n, c)) => n -> c }.toMap)
+        _ <- client(newConnections.collect { case Right(nc) => nc }.toMap)
       yield ()
 
     private def establishConnection(endpoint: Endpoint): Future[Connection] = ctx.out(endpoint)
