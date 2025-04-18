@@ -3,26 +3,35 @@ package libdap.impl
 import it.unibo.dap.api.NativeProductApi
 import it.unibo.dap.model.Equatable
 import it.unibo.dap.utils.CUtils.*
-import libdap.aliases.{ size_t, Neighbour, Token }
+import libdap.aliases.{ size_t, uint8_t, Neighbour, Token }
 import libdap.structs.*
 
 import scala.scalanative.libc
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.*
+import scala.util.chaining.scalaUtilChainingOps
 
 object Implementations extends libdap.ExportedFunctions:
   import it.unibo.dap.api.NativeProductApi.NativeInterface.given
+
+  override def pack(data: Ptr[uint8_t], size: size_t): Ptr[RawData] =
+    freshPointer[RawData]().tap: rd =>
+      (!rd).data = freshPointer[uint8_t](size.toInt)
+      (!rd).size = size
+      for i <- 0 until size.toInt do (!rd).data(i) = data(i)
 
   override def MSet_Token_free(set: Ptr[MSet_Token]): Unit =
     stdlib.free((!set).elements)
     stdlib.free(set)
 
   override def MSet_Token_of(elements: Ptr[Token], size: size_t): Ptr[MSet_Token] =
-    val mset = freshPointer[MSet_Token]()
-    (!mset).size = size
-    (!mset).elements = freshPointer[Token](size.toInt)
-    for i <- 0 until size.toInt do (!mset).elements(i) = elements(i)
-    mset
+    freshPointer[MSet_Token]().tap: mset =>
+      (!mset).size = size
+      (!mset).elements = freshPointer[Token](size.toInt)
+      for i <- 0 until size.toInt do (!mset).elements(i) = elements(i)
+
+  override def MSet_Token_get(set: Ptr[MSet_Token], index: size_t): Token =
+    if index >= (!set).size then null.asInstanceOf[Token] else (!set).elements(index.toInt)
 
   override def launch_simulation(
       rules: Ptr[Rule],

@@ -23,6 +23,11 @@ typedef struct {
 } RawData;
 
 /*
+ * Packs the given data into a RawData structure.
+ */
+RawData *pack(uint8_t* data, size_t size);
+
+/*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
  * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
  */
@@ -36,6 +41,11 @@ typedef struct {                                                            \
  * Creates a new multi-set with the given elements and size.
  */                                                                         \
 MSet_##Type* MSet_##Type##_of(Type* elements, size_t size);                 \
+                                                                            \
+/*
+ * Gets the index-th element of the multi-set.
+ */                                                                         \
+Type MSet_##Type##_get(MSet_##Type* set, size_t index);                     \
                                                                             \
 /*
  * Frees the memory allocated for the multi-set.
