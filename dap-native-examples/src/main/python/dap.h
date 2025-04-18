@@ -22,6 +22,19 @@ typedef struct {
     size_t size;
 } RawData;
 
+RawData *pack(uint8_t* data, size_t size) {
+    RawData *rd = (RawData*)malloc(sizeof(RawData));
+    if (!rd) return NULL;
+    rd->data = (uint8_t*)malloc(size);
+    if (!rd->data) {
+        free(rd);
+        return NULL;
+    }
+    memcpy(rd->data, data, size);
+    rd->size = size;
+    return rd;
+}
+
 /*
  * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
  * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
@@ -40,7 +53,14 @@ MSet_##Type* MSet_##Type##_of(Type* elements, size_t size);                 \
 /*
  * Frees the memory allocated for the multi-set.
  */                                                                         \
-void MSet_##Type##_free(MSet_##Type* set);
+void MSet_##Type##_free(MSet_##Type* set);                                  \
+                                                                            \
+Type MSet_##Type##_get(MSet_##Type* set, size_t index) {                    \
+    if (index < set->size) {                                                \
+        return set->elements[index];                                        \
+    }                                                                       \
+    return NULL;                                                            \
+}
 
 /*
  * An opaque data structure representing a token in a DAP model, i.e.,

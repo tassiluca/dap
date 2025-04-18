@@ -7,13 +7,13 @@ val libDAP = DAPNativeLib()
 inner class DAPNativeLib {
     val name: String = "dap"
     val libraryName = "lib$name"
-    val projectPath: Path = rootDir.parentFile.toPath().resolve(name)
+    val project: File = rootDir.parentFile.resolve(name)
 
-    fun headerFile(): File? = matchingFile { it.isFile && it.name == "$name.h" }
+    fun headerFile(): File? = matchingFile { it.name == "$name.h" }
 
-    fun libFile(): File? = matchingFile { it.isFile && it.name.matches(Regex("$libraryName\\.(so|dylib|dll|lib)")) }
+    fun libFile(): File? = matchingFile { it.name.matches(Regex("$libraryName\\.(so|dylib|dll|lib)")) }
 
-    private fun matchingFile(predicate: (File) -> Boolean) = projectPath.toFile().walkTopDown().find(predicate)
+    private fun matchingFile(predicate: (File) -> Boolean) = project.walkTopDown().find { it.isFile && predicate(it) }
 
     fun build(): File? = exec {
         workingDir(rootDir.parentFile)

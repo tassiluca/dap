@@ -2,6 +2,7 @@ from dap import *
 import argparse
 from datetime import datetime
 import msgpack
+import time
 
 parser = argparse.ArgumentParser(description="Distributed Asynchronous Petri Nets simulation.")
 parser.add_argument("--port", type=int, required=True, help="Service port")
@@ -31,12 +32,6 @@ token_a = TokenImpl("a", port)
 token_b = TokenImpl("b", port)
 a = pack(token_a.serialize())
 b = pack(token_b.serialize())
-
-# === Neighbours net ===
-print("Port: ", port)
-net = MSet_Neighbour_create(len(neighbors))
-for i in range(len(neighbors)):
-    MSet_Neighbour_set(net, i, neighbors[i])
 
 # === Global instances ===
 _global_eq_instance = None
@@ -81,60 +76,46 @@ class PyStateChangeListener(StateChangeListener):
 # === Rules ===
 # 1) a --1--> a|^a
 rule = Rule()
-rule.preconditions = MSet_Token_create(1)
-MSet_Token_set(rule.preconditions, 0, a)
+rule.preconditions = MSet_Token_of([a])
 rule.rate = 1.0
-rule.effects = MSet_Token_create(1)
-MSet_Token_set(rule.effects, 0, a)
+rule.effects = MSet_Token_of([a])
 rule.msg = a
 # 2) a|a --1000--> a
 rule2 = Rule()
-rule2.preconditions = MSet_Token_create(2)
-MSet_Token_set(rule2.preconditions, 0, a)
-MSet_Token_set(rule2.preconditions, 1, a)
-rule2.rate = 1000.0
-rule2.effects = MSet_Token_create(1)
-MSet_Token_set(rule2.effects, 0, a)
+rule2.preconditions = MSet_Token_of([a, a])
+rule2.rate = 1_000.0
+rule2.effects = MSet_Token_of([a])
 rule2.msg = None
 # 3) a|b --2--> a|b|^b
 rule3 = Rule()
-rule3.preconditions = MSet_Token_create(2)
-MSet_Token_set(rule3.preconditions, 0, a)
-MSet_Token_set(rule3.preconditions, 1, b)
+rule3.preconditions = MSet_Token_of([a, b])
 rule3.rate = 2.0
-rule3.effects = MSet_Token_create(2)
-MSet_Token_set(rule3.effects, 0, a)
-MSet_Token_set(rule3.effects, 1, b)
+rule3.effects = MSet_Token_of([a, b])
 rule3.msg = b
 # 4) b|b --1_000--> b
 rule4 = Rule()
-rule4.preconditions = MSet_Token_create(2)
-MSet_Token_set(rule4.preconditions, 0, b)
-MSet_Token_set(rule4.preconditions, 1, b)
+rule4.preconditions = MSet_Token_of([b, b])
 rule4.rate = 1000.0
-rule4.effects = MSet_Token_create(1)
-MSet_Token_set(rule4.effects, 0, b)
+rule4.effects = MSet_Token_of([b])
 rule4.msg = None
-# All rules
-all_rules = MSet_Rule_create(4)
-MSet_Rule_set(all_rules, 0, rule)
-MSet_Rule_set(all_rules, 1, rule2)
-MSet_Rule_set(all_rules, 2, rule3)
-MSet_Rule_set(all_rules, 3, rule4)
+all_rules = [rule, rule2, rule3, rule4]
 
 # === Initial state ===
 if port == 2550:
-    initial_tokens = MSet_Token_create(1)
-    MSet_Token_set(initial_tokens, 0, a)
+    initial_tokens = MSet_Token_of([a])
 elif port == 2553:
-    initial_tokens = MSet_Token_create(1)
-    MSet_Token_set(initial_tokens, 0, b)
+    initial_tokens = MSet_Token_of([b])
 else:
-    initial_tokens = MSet_Token_create(0)
+    initial_tokens = MSet_Token_of([])
 initial_state = DAPState()
 initial_state.tokens = initial_tokens
 initial_state.msg = None
 
 # === Launch simulation ===
-register_eq_wrapper(PyEq())
-launch_simulation_wrapper(all_rules, initial_state, port, net, PyStateChangeListener())
+
+print("[🐍] Launching simulation...")
+
+launch_simulation_wrapper(all_rules, initial_state, port, neighbors, PyStateChangeListener(), PyEq())
+
+time.sleep(30)
+print("[🐍] Simulation finished.")
