@@ -88,7 +88,9 @@ typedef struct {
  * A neighbor place (node) in the Distributed Petri Net.
  * It is represented as string in the form of <hostname>:<port>.
  */
-typedef const signed char* Neighbour;
+typedef struct {
+    const char* name;
+} Neighbour;
 
 /*
  * Launches the distributed simulation of a DAP model.

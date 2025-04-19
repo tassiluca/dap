@@ -9,7 +9,11 @@ parser.add_argument("--port", type=int, required=True, help="Service port")
 parser.add_argument("--neighbors", type=str, nargs="+", required=True, help="Neighbors to connect to")
 args = parser.parse_args()
 port = args.port
-neighbors = [n for n in args.neighbors]
+neighbors = []
+for neighbor in args.neighbors:
+    n = Neighbour()
+    n.name = neighbor
+    neighbors.append(n)
 
 class TokenImpl():
     def __init__(self, name: str, device_id: int):

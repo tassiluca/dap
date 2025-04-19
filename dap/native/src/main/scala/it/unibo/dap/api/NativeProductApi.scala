@@ -6,8 +6,14 @@ import scala.scalanative.unsafe.Size.intToSize
 import scala.language.postfixOps
 import scala.scalanative.unsafe.*
 import it.unibo.dap.utils.CUtils.freshPointer
-import libdap.aliases.{ uint8_t, Neighbour as CNeighbour, Token as CToken }
-import libdap.structs.{ DAPState as CDAPState, MSet_Token as CMSetToken, RawData, Rule as CRule }
+import libdap.aliases.{ uint8_t, Token as CToken }
+import libdap.structs.{
+  DAPState as CDAPState,
+  MSet_Token as CMSetToken,
+  Neighbour as CNeighbour,
+  RawData,
+  Rule as CRule,
+}
 
 import java.util.concurrent.ForkJoinPool
 import scala.concurrent.ExecutionContext
@@ -59,7 +65,7 @@ object NativeProductApi extends ProductApi:
           elems(i) = CToken(t.value)
         cmset
 
-    given Conversion[CNeighbour, Neighbour] = n => fromCString(n.value)
+    given Conversion[CNeighbour, Neighbour] = n => fromCString(n.name)
 
     given Conversion[CRule, Rule[Token]] = r => Rule(r.preconditions, r.rate, r.effects, Option(r.msg))
 

@@ -10,7 +10,6 @@
 %include <carrays.i>
 %include <cpointer.i>
 %include <std_vector.i>
-%include <cstring.i>
 
 %pointer_class(size_t, SizeTPtr);
 %pointer_class(uint8_t, UInt8Ptr);
@@ -79,17 +78,6 @@
     }
 %}
 
-/* 
- * A type map that will free the memory of a char* when it is replaced by a new 
- * only if it is not the empty string. 
- */
-%typemap(memberin) char * {
-    if ($1 != NULL && $1 != protobuf_c_empty_string) {
-        free($1);
-    }
-    $1 = strdup($input);
-}
-
 // Creates an array of uint8_t that Python can manipulate
 %array_class(uint8_t, UInt8Array);
 %extend UInt8Array {
@@ -136,45 +124,8 @@
 %array_typemap_ptr(Token, RawData)
 %array_typemap_value(Rule, Rule)
 %apply (Rule* elements, size_t size) { (const Rule* rules, size_t rules_size) };
-
-%typemap(in) (const Neighbour* neighbors, size_t neighbors_size) {
-    if (!PyList_Check($input)) {
-        PyErr_SetString(PyExc_TypeError, "Expected a list of strings");
-        return NULL;
-    }
-
-    $2 = PyList_Size($input);
-    $1 = (Neighbour*) malloc($2 * sizeof(Neighbour));
-
-    for (size_t i = 0; i < $2; i++) {
-        PyObject *item = PyList_GetItem($input, i);
-
-        if (PyUnicode_Check(item)) {
-            // Convert Python string to C string
-            const char* str = PyUnicode_AsUTF8(item);
-            if (!str) {
-                free($1);
-                return NULL;  // Error already set by PyUnicode_AsUTF8
-            }
-
-            // Make a copy of the string since PyUnicode_AsUTF8 returns a
-            // temporary pointer that might be invalidated
-            $1[i] = strdup(str);
-        } else {
-            free($1);
-            PyErr_SetString(PyExc_TypeError, "List item is not a string");
-            return NULL;
-        }
-    }
-}
-
-%typemap(freearg) (Neighbour* neighbors, size_t neighbors_size) {
-    // Free each string we allocated with strdup
-    for (size_t i = 0; i < $2; i++) {
-        free((void*)$1[i]);
-    }
-    free($1);
-}
+%array_typemap_value(Neighbour, Neighbour)
+%apply (Neighbour* elements, size_t size) { (const Neighbour* neighbors, size_t neighbors_size) };
 
 %include "dap.h"
 

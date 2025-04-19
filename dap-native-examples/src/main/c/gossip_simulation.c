@@ -87,7 +87,8 @@ int main(int argc, char *argv[]) {
     int neighbours_size = argc - 2;
     Neighbour neighbours[neighbours_size];
     for (int i = 0; i < neighbours_size; i++) {
-        neighbours[i] = argv[i + 2];
+        Neighbour n = { .name = argv[i + 2] };
+        neighbours[i] = n;
     }
     /* Launch simulation. */
     launch_simulation(rules, ARRAY_LEN(rules), initial_state, port, neighbours, ARRAY_LEN(neighbours), &on_state_change, are_equals);
