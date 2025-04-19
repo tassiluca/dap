@@ -4,7 +4,7 @@ import java.nio.file.Path
 val libFolder = rootDir.resolve("lib")
 val libDAP = DAPNativeLib()
 
-inner class DAPNativeLib {
+class DAPNativeLib {
     val name: String = "dap"
     val libraryName = "lib$name"
     val project: File = rootDir.parentFile.resolve(name)
@@ -44,6 +44,12 @@ tasks.withType<LinkExecutable>().configureEach {
 /* Python configuration. */
 pythonPlugin {
     pythonVersion = "3.13.1"
+}
+
+val pipInstall by tasks.registering(VenvTask::class) {
+    venvExec = "pip"
+    val wheelFile = libFolder.walkTopDown().find { it.extension == "whl" } ?: error("No wheel found in $libFolder")
+    args = listOf("install", "$wheelFile")
 }
 
 tasks.register<VenvTask>("runPython") {

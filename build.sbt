@@ -1,6 +1,9 @@
 import bindgen.interface.Binding
 import org.scalajs.linker.interface.OutputPatterns
+
 import scala.scalanative.build.{ BuildTarget, GC, LTO, Mode }
+import scala.sys.process.Process
+import scala.util.chaining.scalaUtilChainingOps
 
 ThisBuild / scalaVersion := "3.6.4"
 ThisBuild / semanticdbEnabled := true
@@ -21,56 +24,66 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:experimental.betterFors",
 )
 
-lazy val os = System.getProperty("os.name").toLowerCase
+val libraryName = "dap"
 
-lazy val nativePackageName = "libdap"
-
-/* Distributed Asynchronous Petri Nets (DAP) library subproject. */
+/* Distributed Asynchronous Petri Nets (DAP) cross-project library. */
 lazy val dap = crossProject(JVMPlatform, NativePlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("dap"))
-  .nativeConfigure(
-    _.settings(
-      nativeConfig ~= { defaultConf =>
-        // Macos builds differently from linux,
-        // see https://stackoverflow.com/questions/66268814/dyld-library-not-loaded-how-to-correctly-tell-gcc-compiler-where-to-find/66284977#66284977]
-        val additionalLinkingOptions =
-          if (os contains "mac") Seq(s"-Wl,-install_name,'@rpath/$nativePackageName.dylib'") else Seq()
-        defaultConf.withGC(GC.boehm) // garbage collector
-          .withLTO(LTO.full) // link-time optimization
-          .withMode(Mode.releaseSize) // build mode
-          .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
-          .withLinkingOptions(defaultConf.linkingOptions ++ additionalLinkingOptions)
-      },
-      bindgenBindings := Seq(
-        Binding(header = (Compile / resourceDirectory).value / "dap.h", nativePackageName).withExport(true),
-      )
-    ).enablePlugins(BindgenPlugin)
-  )
-  .jsConfigure(
-    _.settings(
-      scalaJSLinkerConfig ~= {
-        _.withModuleKind(ModuleKind.ESModule)
-          .withOutputPatterns(OutputPatterns.fromJSFile("%s.mjs"))
-      },
-    )
-  )
   .settings(
-    name := "dap",
+    name := libraryName,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % "3.2.19",
       "com.outr" %%% "scribe" % "3.16.0",
       "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
     ),
   )
+  .nativeConfigure {
+    val packageName = s"lib${libraryName}"
+    _.settings(
+      nativeConfig ~= { defaultConf =>
+        // macOS requires an extra linking option to set the runpath for the dynamic library to be correctly
+        // resolved at runtime with `-rpath` option, see https://stackoverflow.com/a/66284977
+        val additionalLinkOpts = if (os contains "mac") Seq(s"-Wl,-install_name,'@rpath/$packageName.dylib'") else Nil
+        defaultConf.withGC(GC.boehm) // garbage collector
+          .withLTO(LTO.full) // link-time optimization
+          .withMode(Mode.releaseSize) // build mode
+          .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
+          .withLinkingOptions(defaultConf.linkingOptions ++ additionalLinkOpts)
+      },
+      bindgenBindings := Seq(
+        Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName).withExport(true),
+      )
+    ).enablePlugins(BindgenPlugin)
+  }
+  .jsConfigure {
+    _.settings(
+      scalaJSLinkerConfig ~= {
+        _.withModuleKind(ModuleKind.ESModule)
+          .withOutputPatterns(OutputPatterns.fromJSFile("%s.mjs"))
+      },
+    )
+  }
 
-/* Subprojects for DAP library's client with some example using JVM platform. */
-lazy val dapJVMExamples = project.in(file("dap-jvm-examples"))
-  .settings(
-    name := "dap-jvm-examples",
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.19"
-    ),
-    Compile / mainClass := Some("it.unibo.dap.examples.GossipSimulationApp")
-  )
-  .dependsOn(dap.jvm)
+lazy val buildNativePythonWheel = taskKey[Unit]("Build the native Python wheel for the DAP library")
+buildNativePythonWheel := {
+  val log = streams.value.log
+  val dapBaseDir = (dap.native / baseDirectory).value // dap/native
+  val pythonSrcDir = dapBaseDir / "src" / "main" / "swig" / "bindings" / "python"
+  val pythonTargetDir = dapBaseDir / "target" / "python-dist"
+  // Build the native library
+  val sharedLib = (dap.native / Compile / nativeLink).value
+  val sharedLibHeader = dapBaseDir / "src" / "main" / "resources" / "dap.h"
+  // Prepare environment
+  if (pythonTargetDir.exists()) IO.delete(pythonTargetDir)
+  IO.createDirectory(pythonTargetDir)
+  IO.copyFile(sharedLib, pythonTargetDir / sharedLib.name, CopyOptions().withOverwrite(true))
+  IO.copyFile(sharedLibHeader, pythonTargetDir / sharedLibHeader.name, CopyOptions().withOverwrite(true))
+  IO.copyDirectory(pythonSrcDir, pythonTargetDir, CopyOptions().withOverwrite(true))
+  // Build the wheel
+  log.info("Building the native Python wheel...")
+  val result = Process("python3 setup.py bdist_wheel", pythonTargetDir).!
+  if (result != 0) sys.error("Failed to build the native Python wheel.") else log.success("Successfully built!")
+}
+
+lazy val os = System.getProperty("os.name").toLowerCase

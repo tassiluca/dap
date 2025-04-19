@@ -1,5 +1,5 @@
 /*
- * Swig interface file for the DAP library.
+ * Swig interface file for the Native DAP library.
  * Notes: 
  * - to be called with `-threads` option! See [https://github.com/swig/swig/issues/927](this issue)
  * - directors are used to allow the target language to provide implementation to be called by the C code
