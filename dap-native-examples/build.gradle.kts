@@ -49,12 +49,14 @@ pythonPlugin {
 val pipInstall by tasks.registering(VenvTask::class) {
     venvExec = "pip"
     val wheelFile = libFolder.walkTopDown().find { it.extension == "whl" } ?: error("No wheel found in $libFolder")
-    args = listOf("install", "$wheelFile")
+    args = listOf("install", "$wheelFile", "--isolated", "-r", "requirements.txt")
 }
 
 tasks.register<VenvTask>("runPython") {
     workingDir = projectDir.resolve("src/main/python")
-    args = listOf("test.py")
+    val scriptArgs = project.findProperty("args") as String? ?: error("No args provided")
+    args = listOf("-u", "gossip.py") + scriptArgs.split("\\s+".toRegex())
+    dependsOn(pipInstall)
 }
 
 /* Common configurations. */
