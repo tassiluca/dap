@@ -7,7 +7,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 /** An exchange that communicates with other nodes over plain sockets. */
 trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
-  ctx: InetNeighbourhoodResolver & Networking[T, T] =>
+  ctx: InetNeighborhoodResolver & Networking[T, T] =>
 
   /** The port on which the socket server listens for incoming connections. */
   def port: Port
@@ -28,7 +28,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
     private def client(connections: Map[Endpoint, Connection] = Map.empty)(using ExecutionContext): Future[Unit] =
       for
         msg <- outChannel.pop()
-        neighbors <- Future.successful(ctx.neighbourhoodResolver())
+        neighbors <- Future.successful(ctx.neighborhoodResolver())
         newConnections <- Future.traverse(neighbors): n =>
           connections
             .get(n)

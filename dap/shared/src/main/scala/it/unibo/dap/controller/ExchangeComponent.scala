@@ -6,7 +6,7 @@ import it.unibo.dap.utils.{ ReadableChannel, SendableChannel, Spawnable }
   * @tparam T the type of the messages to exchange
   */
 trait ExchangeComponent[T]:
-  ctx: NeighbourhoodResolverComponent =>
+  ctx: NeighborhoodResolverComponent =>
 
   /** The exchange instance. */
   val exchange: Exchange
