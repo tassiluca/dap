@@ -1,15 +1,16 @@
 package libdap.impl
 
-import it.unibo.dap.api.NativeProductApi
-import it.unibo.dap.model.Equatable
-import it.unibo.dap.utils.CUtils.*
-import libdap.aliases.{ size_t, uint8_t, Token }
-import libdap.structs.*
-
 import scala.scalanative.libc
 import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.*
 import scala.util.chaining.scalaUtilChainingOps
+
+import it.unibo.dap.api.NativeProductApi
+import it.unibo.dap.model.Equatable
+import it.unibo.dap.utils.CUtils.*
+
+import libdap.aliases.{ size_t, uint8_t, Token }
+import libdap.structs.*
 
 object Implementations extends libdap.ExportedFunctions:
   import it.unibo.dap.api.NativeProductApi.NativeInterface.given

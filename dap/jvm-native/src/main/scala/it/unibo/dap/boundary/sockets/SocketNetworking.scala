@@ -1,12 +1,13 @@
 package it.unibo.dap.boundary.sockets
 
-import it.unibo.dap.controller.Serializable
-import it.unibo.dap.controller.Serializable.{ deserialize, serialize }
-
 import java.net.{ ServerSocket, Socket }
+
 import scala.collection.Iterator.continually
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
+
+import it.unibo.dap.controller.Serializable
+import it.unibo.dap.controller.Serializable.{ deserialize, serialize }
 
 trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networking[T, T] with InetTypes:
 

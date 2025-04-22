@@ -1,12 +1,12 @@
 package it.unibo.dap.api
 
+import scala.concurrent.ExecutionContext
+
 import it.unibo.dap.boundary.sockets.{ InetNeighborhoodResolver, SocketExchangeComponent, SocketNetworking }
 import it.unibo.dap.controller.DistributableInstances.given
 import it.unibo.dap.controller.{ DAPSimulation, Serializable }
 import it.unibo.dap.model.DAP.*
 import it.unibo.dap.model.{ CTMC, DAP, Equatable }
-
-import scala.concurrent.ExecutionContext
 
 object DAPSimulation:
 

@@ -1,6 +1,7 @@
 package it.unibo.dap.utils
 
 import java.util.concurrent.ConcurrentLinkedQueue
+
 import scala.concurrent.{ Future, Promise }
 
 trait ReadableChannel[+T]:

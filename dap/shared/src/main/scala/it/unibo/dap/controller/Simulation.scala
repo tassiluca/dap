@@ -1,13 +1,14 @@
 package it.unibo.dap.controller
 
 import java.util.Random
-import it.unibo.dap.model.Simulatable
-import it.unibo.dap.model.Simulatable.Event
-import it.unibo.dap.utils.Async
 
 import scala.concurrent.duration.DurationDouble
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.experimental.betterFors
+
+import it.unibo.dap.model.Simulatable
+import it.unibo.dap.model.Simulatable.Event
+import it.unibo.dap.utils.Async
 
 /** A distributed simulation.
   * @tparam B the [[Simulatable]] behaviour to simulate

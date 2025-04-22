@@ -6,8 +6,10 @@ import it.unibo.dap.controller.NeighborhoodResolverComponent
 trait InetTypes:
   /** The host address of a node in the network. */
   type Address = String
+
   /** The port number of a node in the network. */
   type Port = Int
+
   /** An endpoint, represented as a pair of address and port. */
   type Endpoint = (Address, Port)
 

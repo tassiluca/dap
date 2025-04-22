@@ -1,10 +1,10 @@
 package it.unibo.dap.boundary.sockets
 
-import it.unibo.dap.controller.Serializable
-import it.unibo.dap.controller.Serializable.{ deserialize, serialize }
-
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.scalajs.js.typedarray.Uint8Array
+
+import it.unibo.dap.controller.Serializable
+import it.unibo.dap.controller.Serializable.{ deserialize, serialize }
 
 trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networking[T, T] with InetTypes:
 

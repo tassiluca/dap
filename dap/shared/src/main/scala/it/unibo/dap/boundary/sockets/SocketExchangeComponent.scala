@@ -1,9 +1,9 @@
 package it.unibo.dap.boundary.sockets
 
+import scala.concurrent.{ ExecutionContext, Future }
+
 import it.unibo.dap.controller.{ ExchangeComponent, Serializable }
 import it.unibo.dap.utils.{ Channel, ReadableChannel, SendableChannel }
-
-import scala.concurrent.{ ExecutionContext, Future }
 
 /** An exchange that communicates with other nodes over plain sockets. */
 trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
