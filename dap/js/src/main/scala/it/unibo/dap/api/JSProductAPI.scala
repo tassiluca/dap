@@ -12,7 +12,7 @@ object JSProductAPI extends ProductApi:
 
   @JSExportTopLevel("DAPApi")
   @JSExportAll
-  private object JSInterface extends ProductInterface with ADTs:
+  object JSInterface extends ProductInterface with ADTs:
     override given ExecutionContext = JSExecutionContext.queue
 
     def ruleOf[T](pre: MSet[T], rate: Double, eff: MSet[T], msg: T): Rule[T] = Rule(pre, rate, eff, Some(msg))
