@@ -76,6 +76,7 @@ class PyStateChangeListener(StateChangeListener):
             print(f"[🐍] Msg: {token}]")
         else:
             print("[🐍] Msg: None")
+        print("-" * 50)
 
 # === Rules ===
 # 1) a --1--> a|^a
@@ -116,10 +117,7 @@ initial_state.tokens = initial_tokens
 initial_state.msg = None
 
 # === Launch simulation ===
-
 print("[🐍] Launching simulation...")
-
 launch_simulation_wrapper(all_rules, initial_state, port, neighbors, PyStateChangeListener(), PyEq())
-
 time.sleep(30)
 print("[🐍] Simulation finished.")
