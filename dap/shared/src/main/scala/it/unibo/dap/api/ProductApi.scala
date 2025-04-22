@@ -6,8 +6,6 @@ trait ProductApi extends Api:
     ctx: ADTs =>
 
     import scala.concurrent.ExecutionContext
-    import it.unibo.dap.controller.Serializable
-    import it.unibo.dap.model.Equatable
     export ProductADTsConversions.{ *, given }
 
     given ExecutionContext = compiletime.deferred

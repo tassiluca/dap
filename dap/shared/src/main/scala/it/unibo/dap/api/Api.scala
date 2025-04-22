@@ -1,8 +1,5 @@
 package it.unibo.dap.api
 
-import it.unibo.dap.model.Equatable
-import it.unibo.dap.controller.Serializable
-
 import scala.scalajs.js.annotation.JSExport
 
 /** The library entry-point language- and platform-agnostic API. */
@@ -29,6 +26,9 @@ trait Api:
   /** The API interface with which platform-specific code interacts. It needs to be mixed-in with the [[ADTs]]. */
   trait Interface:
     ctx: ADTs =>
+
+    export it.unibo.dap.controller.Serializable
+    export it.unibo.dap.model.Equatable
 
     def simulate[Token: {Serializable, Equatable}](
         rules: Set[Rule[Token]],
