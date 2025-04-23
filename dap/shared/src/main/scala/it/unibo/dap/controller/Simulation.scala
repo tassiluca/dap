@@ -36,11 +36,10 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
 
   /** Launches the simulation. */
   def launch(conf: ctx.Configuration, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
-    if isRunning.compareAndExchange(false, true)
-    then Future.failed(IllegalStateException("Simulation is already running."))
-    else
+    if isRunning.compareAndSet(false, true) then
       val tasks = loop(initial, updateFn) :: ctx.exchange.spawn(conf) :: Nil
       Future.sequence(tasks).map(_ => ())
+    else Future.failed(IllegalStateException("Simulation is already running."))
 
   private final def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     for
