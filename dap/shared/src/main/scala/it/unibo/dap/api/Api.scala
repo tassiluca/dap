@@ -1,18 +1,18 @@
 package it.unibo.dap.api
 
-import scala.scalajs.js.annotation.JSExport
-
 /** The library entry-point language- and platform-agnostic API. */
 trait Api:
+  import it.unibo.dap.controller.DAPSimulation
 
   /** The [[Interface]] instance. */
   val interface: Interface
 
   /** The API Abstract Data Types. */
   trait ADTs:
+    import scala.scalajs.js.annotation.JSExport
 
     @JSExport
-    type Neighbour = String
+    type Neighbor = String
 
     @JSExport
     case class MSet[T](elems: T*)
@@ -30,9 +30,15 @@ trait Api:
     export it.unibo.dap.controller.Serializable
     export it.unibo.dap.model.Equatable
 
+    /* Desired API:
+     * - simulate(rules, initial, neighbors): Simulation
+     * - launch(Simulation, updateFn): Unit
+     * - stop(Simulation): Unit
+     */
+
     def simulate[Token: {Serializable, Equatable}](
         rules: Set[Rule[Token]],
         initial: State[Token],
         updateFn: State[Token] => Unit,
-    )(port: Int, neighbours: Set[Neighbour]): Unit
+    )(port: Int, neighbours: Set[Neighbor]): Unit
 end Api

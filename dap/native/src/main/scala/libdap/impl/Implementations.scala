@@ -46,11 +46,10 @@ object Implementations extends libdap.ExportedFunctions:
   ): Unit =
     given Equatable[Token] = (t1, t2) => equals_fn(t1.value, t2.value) == 1
     val allRules = (0 until rules_size.toInt).map(rules(_)).map(given_Conversion_CRule_Rule).toSet
-    val neighbourhood =
-      (0 until neighbors_size.toInt).map(neighbors(_)).map(given_Conversion_CNeighbour_Neighbour).toSet
+    val neighborhood = (0 until neighbors_size.toInt).map(neighbors(_)).map(given_Conversion_CNeighbour_Neighbor).toSet
     val initialState = given_Conversion_CDAPState_State(!s0)
     val simulate = NativeProductApi.interface.simulate(allRules, initialState, s => Zone(on_state_change(s.toDAPState)))
-    simulate(port, neighbourhood)
+    simulate(port, neighborhood)
   end launch_simulation
 
 end Implementations

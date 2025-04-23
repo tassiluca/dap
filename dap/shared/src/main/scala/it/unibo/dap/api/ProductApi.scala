@@ -14,8 +14,10 @@ trait ProductApi extends Api:
         rules: Set[Rule[Token]],
         initial: State[Token],
         updateFn: State[Token] => Unit,
-    )(port: Int, neighbours: Set[Neighbour]): Unit =
-      DAPSimulation(initial.as, rules.map(given_Conversion_Rule_Rule))(port, neighbours).launch(updateFn)
+    )(port: Int, neighbors: Set[Neighbor]): Unit =
+      SocketBasedDAPSimulation
+        .withStaticNeighbors(initial.as, rules.map(given_Conversion_Rule_Rule), neighbors)
+        .launch(port, updateFn)
 
     object ProductADTsConversions:
 

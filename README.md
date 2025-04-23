@@ -1,6 +1,6 @@
-# DAP proof of concept
+# Distributed Asynchronous Petri Nets Multi-platform-language
 
-**Distributed** version of the Asynchronous Petri Nets DSL running over plain sockets.
+**Distributed** version of the _Asynchronous Petri Nets_ DSL.
 
 ## Requirements
 

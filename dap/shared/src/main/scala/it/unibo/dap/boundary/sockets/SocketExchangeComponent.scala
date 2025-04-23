@@ -10,11 +10,11 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
   ctx: InetNeighborhoodResolver & Networking[T, T] =>
 
   /** The port on which the socket server listens for incoming connections. */
-  def port: Port
+  override type Configuration = Port
 
-  override val exchange: Exchange = SocketExchange(port)
+  override val exchange: Exchange = SocketExchange()
 
-  private class SocketExchange(port: Int) extends Exchange:
+  private class SocketExchange extends Exchange:
     private val inChannel = Channel[T]()
     private val outChannel = Channel[T]()
 
@@ -22,8 +22,8 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
 
     override def outputs: SendableChannel[T] = outChannel.asSendable
 
-    override def spawn(using ExecutionContext): Future[Unit] =
-      Future.sequence(client() :: serveClients :: Nil).map(_ => ())
+    override def spawn(configuration: Configuration)(using ExecutionContext): Future[Unit] =
+      Future.sequence(client() :: serveClients(configuration) :: Nil).map(_ => ())
 
     private def client(connections: Map[Endpoint, Connection] = Map.empty)(using ExecutionContext): Future[Unit] =
       for
@@ -41,10 +41,10 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
 
     private def establishConnection(endpoint: Endpoint): Future[Connection] = ctx.out(endpoint)
 
-    private def serveClients(using ExecutionContext): Future[Unit] = ctx
-      .in(port)(inChannel.push)
+    private def serveClients(configuration: Configuration)(using ExecutionContext): Future[Unit] = ctx
+      .in(configuration)(inChannel.push)
       .recover { case e => scribe.error(s"Error while starting socket server: ${e.getMessage}"); serveClients }
-      .map(_ => scribe.info(s"Socket server bound to port $port"))
+      .map(_ => scribe.info(s"Socket server bound to port $configuration"))
   end SocketExchange
 
 end SocketExchangeComponent

@@ -3,7 +3,7 @@ package it.unibo.dap.api
 import scala.concurrent.ExecutionContext
 import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{ JSExport, JSExportAll, JSExportTopLevel }
+import scala.scalajs.js.annotation.{ JSExportAll, JSExportTopLevel }
 import scala.scalajs.js.typedarray.Uint8Array
 
 object JSProductAPI extends ProductApi:
@@ -27,7 +27,7 @@ object JSProductAPI extends ProductApi:
         rules: js.Array[Rule[T]],
         initial: State[T],
         port: Int,
-        neighbours: js.Array[Neighbour],
+        neighbours: js.Array[Neighbor],
         updateFn: js.Function1[State[T], Unit],
         serde: js.Tuple2[js.Function1[T, Uint8Array], js.Function1[Uint8Array, T]],
         equalizer: js.Function1[js.Tuple2[T, T], Boolean],

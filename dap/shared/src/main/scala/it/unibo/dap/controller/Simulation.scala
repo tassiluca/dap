@@ -1,14 +1,15 @@
 package it.unibo.dap.controller
 
 import java.util.Random
+import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.concurrent.duration.DurationDouble
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.experimental.betterFors
+import scala.concurrent.duration.DurationDouble
 
-import it.unibo.dap.model.Simulatable
-import it.unibo.dap.model.Simulatable.Event
 import it.unibo.dap.utils.Async
+import it.unibo.dap.model.Simulatable.Event
+import it.unibo.dap.model.Simulatable
 
 /** A distributed simulation.
   * @tparam B the [[Simulatable]] behaviour to simulate
@@ -18,21 +19,34 @@ import it.unibo.dap.utils.Async
 trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   ctx: ExchangeComponent[T] =>
 
+  /** A simulation error. */
+  type SimulationError = String
+
   /** The initial state of the simulation. */
   def initial: S
 
-  /** The behaviour to simulate. */
+  /** The behavior to simulate. */
   def behavior: B[S]
 
+  private val isRunning = AtomicBoolean(false)
+
+  /** Stops the simulation at the first possible round. */
+  def stop(): Either[SimulationError, Unit] =
+    Either.cond(isRunning.compareAndSet(false, true), (), "Simulation is not running.")
+
   /** Launches the simulation. */
-  def launch(updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
-    val tasks = loop(initial, updateFn) :: ctx.exchange.spawn :: Nil
-    Future.sequence(tasks).map(_ => ())
+  def launch(conf: ctx.Configuration, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
+    if isRunning.compareAndExchange(false, true)
+    then Future.failed(IllegalStateException("Simulation is already running."))
+    else
+      val tasks = loop(initial, updateFn) :: ctx.exchange.spawn(conf) :: Nil
+      Future.sequence(tasks).map(_ => ())
 
   private final def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     for
       event = behavior.simulateStep(state)(using Random())
       _ <- Async.operations.sleep(event.time.seconds)
+      if isRunning.get()
       _ <- updateLogic(event, updateFn)
     yield ()
 

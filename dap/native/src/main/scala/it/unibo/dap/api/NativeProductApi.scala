@@ -60,7 +60,7 @@ object NativeProductApi extends ProductApi:
           elems(i) = CToken(t.value)
         cmset
 
-    given Conversion[CNeighbour, Neighbour] = n => fromCString(n.name)
+    given Conversion[CNeighbour, Neighbor] = n => fromCString(n.name)
 
     given Conversion[CRule, Rule[Token]] = r => Rule(r.preconditions, r.rate, r.effects, Option(r.msg))
 
