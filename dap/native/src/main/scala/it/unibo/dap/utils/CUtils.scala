@@ -1,8 +1,8 @@
 package it.unibo.dap.utils
 
-import scala.reflect.ClassTag
-import scala.scalanative.libc.stdlib
 import scala.scalanative.unsafe.{ sizeOf, Ptr }
+import scala.scalanative.libc.stdlib
+import scala.reflect.ClassTag
 
 /** A bunch of utilities for C interop. */
 @SuppressWarnings(Array("scalafix:DisableSyntax.asInstanceOf", "scalafix:DisableSyntax.null"))

@@ -2,16 +2,16 @@ package it.unibo.dap.api
 
 import java.util.concurrent.ForkJoinPool
 
-import scala.scalanative.unsafe.Size.intToSize
-import scala.language.postfixOps
 import scala.scalanative.unsafe.*
+import scala.scalanative.libc.stdlib
+import scala.scalanative.unsafe.Size.intToSize
 import scala.concurrent.ExecutionContext
 import scala.scalanative.libc
-import scala.scalanative.libc.stdlib
 import scala.scalanative.unsigned.UByte
+import scala.language.postfixOps
 
-import it.unibo.dap.controller.Serializable
 import it.unibo.dap.utils.CUtils.freshPointer
+import it.unibo.dap.controller.Serializable
 
 import libdap.aliases.{ uint8_t, Token as CToken }
 import libdap.structs.{ DAPState as CDAPState, MSet_Token as CMSetToken, Neighbour as CNeighbour, Rule as CRule, * }

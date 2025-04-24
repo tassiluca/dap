@@ -1,7 +1,7 @@
 package it.unibo.dap.boundary.sockets
 
-import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.scalajs.js.typedarray.Uint8Array
+import scala.concurrent.{ ExecutionContext, Future, Promise }
 
 import it.unibo.dap.controller.Serializable
 import it.unibo.dap.controller.Serializable.{ deserialize, serialize }

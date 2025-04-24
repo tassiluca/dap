@@ -1,10 +1,10 @@
 package it.unibo.dap.api
 
-import scala.concurrent.ExecutionContext
 import scala.scalajs.concurrent.JSExecutionContext
-import scala.scalajs.js
-import scala.scalajs.js.annotation.{ JSExportAll, JSExportTopLevel }
 import scala.scalajs.js.typedarray.Uint8Array
+import scala.concurrent.ExecutionContext
+import scala.scalajs.js.annotation.{ JSExportAll, JSExportTopLevel }
+import scala.scalajs.js
 
 object JSProductAPI extends ProductApi:
 

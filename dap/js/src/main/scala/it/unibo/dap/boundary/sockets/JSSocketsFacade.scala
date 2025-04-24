@@ -1,8 +1,8 @@
 package it.unibo.dap.boundary.sockets
 
-import scala.scalajs.js
-import scala.scalajs.js.annotation.*
 import scala.scalajs.js.typedarray.Uint8Array
+import scala.scalajs.js.annotation.*
+import scala.scalajs.js
 
 @js.native
 @JSImport("net", JSImport.Namespace)
