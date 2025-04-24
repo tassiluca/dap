@@ -15,6 +15,9 @@ trait Api:
     type Neighbor = String
 
     @JSExport
+    case class Neighborhood(neighbors: Neighbor*)
+
+    @JSExport
     case class MSet[T](elems: T*)
 
     @JSExport
@@ -22,6 +25,11 @@ trait Api:
 
     @JSExport
     case class State[Token](tokens: MSet[Token], msg: Option[Token])
+
+    class Simulation[Token](private val s: SocketBasedDAPSimulation[Token]):
+      export s.{ launch, stop }
+
+  end ADTs
 
   /** The API interface with which platform-specific code interacts. It needs to be mixed-in with the [[ADTs]]. */
   trait Interface:
@@ -41,4 +49,5 @@ trait Api:
         initial: State[Token],
         updateFn: State[Token] => Unit,
     )(port: Int, neighbours: Set[Neighbor]): Unit
+  end Interface
 end Api
