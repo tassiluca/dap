@@ -12,8 +12,8 @@ jobs:
   build-lib:
     strategy:
       matrix:
-        os: [ ubuntu-22.04, macos-14 ] #, windows-2022 ]
-        jvm-version: [ 17, 21 ]
+        os: [ubuntu-22.04, macos-14] #, windows-2022 ]
+        jvm-version: [17, 21]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -22,7 +22,7 @@ jobs:
       - name: Set up JDK ${{ matrix.jvm-version }}
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: ${{ matrix.jvm-version }}
       - name: Setup LLVM
         uses: aminya/setup-cpp@v1
@@ -45,3 +45,38 @@ jobs:
         run: sbt +test
       - name: QA
         run: sbt scalafmtCheckAll
+
+  build-native-examples:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-14] #, windows-2022 ]
+        jvm-version: [17, 21]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Set up JDK ${{ matrix.jvm-version }}
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
+        with:
+          distribution: "temurin"
+          java-version: ${{ matrix.jvm-version }}
+      - name: Setup LLVM
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: llvm-17
+          make: true
+          clang: true
+      - name: Install Boehm GC on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get install -y libgc-dev
+      - name: Set up Homebrew
+        if: startsWith(matrix.os, 'macos')
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install Boehm GC on MacOS
+        if: startsWith(matrix.os, 'macos')
+        run: brew install bdw-gc
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@26ab4b0fa1c47fa62fc1f6e51823a658fb6c760c # v1
+      - name: Build native examples
+        run: cd dap-native-examples && ./gradlew build
