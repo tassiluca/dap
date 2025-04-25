@@ -19,7 +19,7 @@ import it.unibo.dap.model.Simulatable
 trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   ctx: ExchangeComponent[T] =>
 
-  /** A simulation error. */
+  /** A simulation explanatory error message. */
   type SimulationError = String
 
   /** The initial state of the simulation. */
@@ -32,7 +32,7 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
 
   /** Stops the simulation at the first possible round. */
   def stop(): Either[SimulationError, Unit] =
-    Either.cond(isRunning.compareAndSet(false, true), (), "Simulation is not running.")
+    Either.cond(isRunning.compareAndSet(true, false), (), "Simulation is not running.")
 
   /** Launches the simulation. */
   def launch(conf: ctx.Configuration, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =

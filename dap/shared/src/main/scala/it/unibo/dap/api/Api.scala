@@ -2,7 +2,6 @@ package it.unibo.dap.api
 
 /** The library entry-point language- and platform-agnostic API. */
 trait Api:
-  import it.unibo.dap.controller.DAPSimulation
 
   /** The [[Interface]] instance. */
   val interface: Interface
