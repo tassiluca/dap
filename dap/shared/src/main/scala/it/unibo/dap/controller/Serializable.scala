@@ -13,6 +13,9 @@ object Serializable:
   def serialize[T](t: T)(using s: Serializable[T]): Array[Byte] = s.serialize(t)
   def deserialize[T](t: Array[Byte])(using s: Serializable[T]): T = s.deserialize(t)
 
+  def from[T](serializer: T => Array[Byte], deserializer: Array[Byte] => T): Serializable[T] =
+    SerDe(serializer, deserializer).asSerializable
+
   extension [T](serde: SerDe[T])
 
     def asSerializable: Serializable[T] = new Serializable[T]:

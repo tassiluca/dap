@@ -8,7 +8,10 @@ import it.unibo.dap.model.{ CTMC, DAP, Equatable }
 import it.unibo.dap.controller.DistributableInstances.given
 import it.unibo.dap.controller.{ DAPSimulation, Serializable }
 
-trait SocketBasedDAPSimulation[Token: {Equatable, Serializable}](
+/** A Distributed-Asynchronous Socket-based Simulation, namely a
+  * [[DAPSimulation]] that uses plain sockets for communication.
+  */
+trait DASPSimulation[Token: {Equatable, Serializable}](
     initialState: State[Token],
     rules: Set[Rule[Token]],
 ) extends DAPSimulation[Token]
@@ -18,13 +21,14 @@ trait SocketBasedDAPSimulation[Token: {Equatable, Serializable}](
   override def initial: State[Token] = initialState
   override def behavior: CTMC[State[Token]] = DAP(rules)
 
-object SocketBasedDAPSimulation:
+object DASPSimulation:
 
+  /** Creates a new [[DASPSimulation]] with a static set of neighbors as neighborhood. */
   def withStaticNeighbors[Token: {Equatable, Serializable}](
       s0: DAP.State[Token],
       rules: Set[DAP.Rule[Token]],
       neighbors: Set[String],
-  )(using ExecutionContext): SocketBasedDAPSimulation[Token] = new SocketBasedDAPSimulation[Token](s0, rules):
+  )(using ExecutionContext): DASPSimulation[Token] = new DASPSimulation[Token](s0, rules):
     override val neighborhoodResolver: NeighborhoodResolver = NeighborhoodResolver.static:
       neighbors.map:
         case s"$address:$port" => (address, port.toInt)

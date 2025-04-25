@@ -2,7 +2,7 @@ package it.unibo.dap.boundary.sockets
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-import it.unibo.dap.utils.{ Channel, ReadableChannel, SendableChannel }
+import it.unibo.dap.utils.*
 import it.unibo.dap.controller.{ ExchangeComponent, Serializable }
 
 /** An exchange that communicates with other nodes over plain sockets. */
@@ -14,7 +14,8 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
 
   override val exchange: Exchange = SocketExchange()
 
-  private class SocketExchange extends Exchange:
+  private class SocketExchange extends Exchange with AutoCloseable:
+    private var connectionListener = Option.empty[ConnectionListener]
     private val inChannel = Channel[T]()
     private val outChannel = Channel[T]()
 
@@ -23,7 +24,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
     override def outputs: SendableChannel[T] = outChannel.asSendable
 
     override def spawn(configuration: Configuration)(using ExecutionContext): Future[Unit] =
-      Future.sequence(client() :: serveClients(configuration) :: Nil).map(_ => ())
+      Future.sequence(client() :: serveClients(configuration) :: Nil).unit
 
     private def client(connections: Map[Endpoint, Connection] = Map.empty)(using ExecutionContext): Future[Unit] =
       for
@@ -43,8 +44,15 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
 
     private def serveClients(configuration: Configuration)(using ExecutionContext): Future[Unit] = ctx
       .in(configuration)(inChannel.push)
-      .recover { case e => scribe.error(s"Error while starting socket server: ${e.getMessage}"); serveClients }
-      .map(_ => scribe.info(s"Socket server bound to port $configuration"))
+      .map: c =>
+        scribe.info(f"Socket server listening on port $configuration")
+        connectionListener = Some(c)
+      .recoverWith { case e => scribe.error(s"Socket server error: ${e.getMessage}"); serveClients(configuration) }
+
+    override def close(): Unit =
+      inChannel.close()
+      outChannel.close()
+      connectionListener.foreach(_.close())
   end SocketExchange
 
 end SocketExchangeComponent

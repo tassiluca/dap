@@ -20,22 +20,27 @@ const a = new Token("a", port);
 const b = new Token("b", port);
 
 // 1) a|a --1_000--> a
-const rule1 = DAPApi.ruleOf(DAPApi.MSet(a, a), 1_000.0, DAPApi.MSet(a));
+const rule1 = DAPApi.Rule(DAPApi.MSet(a, a), 1_000.0, DAPApi.MSet(a));
 // 2) a --1--> a|^a
-const rule2 = DAPApi.ruleOf(DAPApi.MSet(a), 1.0, DAPApi.MSet(a), a);
+const rule2 = DAPApi.Rule(DAPApi.MSet(a), 1.0, DAPApi.MSet(a), a);
 const allRules = [rule1, rule2];
 // Initial state
-const s0 = port === 2550 ? DAPApi.stateOf(DAPApi.MSet(a)) : DAPApi.stateOf(DAPApi.MSet());
-DAPApi.simulate(
+const initialState = port === 2550 ? DAPApi.State(DAPApi.MSet(a)) : DAPApi.State(DAPApi.MSet());
+
+const simulation = DAPApi.simulation(
     allRules,
-    s0,
-    port,
+    initialState,
     net,
-    state => {
-        console.log(new Date().toLocaleString());
-        console.log(state.toString());
-        console.log("-".repeat(30));
-    },
-    [token => token.serialize(), bytes => Token.deserialize(bytes)],
-    t => t[0].equals(t[1])
-)
+    token => token.serializeAsString(),
+    stringified => Token.deserializeFromString(stringified),
+    (t1, t2) => t1.equals(t2),
+);
+DAPApi.launch(simulation, port, state => {
+    console.log(new Date().toLocaleString());
+    console.log(state.toString());
+    console.log("-".repeat(30));
+});
+setTimeout(() => {
+    console.log("Stopping simulation...");
+    DAPApi.stop(simulation);
+}, 30_000);

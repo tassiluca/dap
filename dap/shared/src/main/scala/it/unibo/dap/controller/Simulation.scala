@@ -7,7 +7,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.experimental.betterFors
 import scala.concurrent.duration.DurationDouble
 
-import it.unibo.dap.utils.Async
+import it.unibo.dap.utils.{ unit, Async }
 import it.unibo.dap.model.Simulatable.Event
 import it.unibo.dap.model.Simulatable
 
@@ -31,17 +31,18 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   private val isRunning = AtomicBoolean(false)
 
   /** Stops the simulation at the first possible round. */
-  def stop(): Either[SimulationError, Unit] =
-    Either.cond(isRunning.compareAndSet(true, false), (), "Simulation is not running.")
+  def stop(): Either[SimulationError, Unit] = Either
+    .cond(isRunning.compareAndSet(true, false), (), "Simulation is not running.")
+    .map(_ => exchange.close())
 
   /** Launches the simulation. */
   def launch(conf: ctx.Configuration, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     if isRunning.compareAndSet(false, true) then
       val tasks = loop(initial, updateFn) :: ctx.exchange.spawn(conf) :: Nil
-      Future.sequence(tasks).map(_ => ())
+      Future.sequence(tasks).unit
     else Future.failed(IllegalStateException("Simulation is already running."))
 
-  private final def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
+  private def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     for
       event = behavior.simulateStep(state)(using Random())
       _ <- Async.operations.sleep(event.time.seconds)
@@ -49,7 +50,7 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
       _ <- updateLogic(event, updateFn)
     yield ()
 
-  private final def updateLogic(event: Event[S], updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
+  private def updateLogic(event: Event[S], updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     updateFn(event.state)
     event.state.msg.foreach(ctx.exchange.outputs.push)
     val in = ctx.exchange.inputs.poll()

@@ -1,13 +1,12 @@
 package it.unibo.dap.api
 
+import scala.scalajs.js.JSConverters.{ JSRichIterableOnce, JSRichOption }
 import scala.scalajs.concurrent.JSExecutionContext
-import scala.scalajs.js.typedarray.Uint8Array
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js.annotation.{ JSExportAll, JSExportTopLevel }
 import scala.scalajs.js
 
 object JSProductAPI extends ProductApi:
-
   override val interface: ProductInterface = JSInterface
 
   @JSExportTopLevel("DAPApi")
@@ -15,30 +14,16 @@ object JSProductAPI extends ProductApi:
   object JSInterface extends ProductInterface with ADTs:
     override given ExecutionContext = JSExecutionContext.queue
 
-    def ruleOf[T](pre: MSet[T], rate: Double, eff: MSet[T], msg: T): Rule[T] = Rule(pre, rate, eff, Some(msg))
+    override type IOption[T] = js.UndefOr[T]
+    override given [T] => Iso[IOption[T], Option[T]] = Iso(_.toOption, _.orUndefined)
 
-    def ruleOf[T](pre: MSet[T], rate: Double, eff: MSet[T]): Rule[T] = Rule(pre, rate, eff, None)
+    override type ISeq[T] = js.Array[T]
+    override given [T] => Iso[ISeq[T], Seq[T]] = Iso(_.toSeq, _.toJSArray)
 
-    def stateOf[T](tokens: MSet[T], msg: T): State[T] = State(tokens, Some(msg))
+    override type IFunction1[T1, R] = js.Function1[T1, R]
+    override given [T1, R] => Conversion[IFunction1[T1, R], T1 => R] = jsf => jsf(_)
 
-    def stateOf[T](tokens: MSet[T]): State[T] = State(tokens, None)
-
-    def simulate[T](
-        rules: js.Array[Rule[T]],
-        initial: State[T],
-        port: Int,
-        neighbours: js.Array[Neighbor],
-        updateFn: js.Function1[State[T], Unit],
-        serde: js.Tuple2[js.Function1[T, Uint8Array], js.Function1[Uint8Array, T]],
-        equalizer: js.Function1[js.Tuple2[T, T], Boolean],
-    ): Unit =
-      given Equatable[T] = (v1: T, v2: T) => equalizer((v1, v2))
-      given Serializable[T] = new Serializable[T]:
-        override def serialize(t: T): Array[Byte] = serde._1(t).view.map(_.toByte).toArray
-        override def deserialize(bytes: Array[Byte]): T =
-          val typedArray = Uint8Array(bytes.length)
-          for i <- bytes.indices do typedArray(i) = bytes(i)
-          serde._2(typedArray)
-      simulate(rules.toSet, initial, updateFn)(port, neighbours.toSet)
+    override type IFunction2[T1, T2, R] = js.Function2[T1, T2, R]
+    override given [T1, T2, R] => Conversion[IFunction2[T1, T2, R], (T1, T2) => R] = jsf => jsf(_, _)
   end JSInterface
 end JSProductAPI

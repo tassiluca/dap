@@ -14,7 +14,7 @@ trait ExchangeComponent[T]:
   /** The exchange instance. */
   val exchange: Exchange
 
-  trait Exchange extends Spawnable[Configuration]:
+  trait Exchange extends Spawnable[Configuration] with AutoCloseable:
     /** The readable channel on which to receive messages from neighbors. */
     def inputs: ReadableChannel[T]
 

@@ -11,6 +11,7 @@ import scala.scalanative.unsigned.UByte
 import scala.language.postfixOps
 
 import it.unibo.dap.utils.CUtils.freshPointer
+import it.unibo.dap.utils.{ as, Iso }
 import it.unibo.dap.controller.Serializable
 
 import libdap.aliases.{ uint8_t, Token as CToken }
@@ -29,6 +30,20 @@ object NativeProductApi extends ProductApi:
 
   trait NativeADTs extends ADTs:
     type Token = CToken
+
+    override type IOption[T] = T | Null
+
+    override given [T] => Iso[IOption[T], Option[T]] =
+      Iso(t => Option.when(t != null)(t.asInstanceOf[T]), t => t.orNull)
+
+    override type ISeq[T] = Ptr[T]
+    override given [T] => Iso[ISeq[T], Seq[T]] = ???
+
+    override type IFunction1[T1, R] = CFuncPtr1[T1, R]
+    override given [T1, R] => Conversion[IFunction1[T1, R], T1 => R] = cf => t => cf(t)
+
+    override type IFunction2[T1, T2, R] = CFuncPtr2[T1, T2, R]
+    override given [T1, T2, R] => Conversion[IFunction2[T1, T2, R], (T1, T2) => R] = cf => (t1, t2) => cf(t1, t2)
 
     given Serializable[Token] with
 
@@ -62,13 +77,13 @@ object NativeProductApi extends ProductApi:
 
     given Conversion[CNeighbour, Neighbor] = n => fromCString(n.name)
 
-    given Conversion[CRule, Rule[Token]] = r => Rule(r.preconditions, r.rate, r.effects, Option(r.msg))
+    given Conversion[CRule, Rule[Token]] = r => Rule(r.preconditions, r.rate, r.effects, r.msg)
 
-    given Conversion[CDAPState, State[Token]] = s => State(tokens = s.tokens, msg = Option(s.msg))
+    given Conversion[CDAPState, State[Token]] = s => State(tokens = s.tokens, msg = s.msg)
 
     extension (s: State[Token])
 
       def toDAPState(using Zone): Ptr[CDAPState] =
-        CDAPState(tokens = s.tokens.toCMSetToken, msg = CToken(s.msg.map(_.value).orNull))
+        CDAPState(tokens = s.tokens.toCMSetToken, msg = CToken(s.msg.as.map(_.value).orNull))
   end NativeADTs
 end NativeProductApi

@@ -12,41 +12,42 @@ trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networki
     def createConnection(socket: Socket) = new Connection:
       override def send(msg: T): Future[Unit] =
         if !isOpen then Future.failed(IllegalStateException("Connection is closed!"))
-        val promise = Promise[Unit]()
-        val bytes = serialize(msg)
-        val data = Uint8Array(bytes.length)
-        for i <- bytes.indices do data(i) = bytes(i)
-        socket.write(data): err =>
-          if err != null then promise.tryFailure(new Exception(err.toString)) else promise.trySuccess(())
-        promise.future
+        else
+          val promise = Promise[Unit]()
+          val bytes = serialize(msg)
+          val data = Uint8Array(bytes.length)
+          for i <- bytes.indices do data(i) = bytes(i)
+          socket.write(data)(err => if err != null then promise.tryFailure(Exception(err)) else promise.trySuccess(()))
+          promise.future
       override def isOpen: Boolean = !socket.destroyed
       override def close(): Unit = socket.destroy()
-    val promiseConn = Promise[Connection]()
+    val connPromise = Promise[Connection]()
     val socket = Net.connect(endpoint._2, endpoint._1)
-    socket.on("connect")(_ => promiseConn.trySuccess(createConnection(socket)))
+    socket.on("connect")(_ => connPromise.trySuccess(createConnection(socket)))
     socket.on("error"): err =>
+      connPromise.tryFailure(Exception(err.toString))
       socket.destroy()
-      promiseConn.tryFailure(new Exception(err.toString))
-    promiseConn.future
+    connPromise.future
   end out
 
   override def in(port: Port)(onReceive: T => Unit): Future[ConnectionListener] =
-    val promiseConnListener = Promise[ConnectionListener]()
+    val connListenerPromise = Promise[ConnectionListener]()
     def react(data: Uint8Array): Unit =
       val bytes = new Array[Byte](data.length)
       for i <- 0 until data.length do bytes(i) = data(i).toByte
       onReceive(deserialize(bytes))
-    val server = Net.createServer(socket => socket.on("data")(data => react(data.asInstanceOf[Uint8Array])))
+    val server = Net.createServer(_.on("data")(data => react(data.asInstanceOf[Uint8Array])))
     val listener = new ConnectionListener:
-      private var open = true
+      @volatile private var open = true
       override def isOpen: Boolean = open
-      override def close(): Unit = open = false; server.close()
-    server.on("listening"): _ =>
-      scribe.info("Socket server is now listening...")
-      promiseConnListener.trySuccess(listener)
+      override def close(): Unit =
+        open = false
+        server.close()
+    server.on("listening")(_ => connListenerPromise.trySuccess(listener))
     server.on("error"): err =>
+      connListenerPromise.tryFailure(new Exception(err.toString))
       server.close()
-      promiseConnListener.tryFailure(new Exception(err.toString))
     server.listen(port)
-    promiseConnListener.future
+    connListenerPromise.future
+  end in
 end SocketNetworking
