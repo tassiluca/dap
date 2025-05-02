@@ -5,22 +5,22 @@
 extern "C" {
 #endif
 
-#include "../../../lib/dap.h"
+  #include "../../../lib/dap.h"
 
-typedef struct {
-    char* name;
+  typedef struct {
+    char *name;
     int device_id;
-} TokenImpl;
+  } TokenImpl;
 
-Token createToken(const char* token, int device_id);
+  Token createToken(const char *token, int device_id);
 
-uint8_t* serialize(TokenImpl *token, size_t *out_size);
+  const char *serialize(Token token);
 
-TokenImpl* deserialize(const uint8_t* buffer);
+  Token deserialize(const char *buffer);
 
-int are_equals(Token t1, Token t2);
+  bool equals(Token t1, Token t2);
 
-void print_token(Token t);
+  void print_token(Token t);
 
 #ifdef __cplusplus
 }

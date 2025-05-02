@@ -10,101 +10,111 @@
 extern "C" {
 #endif
 
-#include <stddef.h>
-#include <stdint.h>
+  #include <stdlib.h>
+  #include <stdbool.h>
+  #include <stddef.h>
+  #include <stdint.h>
+  #include <stdio.h>
 
-/*
- * RawData is a structure that holds raw data and its size.
- * It is used to represent a block of serialized data.
- */
-typedef struct {
-    uint8_t* data;
-    size_t size;
-} RawData;
+  /*
+  * A multi-set of elements of type `Type`. Elements can be repeated and
+  * unordered. The programmer can define a multi-set of any type by using the
+  * macro `DEFINE_MSET(Type)`.
+  */
+  #define DEFINE_ARRAY(Type)                                                     \
+    typedef struct {                                                             \
+      Type *elements;                                                            \
+      size_t size;                                                               \
+    } Array_##Type;                                                              \
+                                                                                 \
+    static inline Array_##Type *Array_##Type##_of(Type *elements, size_t size) { \
+      Array_##Type *array = (Array_##Type *) malloc(sizeof(Array_##Type));       \
+      if (array == NULL) {                                                       \
+        perror("Allocation memory error on array");                              \
+        exit(EXIT_FAILURE);                                                      \
+      }                                                                          \
+      array->elements = elements;                                                \
+      array->size = size;                                                        \
+      return array;                                                              \
+    }
 
-/*
- * Packs the given data into a RawData structure.
- */
-RawData *pack(uint8_t* data, size_t size);
+  /**
+   * A generic structure representing a token in the DAP model, i.e.,
+   * the data exchanged between places (nodes) in the Distributed Petri Net.
+   */
+  typedef const void *Token;
 
-/*
- * A multi-set of elements of type `Type`. Elements can be repeated and unordered.
- * The programmer can define a multi-set of any type by using the macro `DEFINE_MSET(Type)`.
- */
-#define DEFINE_MSET(Type)                                                   \
-typedef struct {                                                            \
-    Type* elements;                                                         \
-    size_t size;                                                            \
-} MSet_##Type;                                                              \
-                                                                            \
-/*
- * Creates a new multi-set with the given elements and size.
- */                                                                         \
-MSet_##Type* MSet_##Type##_of(Type* elements, size_t size);                 \
-                                                                            \
-/*
- * Gets the index-th element of the multi-set.
- */                                                                         \
-Type MSet_##Type##_get(MSet_##Type* set, size_t index);                     \
-                                                                            \
-/*
- * Frees the memory allocated for the multi-set.
- */                                                                         \
-void MSet_##Type##_free(MSet_##Type* set);
+  DEFINE_ARRAY(Token)
 
-/*
- * An opaque data structure representing a token in a DAP model, i.e.,
- * the data exchanged between places (nodes) in the Distributed Petri Net.
- */
-typedef const RawData *Token;
-
-/*
- * A multi-set of tokens.
- */
-DEFINE_MSET(Token)
-
-/*
- * A snapshot of the state of the current place (node).
- */
-struct DAPState {
-    const MSet_Token *tokens;
+  /** A snapshot of the state of the current place (node) in the Distributed Petri Net. */
+  struct DAPState {
+    const Array_Token *tokens;
     Token msg;
-};
+  };
 
-/*
- * The rule guiding the evolution of the Distributed Petri Net.
- * A rule is defined by its preconditions, rate, effects, and messages and
- * is fired whenever its preconditions are satisfied, producing the effects
- * in the same place (node) and sending messages to the neighbors, according to its rate.
- */
-typedef struct {
-    const MSet_Token *preconditions;
+  /**
+   * The rule guiding the evolution of the Distributed Petri Net.
+   * A rule is defined by its `preconditions`, `rate`, `effects`, and `messages` and
+   * is fired whenever its preconditions are satisfied, producing the effects
+   * in the same place (node) and sending messages to the neighbors, according to
+   * its rate.
+   */
+  typedef struct {
+    const Array_Token *preconditions;
     double rate;
-    const MSet_Token *effects;
+    const Array_Token *effects;
     Token msg;
-} Rule;
+  } Rule;
 
-/*
- * A neighbor place (node) in the Distributed Petri Net.
- * It is represented as string in the form of <hostname>:<port>.
- */
-typedef struct {
-    const char* name;
-} Neighbour;
+  DEFINE_ARRAY(Rule)
 
-/*
- * Launches the distributed simulation of a DAP model.
- * The simulation is started on the given `port` with a preconfigured `neighborhood`
- * and is guided by the given `rules`, which are applied to the initial state `s0`.
- */
-void launch_simulation(
-    const Rule* rules, size_t rules_size,
-    const struct DAPState *s0,
-    int port,
-    const Neighbour *neighbors, size_t neighbors_size,
-    void (*on_state_change)(const struct DAPState *state),
-    int (*equals_fn)(const RawData *a, const RawData *b)
-);
+  /**
+   * A neighbor place (node) in the Distributed Petri Net.
+   * It is represented as string in the form of <hostname>:<port>.
+   */
+  typedef struct {
+    const char *name;
+  } Neighbor;
+
+  DEFINE_ARRAY(Neighbor)
+
+  /** An opaque type representing a DAP simulation based on sockets. */
+  typedef const void *DASPSimulation;
+
+  /** 
+   * Creates a DAP simulation based on sockets with statically-encoded set of neighbors.
+   * @param rules the rules to be applied to the simulation.
+   * @param initial_state the initial state of the simulation.
+   * @param neighborhood the neighborhood of this node, i.e., the set of
+   *                      neighbors to which this node is connected.
+   * @param serializer a function to serialize the token into a string.
+   * @param deserializer a function to deserialize the string into a token.
+   * @param equalizer a function to compare two tokens for equality.
+   * @return a Simulation object representing the DAP simulation.
+   */
+  DASPSimulation simulation(
+    Array_Rule *rules, 
+    const struct DAPState *initial_state,
+    Array_Neighbor *neighborhood,
+    const char *(*serializer)(Token),
+    Token (*deserializer)(const char *str),
+    bool (*equalizer)(Token, Token)
+  );
+
+  /**
+   * Launches the DAP simulation. Side effects happens.
+   * @param simulation the simulation to be launched.
+   * @param port the port the node will listen on for incoming neighbors connections.
+   * @param on_state_change a callback function to be called when the state of the 
+   *                        simulation changes.
+   */
+  void launch(DASPSimulation simulation, int port, void (*on_state_change)(const struct DAPState *state));
+
+  /**
+   * Stops the DAP simulation.
+   * @param simulation the simulation instance to be stopped.
+   */
+  void stop(DASPSimulation simulation);
 
 #ifdef __cplusplus
 }

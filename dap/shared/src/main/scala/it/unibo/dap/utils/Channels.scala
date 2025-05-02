@@ -18,6 +18,7 @@ trait Channel[T] extends ReadableChannel[T] with SendableChannel[T]:
 
 object Channel:
 
+  /** An error explanatory message occurring during channel operations. */
   type Error = String
 
   def apply[T](): Channel[T] = new ChannelImpl[T]()
@@ -25,6 +26,9 @@ object Channel:
   def readable[T](): ReadableChannel[T] = apply().asReadable
 
   def sendable[T](): SendableChannel[T] = apply().asSendable
+
+  /** An exception thrown when the channel is closed. */
+  class ClosedException(msg: String = "") extends Exception(s"Channel is closed. ${msg}")
 
   private class ChannelImpl[T] extends Channel[T]:
     private var closed = false
@@ -39,7 +43,7 @@ object Channel:
     override def pop(): Future[T] = synchronized:
       poll() match
         case Some(item) => Future.successful(item)
-        case _ if closed => Future.failed(new NoSuchElementException("Channel is closed and no items are available."))
+        case _ if closed => Future.failed(ClosedException("No items are available."))
         case _ =>
           val promise = Promise[T]()
           waiters.enqueue(promise)
@@ -52,7 +56,7 @@ object Channel:
       if closed then Left("Channel is already closed.")
       else
         closed = true
-        waiters.foreach(_.failure(new NoSuchElementException("Channel is closed.")))
+        waiters.foreach(_.failure(ClosedException()))
         waiters.clear()
         Right(())
   end ChannelImpl

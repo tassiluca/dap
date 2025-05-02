@@ -12,28 +12,32 @@ trait Api:
     import it.unibo.dap.utils.Iso
     export scala.scalajs.js.annotation.{ JSExport, JSExportAll }
 
+    type IString
+    given Iso[IString, String] = compiletime.deferred
+
     type IOption[T]
     given [T] => Iso[IOption[T], Option[T]] = compiletime.deferred
 
     type ISeq[T]
-    given [T] => Iso[ISeq[T], Seq[T]] = compiletime.deferred
+    given iseqc[T]: Conversion[ISeq[T], Seq[T]]
+    given iseqcc[T]: Conversion[Seq[T], ISeq[T]]
 
     type IFunction1[T1, R]
-    given [T1, R] => Conversion[IFunction1[T1, R], T1 => R] = compiletime.deferred
+    given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R]
 
     type IFunction2[T1, T2, R]
-    given [T1, T2, R] => Conversion[IFunction2[T1, T2, R], (T1, T2) => R] = compiletime.deferred
+    given f2c[T1, T2, R]: Conversion[IFunction2[T1, T2, R], (T1, T2) => R]
 
     @JSExport
-    type Neighbor = String
+    type Neighbor = IString
 
     @JSExport
     case class Neighborhood(neighbors: Neighbor*)
 
-    @JSExport
-    case class MSet[T](elems: T*)
+    @JSExport @JSExportAll
+    case class MSet[T](elems: ISeq[T])
 
-    @JSExport
+    @JSExport @JSExportAll
     case class Rule[Token](pre: MSet[Token], rate: Double, eff: MSet[Token], msg: IOption[Token])
 
     @JSExport @JSExportAll
@@ -52,8 +56,8 @@ trait Api:
         rules: ISeq[Rule[Token]],
         initialState: State[Token],
         neighborhood: ISeq[Neighbor],
-        serializer: IFunction1[Token, String],
-        deserializer: IFunction1[String, Token],
+        serializer: IFunction1[Token, IString],
+        deserializer: IFunction1[IString, Token],
         equalizer: IFunction2[Token, Token, Boolean],
     ): DASPSimulation[Token]
 
@@ -62,13 +66,5 @@ trait Api:
 
     @JSExport
     def stop[Token](simulation: DASPSimulation[Token]): Unit
-
-    /// DEPRECATED API - STILL HERE FOR NATIVE ///
-
-    def simulate[Token: {Serializable, Equatable}](
-        rules: Set[Rule[Token]],
-        initial: State[Token],
-        updateFn: State[Token] => Unit,
-    )(port: Int, neighbours: Set[Neighbor]): Unit
   end Interface
 end Api

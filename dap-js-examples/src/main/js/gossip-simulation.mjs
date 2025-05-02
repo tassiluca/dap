@@ -20,12 +20,12 @@ const a = new Token("a", port);
 const b = new Token("b", port);
 
 // 1) a|a --1_000--> a
-const rule1 = DAPApi.Rule(DAPApi.MSet(a, a), 1_000.0, DAPApi.MSet(a));
+const rule1 = DAPApi.Rule(DAPApi.MSet([a, a]), 1_000.0, DAPApi.MSet([a]));
 // 2) a --1--> a|^a
-const rule2 = DAPApi.Rule(DAPApi.MSet(a), 1.0, DAPApi.MSet(a), a);
+const rule2 = DAPApi.Rule(DAPApi.MSet([a]), 1.0, DAPApi.MSet([a]), a);
 const allRules = [rule1, rule2];
 // Initial state
-const initialState = port === 2550 ? DAPApi.State(DAPApi.MSet(a)) : DAPApi.State(DAPApi.MSet());
+const initialState = port === 2550 ? DAPApi.State(DAPApi.MSet([a])) : DAPApi.State(DAPApi.MSet([]));
 
 const simulation = DAPApi.simulation(
     allRules,
@@ -37,7 +37,9 @@ const simulation = DAPApi.simulation(
 );
 DAPApi.launch(simulation, port, state => {
     console.log(new Date().toLocaleString());
-    console.log(state.toString());
+    console.log("State:");
+    console.log("  Local:", state.tokens.elems);
+    console.log("  Message:", state.msg);
     console.log("-".repeat(30));
 });
 setTimeout(() => {

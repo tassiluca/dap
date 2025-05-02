@@ -24,7 +24,8 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
     override def outputs: SendableChannel[T] = outChannel.asSendable
 
     override def spawn(configuration: Configuration)(using ExecutionContext): Future[Unit] =
-      Future.sequence(client() :: serveClients(configuration) :: Nil).unit
+      val tasks = client().recover { case e: Channel.ClosedException => () } :: serveClients(configuration) :: Nil
+      Future.sequence(tasks).unit
 
     private def client(connections: Map[Endpoint, Connection] = Map.empty)(using ExecutionContext): Future[Unit] =
       for

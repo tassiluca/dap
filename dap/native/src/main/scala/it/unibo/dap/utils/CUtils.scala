@@ -32,7 +32,7 @@ object CUtils:
   inline def withLogging[T](block: => T): T =
     try block
     catch
-      case e: Exception =>
+      case e =>
         scribe.error(e.getMessage)
         stdlib.exit(1).asInstanceOf[T]
 end CUtils

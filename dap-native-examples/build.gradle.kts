@@ -17,7 +17,7 @@ class DAPNativeLib {
 
     fun build(): File? = exec {
         workingDir(rootDir.parentFile)
-        commandLine("sbt", "${name}Native/nativeLink")
+        commandLine("sbt", "clean", "${name}Native/nativeLink")
     }.assertNormalExitValue().let { libFile() }
 }
 

@@ -39,6 +39,6 @@ export class Token {
     }
 
     toString() {
-        return `Token(${this.name}, ${this.deviceId})`;
+        return `Token { name = ${this.name}, deviceId = ${this.deviceId} }`;
     }
 }

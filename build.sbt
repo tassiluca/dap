@@ -42,19 +42,20 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform, JSPlatform)
     val packageName = s"lib${libraryName}"
     _.settings(
       nativeConfig ~= { defaultConf =>
-        // macOS requires an extra linking option to set the runpath for the dynamic library to be correctly
-        // resolved at runtime with `-rpath` option, see https://stackoverflow.com/a/66284977
+        // macOS requires an additional linking option to correctly set the runtime path of the dynamic 
+        // library using the `-rpath` option. For more information, see https://stackoverflow.com/a/66284977.
         val additionalLinkOpts = if (os contains "mac") Seq(s"-Wl,-install_name,'@rpath/$packageName.dylib'") else Nil
-        defaultConf.withGC(GC.boehm) // garbage collector
-          .withLTO(LTO.full) // link-time optimization
-          .withMode(Mode.releaseSize) // build mode
-          .withBuildTarget(BuildTarget.libraryDynamic) // build target: dynamic library, static library, executable
+        defaultConf.withGC(GC.boehm)
+          .withLTO(LTO.full)
+          .withMode(Mode.releaseSize)
+          .withBuildTarget(BuildTarget.libraryDynamic)
           .withLinkingOptions(defaultConf.linkingOptions ++ additionalLinkOpts)
       },
-      bindgenBindings := Seq(
-        Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName).withExport(true),
-      )
-    ).enablePlugins(BindgenPlugin)
+    )
+    //   bindgenBindings := Seq(
+    //     Binding(header = (Compile / resourceDirectory).value / "dap.h", packageName).withExport(true),
+    //   )
+    // ).enablePlugins(BindgenPlugin)
   }
   .jsConfigure {
     _.settings(
