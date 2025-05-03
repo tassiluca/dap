@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "gossip_model.h"
@@ -68,24 +69,27 @@ int main(int argc, char *argv[]) {
     initial_state->tokens = initial_tokens;
   }
   /* Neighborhood. */
-  int neighbours_size = argc - 2;
-  Neighbor neighbours[neighbours_size];
-  for (int i = 0; i < neighbours_size; i++) {
-    Neighbor n = {.name = argv[i + 2], .port = port};
-    neighbours[i] = n;
-  }
-  printf("Neighbors: ");
-  for (int i = 0; i < neighbours_size; i++) {
-    printf("%s ", neighbours[i].name);
+  int neighbors_size = argc - 2;
+  Neighbor neighbors[neighbors_size];
+  for (int i = 0; i < neighbors_size; i++) {
+    char *arg = argv[i + 2];
+    char *sep = strchr(arg, ':');
+    if (!sep) {
+      fprintf(stderr, "Invalid format: %s\n", arg);
+      continue;
+    }
+    *sep = '\0';
+    neighbors[i].name = strdup(arg);
+    neighbors[i].port = atoi(sep + 1);
   }
   printf("\n");
-  Array_Neighbor *neighborhood = Array_Neighbor_of(neighbours, neighbours_size);
+  Array_Neighbor *neighborhood = Array_Neighbor_of(neighbors, neighbors_size);
   /* Launch simulation. */
   DASPSimulation sim = simulation(all_rules, initial_state, neighborhood, &serialize, &deserialize, &equals);
   launch(sim, port, &on_state_change);
   sleep(20);
   stop(sim);
-  sleep(5);
+  sleep(3);
   return 0;
 }
 
