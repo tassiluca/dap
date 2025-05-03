@@ -74,6 +74,7 @@ extern "C" {
    */
   typedef struct {
     const char *name;
+    int port;
   } Neighbor;
 
   DEFINE_ARRAY(Neighbor)

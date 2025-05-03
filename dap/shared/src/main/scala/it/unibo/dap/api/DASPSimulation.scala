@@ -27,9 +27,6 @@ object DASPSimulation:
   def withStaticNeighbors[Token: {Equatable, Serializable}](
       s0: DAP.State[Token],
       rules: Set[DAP.Rule[Token]],
-      neighbors: Set[String],
+      neighbors: Set[(String, Int)],
   )(using ExecutionContext): DASPSimulation[Token] = new DASPSimulation[Token](s0, rules):
-    override val neighborhoodResolver: NeighborhoodResolver = NeighborhoodResolver.static:
-      neighbors.map:
-        case s"$address:$port" => (address, port.toInt)
-        case _ => throw new IllegalArgumentException("Invalid address:port format")
+    override val neighborhoodResolver: NeighborhoodResolver = NeighborhoodResolver.static(neighbors)

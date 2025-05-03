@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   int neighbours_size = argc - 2;
   Neighbor neighbours[neighbours_size];
   for (int i = 0; i < neighbours_size; i++) {
-    Neighbor n = {.name = argv[i + 2]};
+    Neighbor n = {.name = argv[i + 2], .port = port};
     neighbours[i] = n;
   }
   printf("Neighbors: ");

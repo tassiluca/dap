@@ -22,7 +22,8 @@ trait ProductApi extends Api:
     ): DASPSimulation[Token] =
       given Equatable[Token] = (t1, t2) => equalizer(t1, t2)
       given Serializable[Token] = Serializable.from(serializer(_).as.getBytes, b => deserializer(new String(b).back))
-      val allNeighbors = neighborhood.toSet.map(_.as)
+      val allNeighbors = neighborhood.map(n => (n.address.as, n.port)).toSet
+      scribe.info(s"Neighbors: $allNeighbors")
       val realRules = rules.map(r => given_Conversion_Rule_Rule(r)).toSet
       DASPSimulation.withStaticNeighbors(initialState, realRules, allNeighbors)
 

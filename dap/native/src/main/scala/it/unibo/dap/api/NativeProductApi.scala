@@ -8,7 +8,6 @@ import scala.concurrent.ExecutionContext
 import scala.scalanative.libc
 import scala.language.postfixOps
 
-import it.unibo.dap.utils.Iso
 import it.unibo.dap.utils.CUtils
 import scala.util.chaining.scalaUtilChainingOps
 import it.unibo.dap.utils.CUtils.withLogging
@@ -91,9 +90,26 @@ object NativeProductApi extends ProductApi:
               case _ => scribe.error("[back] I don't have a class tag"); ???
           case _ => scribe.error("[back] I don't have a tag!"); ???
 
+    /* Currently, it is not possible to use `CFuncPtrN` as reification of agnostic function types
+     * because, since the C types are not automatically generated from the agnostic types,
+     * when we need to convert a Scala function using an agnostic type back to a C function
+     * we would need to perform a conversion of the input argument like this:
+     *
+     * {{
+     *    val updateFn: CFuncPtr1[Ptr[CState], Unit] = ??? // some C callback provided by the C client
+     *    val f = CFuncPtr1.fromScalaFunction[State[CToken], Unit]: s =>
+     *      updateFn(s /* using Conversion[State[CToken], Ptr[CState]] */)))
+     *              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     *    Closing over local state of parameter updateFn in function transformed to CFuncPtr
+     *    results in undefined behaviour
+     * }}
+     * 
+     * But this is actually forbidden! When Scala Native allows to support automatic conversion
+     * of agnostic types to C types, we should be able to use `CFuncPtrN`.
+     */
     override type IFunction1[T1, R] = T1 => R
 
-    inline given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R] with
+    given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R] with
       inline def apply(f: IFunction1[T1, R]) = f.apply
 
     override type IFunction2[T1, T2, R] = CFuncPtr2[T1, T2, R]
@@ -103,7 +119,7 @@ object NativeProductApi extends ProductApi:
 
     // API Conversions
 
-    given toNeighbor: Conversion[CNeighbor, Neighbor] = _._1
+    given toNeighbor: Conversion[CNeighbor, Neighbor] = n => Neighbor(address = n._1, port = n._2)
 
     given toRule: Conversion[CRule, Rule[CToken]] = r =>
       Rule(pre = (r._1).pipe(pre => MSet(pre)), rate = r._2, eff = (r._3).pipe(eff => MSet(eff)), msg = r._4)

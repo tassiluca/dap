@@ -13,6 +13,6 @@ extension [T](a: CSeq[T])
 
 type CRule = CStruct4[Ptr[CSeq[CToken]], Double, Ptr[CSeq[CToken]], CToken]
 
-type CNeighbor = CStruct1[CString]
+type CNeighbor = CStruct2[CString, CInt]
 
 type CState = CStruct2[Ptr[CSeq[CToken]], CToken]

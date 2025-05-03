@@ -11,9 +11,10 @@ if (args.length < 2) {
 
 const port = parseInt(args[0], 10);
 const net = args.slice(1);
+const neighborhood = net.map(n => DAPApi.Neighbor(n.split(":")[0], parseInt(n.split(":")[1])))
 
 console.log("Port:", port);
-console.log("Net:", net);
+console.log("My neighbors:", neighborhood.toString());
 
 // Two simple tokens
 const a = new Token("a", port);
@@ -30,19 +31,17 @@ const initialState = port === 2550 ? DAPApi.State(DAPApi.MSet([a])) : DAPApi.Sta
 const simulation = DAPApi.simulation(
     allRules,
     initialState,
-    net,
+    neighborhood,
     token => token.serializeAsString(),
     stringified => Token.deserializeFromString(stringified),
     (t1, t2) => t1.equals(t2),
 );
 DAPApi.launch(simulation, port, state => {
-    console.log(new Date().toLocaleString());
-    console.log("State:");
-    console.log("  Local:", state.tokens.elems);
-    console.log("  Message:", state.msg);
+    console.log("[JS]", new Date().toLocaleString());
+    console.log("[JS] State:");
+    console.log("[JS]  Local:", state.tokens.elems);
+    console.log("[JS]  Message:", state.msg);
     console.log("-".repeat(30));
+    console.log();
 });
-setTimeout(() => {
-    console.log("Stopping simulation...");
-    DAPApi.stop(simulation);
-}, 30_000);
+setTimeout(() => DAPApi.stop(simulation), 30_000);

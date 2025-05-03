@@ -1,38 +1,21 @@
 package it.unibo.dap.api
 
-/** The library entry-point language- and platform-agnostic API. */
-trait Api:
+import scala.scalajs.js.annotation.{ JSExport, JSExportAll }
+
+/** The DAP library entry-point language- and platform-agnostic API. */
+trait Api extends PlatformIndependentAPI:
 
   /** The [[Interface]] instance. */
   val interface: Interface
 
   /** The API Abstract Data Types. */
-  trait ADTs:
-
-    import it.unibo.dap.utils.Iso
-    export scala.scalajs.js.annotation.{ JSExport, JSExportAll }
-
-    type IString
-    given Iso[IString, String] = compiletime.deferred
-
-    type IOption[T]
-    given [T] => Iso[IOption[T], Option[T]] = compiletime.deferred
-
-    type ISeq[T]
-    given iseqc[T]: Conversion[ISeq[T], Seq[T]]
-    given iseqcc[T]: Conversion[Seq[T], ISeq[T]]
-
-    type IFunction1[T1, R]
-    given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R]
-
-    type IFunction2[T1, T2, R]
-    given f2c[T1, T2, R]: Conversion[IFunction2[T1, T2, R], (T1, T2) => R]
+  trait ADTs extends PlatformIndependentTypes:
 
     @JSExport
-    type Neighbor = IString
+    case class Neighbor(address: IString, port: Int)
 
     @JSExport
-    case class Neighborhood(neighbors: Neighbor*)
+    case class Neighborhood(neighbors: ISeq[Neighbor]*)
 
     @JSExport @JSExportAll
     case class MSet[T](elems: ISeq[T])
