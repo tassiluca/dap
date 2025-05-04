@@ -9,7 +9,7 @@ import scala.scalajs.js
 object JSProductAPI extends ProductApi:
   override val interface: ProductInterface = JSInterface
 
-  @JSExportTopLevel("DAPApi")
+  @JSExportTopLevel("DAP")
   @JSExportAll
   object JSInterface extends ProductInterface with ADTs:
     override given ExecutionContext = JSExecutionContext.queue

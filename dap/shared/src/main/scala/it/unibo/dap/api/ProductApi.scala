@@ -20,10 +20,9 @@ trait ProductApi extends Api:
         deserializer: IFunction1[IString, Token],
         equalizer: IFunction2[Token, Token, Boolean],
     ): DASPSimulation[Token] =
-      given Equatable[Token] = (t1, t2) => equalizer(t1, t2)
+      given Equatable[Token] = equalizer(_, _)
       given Serializable[Token] = Serializable.from(serializer(_).as.getBytes, b => deserializer(new String(b).back))
       val allNeighbors = neighborhood.map(n => (n.address.as, n.port)).toSet
-      scribe.info(s"Neighbors: $allNeighbors")
       val realRules = rules.map(r => given_Conversion_Rule_Rule(r)).toSet
       DASPSimulation.withStaticNeighbors(initialState, realRules, allNeighbors)
 
@@ -31,10 +30,11 @@ trait ProductApi extends Api:
         simulation: DASPSimulation[Token],
         port: Int,
         updateFn: IFunction1[State[Token], Unit],
-    ): Unit =
-      simulation
-        .launch(port)(updateFn.apply)
-        .onComplete { case Failure(e) => scribe.error(e); case _ => scribe.info("Simulation completed") }
+    ): Unit = simulation
+      .launch(port)(updateFn.apply)
+      .onComplete:
+        case Failure(e) => scribe.error(e)
+        case _ => scribe.info("Simulation completed")
 
     override def stop[Token](simulation: DASPSimulation[Token]): Unit =
       simulation.stop().left.foreach(scribe.error(_))
@@ -44,14 +44,14 @@ trait ProductApi extends Api:
       export it.unibo.dap.utils.{ as, back, Iso }
       import it.unibo.dap.model
 
-      // inline given [T] => Iso[MSet[T], model.MSet[T]] =
-      //   Iso(m => model.MSet.ofList(m.elems.toList), m => MSet(m.asList.toSeq))
-
       given from[T]: Conversion[MSet[T], model.MSet[T]] with
         inline def apply(m: MSet[T]): model.MSet[T] = model.MSet.ofList(m.elems.toList)
 
       given to[T]: Conversion[model.MSet[T], MSet[T]] with
         inline def apply(m: model.MSet[T]): MSet[T] = MSet(m.asList.toSeq)
+
+      // inline given [T] => Iso[MSet[T], model.MSet[T]] =
+      //   Iso(m => model.MSet.ofList(m.elems.toList), m => MSet(m.asList.toSeq))
 
       given fromT[Token]: Conversion[State[Token], model.DAP.State[Token]] with
         inline def apply(s: State[Token]): model.DAP.State[Token] = model.DAP.State(s.tokens, s.msg.as)
@@ -59,11 +59,11 @@ trait ProductApi extends Api:
       given toT[Token]: Conversion[model.DAP.State[Token], State[Token]] with
         inline def apply(s: model.DAP.State[Token]): State[Token] = State(s.tokens, s.msg.back)
 
-      // inline given [Token] => Iso[State[Token], model.DAP.State[Token]] =
-      //   Iso(s => model.DAP.State(s.tokens, s.msg.as), s => State(s.tokens, s.msg.back))
-
       given [Token]: Conversion[State[Token] => Unit, model.DAP.State[Token] => Unit] with
         inline def apply(f: State[Token] => Unit): model.DAP.State[Token] => Unit = s => f(s)
+
+      // inline given [Token] => Iso[State[Token], model.DAP.State[Token]] =
+      //   Iso(s => model.DAP.State(s.tokens, s.msg.as), s => State(s.tokens, s.msg.back))
 
       given [Token]: Conversion[Rule[Token], model.DAP.Rule[Token]] with
         inline def apply(r: Rule[Token]): model.DAP.Rule[Token] = model.DAP.Rule(r.pre, _ => r.rate, r.eff, r.msg.as)

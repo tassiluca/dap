@@ -11,11 +11,8 @@ trait Api extends PlatformIndependentAPI:
   /** The API Abstract Data Types. */
   trait ADTs extends PlatformIndependentTypes:
 
-    @JSExport
+    @JSExport @JSExportAll
     case class Neighbor(address: IString, port: Int)
-
-    @JSExport
-    case class Neighborhood(neighbors: ISeq[Neighbor]*)
 
     @JSExport @JSExportAll
     case class MSet[T](elems: ISeq[T])
