@@ -27,6 +27,7 @@ trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networki
         private val acceptLoop = Future:
           continually(Try(socketServer.accept())).filter(_.isSuccess).foreach(s => serve(s.get))
         private def serve(client: Socket) = Future:
+          scribe.debug(s"Accepted connection from ${client.getInetAddress}")
           val in = client.getInputStream
           val buffer = new Array[Byte](_length = 2048)
           continually(in.read(buffer))
@@ -35,7 +36,7 @@ trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networki
               val message = deserialize(buffer.take(readBytes))
               onReceive(message)
           client.close()
-        .recover { case _: Exception => if !client.isClosed then client.close() }
+        .recover { case e: Exception => scribe.error(e); if !client.isClosed then client.close() }
         override def isOpen: Boolean = socketServer.isClosed
         override def close(): Unit = socketServer.close()
     yield connListener

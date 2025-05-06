@@ -27,27 +27,32 @@ const char *serialize(Token token) {
     return NULL;
   }
   TokenImpl *token_impl = (TokenImpl *)token;
-  // Estimate enough space: 30 for JSON syntax + strlen(name) + possible number length
-  size_t buffer_size = 30 + strlen(token_impl->name) + 20;
-  char *json = malloc(buffer_size);
-  if (json == NULL) {
+  const char *json_template = "{\"name\": \"%s\", \"device_id\": \"%d\"}";
+  int json_length = snprintf(NULL, 0, json_template, token_impl->name, token_impl->device_id);
+  if (json_length < 0) {
     return NULL;
   }
-  snprintf(json, buffer_size, "{\"name\":\"%s\",\"device_id\":%d}", token_impl->name, token_impl->device_id);
+  int json_lenght_with_terminator = json_length + 1;
+  char *json = malloc(json_lenght_with_terminator);
+  if (!json) {
+    return NULL;
+  }
+  snprintf(json, json_lenght_with_terminator, json_template, token_impl->name, token_impl->device_id);
   return json;
 }
 
 Token deserialize(const char *buffer) {
-  if (buffer == NULL) {
+  if (!buffer) {
     return NULL;
   }
   TokenImpl *token = malloc(sizeof(TokenImpl));
-  if (token == NULL) {
+  if (!token) {
     return NULL;
   }
   char name[256];
   int device_id;
-  if (sscanf(buffer, "{\"name\":\"%255[^\"]\",\"device_id\":%d}", name, &device_id) != 2) {
+  int matched = sscanf(buffer, "{\"name\": \"%255[^\"]\", \"device_id\": %d}", name, &device_id);
+  if (matched != 2) { // Check if both name and device_id were successfully parsed
     free(token);
     return NULL;
   }
@@ -76,5 +81,5 @@ void print_token(Token t) {
   if (!token) {
     return;
   }
-  printf("%s - %d", token->name, token->device_id);
+  printf("Name: %s, Device ID: %d", token->name, token->device_id);
 }

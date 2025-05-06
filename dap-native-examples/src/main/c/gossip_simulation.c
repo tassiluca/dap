@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
   /* Launch simulation. */
   DASPSimulation sim = simulation(all_rules, initial_state, neighborhood, &serialize, &deserialize, &equals);
   launch(sim, port, &on_state_change);
-  sleep(20);
+  sleep(30);
   stop(sim);
   sleep(3);
   return 0;
@@ -97,7 +97,7 @@ void on_state_change(const struct DAPState *state) {
   struct timeval tv;
   gettimeofday(&tv, NULL);
   const struct tm *lt = localtime(&tv.tv_sec);
-  printf("\n----------------------------------------\n");
+  printf("\n--------------------------------------------------\n");
   printf("[C] %02d:%02d:%02d.%03d \n", lt->tm_hour, lt->tm_min, lt->tm_sec, tv.tv_usec / 1000);
   printf("[C] State Tokens: ");
   printf("{ ");
@@ -110,5 +110,5 @@ void on_state_change(const struct DAPState *state) {
   printf(" }\n");
   printf("[C] Message: ");
   print_token(state->msg);
-  printf("\n----------------------------------------\n");
+  printf("\n--------------------------------------------------\n");
 }

@@ -49,7 +49,7 @@ pythonPlugin {
 val pipInstall by tasks.registering(VenvTask::class) {
     venvExec = "pip"
     val wheelFile = libFolder.walkTopDown().find { it.extension == "whl" } ?: error("No wheel found in $libFolder")
-    args = listOf("install", "$wheelFile", "--isolated", "-r", "requirements.txt")
+    args = listOf("install", "$wheelFile", "--force-reinstall", "--isolated", /* "-r", "requirements.txt" */)
 }
 
 tasks.register<VenvTask>("runPython") {

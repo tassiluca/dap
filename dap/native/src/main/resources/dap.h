@@ -36,13 +36,21 @@ extern "C" {
       array->elements = elements;                                                \
       array->size = size;                                                        \
       return array;                                                              \
+    }                                                                            \
+                                                                                 \
+    static inline Type Array_##Type##_get(Array_##Type *array, size_t index) {   \
+      if (index >= array->size) {                                                \
+        fprintf(stderr, "Index out of bounds: %zu >= %zu\n", index, array->size);\
+        exit(EXIT_FAILURE);                                                      \
+      }                                                                          \
+      return array->elements[index];                                             \
     }
 
   /**
    * A generic structure representing a token in the DAP model, i.e.,
    * the data exchanged between places (nodes) in the Distributed Petri Net.
    */
-  typedef const void *Token;
+  typedef void *Token;
 
   DEFINE_ARRAY(Token)
 
@@ -79,8 +87,8 @@ extern "C" {
 
   DEFINE_ARRAY(Neighbor)
 
-  /** An opaque type representing a DAP simulation based on sockets. */
-  typedef const void *DASPSimulation;
+  /** An opaque type representing a DAP simulation running over sockets. */
+  typedef struct Simulation *DASPSimulation;
 
   /** 
    * Creates a DAP simulation based on sockets with statically-encoded set of neighbors.

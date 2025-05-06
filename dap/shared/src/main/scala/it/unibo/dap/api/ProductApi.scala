@@ -23,8 +23,8 @@ trait ProductApi extends Api:
       given Equatable[Token] = equalizer(_, _)
       given Serializable[Token] = Serializable.from(serializer(_).as.getBytes, b => deserializer(new String(b).back))
       val allNeighbors = neighborhood.map(n => (n.address.as, n.port)).toSet
-      val realRules = rules.map(r => given_Conversion_Rule_Rule(r)).toSet
-      DASPSimulation.withStaticNeighbors(initialState, realRules, allNeighbors)
+      val allRules = rules.map(r => given_Conversion_Rule_Rule(r)).toSet
+      DASPSimulation.withStaticNeighbors(initialState, allRules, allNeighbors)
 
     inline override def launch[Token](
         simulation: DASPSimulation[Token],

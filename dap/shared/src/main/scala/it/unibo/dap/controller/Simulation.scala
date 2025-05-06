@@ -45,7 +45,7 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   private def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     for
       event = behavior.simulateStep(state)(using Random())
-      _ <- Async.operations.sleep(event.time.seconds)
+      _ <- Async.operations.sleep(if event.time > 0 then event.time.seconds else 1.seconds)
       if isRunning.get()
       _ <- updateLogic(event, updateFn)
     yield ()
