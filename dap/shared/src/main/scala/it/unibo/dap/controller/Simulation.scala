@@ -4,7 +4,6 @@ import java.util.Random
 import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.language.experimental.betterFors
 import scala.concurrent.duration.DurationDouble
 
 import it.unibo.dap.utils.{ unit, Async }

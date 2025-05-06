@@ -5,23 +5,23 @@ import scala.scalanative.build.{ BuildTarget, GC, LTO, Mode }
 import scala.sys.process.Process
 import scala.util.chaining.scalaUtilChainingOps
 
-ThisBuild / scalaVersion := "3.6.4"
+ThisBuild / scalaVersion := "3.7.0"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / scalacOptions ++= Seq(
-  "-Wunused:all",
-  "-Wvalue-discard",
-  "-Wnonunit-statement",
-  "-Wsafe-init",
-  "-Ycheck-reentrant",
-  "-Xcheck-macros",
-  "-rewrite",
-  "-indent",
-  "-unchecked",
   "-explain",
   "-feature",
+  "-indent",
   "-language:implicitConversions",
-  "-language:experimental.betterFors",
+  "-preview",
+  "-rewrite",
+  "-unchecked",
+  "-Wnonunit-statement",
+  "-Wsafe-init",
+  "-Wunused:all",
+  "-Wvalue-discard",
+  "-Xcheck-macros",
+  "-Ycheck-reentrant",
 )
 
 val libraryName = "dap"
