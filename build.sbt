@@ -9,19 +9,18 @@ ThisBuild / scalaVersion := "3.7.0"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / scalacOptions ++= Seq(
-  "-Wunused:all",
-  "-Wvalue-discard",
-  "-Wnonunit-statement",
-  "-Wsafe-init",
-  "-Ycheck-reentrant",
-  "-Xcheck-macros",
-  "-rewrite",
-  "-indent",
-  "-unchecked",
   "-explain",
   "-feature",
-  "-language:implicitConversions",
-  "-language:experimental.betterFors",
+  "-indent",
+  "-preview",
+  "-rewrite",
+  "-unchecked",
+  "-Wnonunit-statement",
+  "-Wsafe-init",
+  "-Wunused:all",
+  "-Wvalue-discard",
+  "-Xcheck-macros",
+  "-Ycheck-reentrant",
 )
 
 val libraryName = "dap"
