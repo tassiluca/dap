@@ -1,12 +1,12 @@
 package it.unibo.dap.boundary.sockets
 
 import scala.scalajs.js.typedarray.Uint8Array
-import scala.concurrent.{ ExecutionContext, Future, Promise }
+import scala.concurrent.{ Future, Promise }
 
 import it.unibo.dap.controller.Serializable
 import it.unibo.dap.controller.Serializable.{ deserialize, serialize }
 
-trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networking[T, T] with InetTypes:
+trait SocketNetworking[T: Serializable] extends Networking[T, T] with InetTypes:
 
   override def out(endpoint: Endpoint): Future[Connection] =
     def createConnection(socket: Socket) = new Connection:

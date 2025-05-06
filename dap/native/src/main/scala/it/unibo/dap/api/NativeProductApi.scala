@@ -5,7 +5,6 @@ import java.util.concurrent.ForkJoinPool
 import scala.scalanative.unsafe.*
 import scala.scalanative.libc.stdlib
 import scala.concurrent.ExecutionContext
-import scala.scalanative.libc
 import scala.language.postfixOps
 
 import it.unibo.dap.utils.CUtils

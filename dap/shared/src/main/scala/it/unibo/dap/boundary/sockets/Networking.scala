@@ -2,13 +2,11 @@ package it.unibo.dap.boundary.sockets
 
 import scala.concurrent.Future
 
-import it.unibo.dap.controller.Serializable
-
 /** High-level, platform-independent networking interface.
   * @tparam MessageIn the type of the messages received from the network
   * @tparam MessageOut the type of the messages sent over the network
   */
-trait Networking[+MessageIn: Serializable, -MessageOut: Serializable]:
+trait Networking[+MessageIn, -MessageOut]:
   self: InetTypes =>
 
   /** Creates an outgoing [[Connection]] to the given [[endpoint]]. */

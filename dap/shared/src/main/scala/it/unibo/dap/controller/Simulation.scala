@@ -38,7 +38,7 @@ trait Simulation[B[_]: Simulatable, T, S: DistributableState[T]]:
   def launch(conf: ctx.Configuration)(updateFn: S => Unit)(using ExecutionContext): Future[Unit] =
     if isRunning.compareAndSet(false, true) then
       val tasks = loop(initial, updateFn) :: ctx.exchange.spawn(conf) :: Nil
-      Future.sequence(tasks).recover { case e: NoSuchElementException => () }.unit
+      Future.sequence(tasks).recover { case _: NoSuchElementException => () }.unit
     else Future.failed(IllegalStateException("Simulation is already running."))
 
   private def loop(state: S, updateFn: S => Unit)(using ExecutionContext): Future[Unit] =

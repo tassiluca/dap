@@ -3,10 +3,10 @@ package it.unibo.dap.boundary.sockets
 import scala.concurrent.{ ExecutionContext, Future }
 
 import it.unibo.dap.utils.*
-import it.unibo.dap.controller.{ ExchangeComponent, Serializable }
+import it.unibo.dap.controller.ExchangeComponent
 
 /** An exchange that communicates with other nodes over plain sockets. */
-trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
+trait SocketExchangeComponent[T] extends ExchangeComponent[T]:
   ctx: InetNeighborhoodResolver & Networking[T, T] =>
 
   /** The port on which the socket server listens for incoming connections. */
@@ -24,7 +24,7 @@ trait SocketExchangeComponent[T: Serializable] extends ExchangeComponent[T]:
     override def outputs: SendableChannel[T] = outChannel.asSendable
 
     override def spawn(configuration: Configuration)(using ExecutionContext): Future[Unit] =
-      val tasks = client().recover { case e: Channel.ClosedException => () } :: serveClients(configuration) :: Nil
+      val tasks = client().recover { case _: Channel.ClosedException => () } :: serveClients(configuration) :: Nil
       Future.sequence(tasks).unit
 
     private def client(connections: Map[Endpoint, Connection] = Map.empty)(using ExecutionContext): Future[Unit] =

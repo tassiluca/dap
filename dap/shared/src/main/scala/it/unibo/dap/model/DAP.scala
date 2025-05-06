@@ -20,9 +20,9 @@ object DAP:
   /** State of the network at a given time. */
   case class State[T](tokens: MSet[T], msg: Option[T])
 
-  def apply[T: Equatable](rules: Rule[T]*): DAP[T] = rules.toSet
+  def apply[T](rules: Rule[T]*): DAP[T] = rules.toSet
 
-  def apply[T: Equatable](rules: Set[Rule[T]]): DAP[T] = rules
+  def apply[T](rules: Set[Rule[T]]): DAP[T] = rules
 
   def toCTMC[T: Equatable](spn: DAP[T]): CTMC[State[T]] = CTMC.ofFunction(toPartialFunction(spn))
 

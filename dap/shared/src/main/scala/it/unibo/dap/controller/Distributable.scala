@@ -16,7 +16,7 @@ trait Distributable[State, Message]:
 object DistributableInstances:
   import it.unibo.dap.model.{ DAP, MSet }
 
-  given [T: Serializable] => Distributable[DAP.State[T], T] =
+  given [T] => Distributable[DAP.State[T], T] =
     new Distributable[DAP.State[T], T]:
       extension (s: DAP.State[T])
         override def msg: Option[T] = s.msg
