@@ -1,7 +1,6 @@
 package it.unibo.dap.api
 
-/**
-  */
+/** Root base trait with building blocks for crafting a platform-independent API. */
 trait PlatformIndependentAPI:
 
   export it.unibo.dap.utils.Iso
