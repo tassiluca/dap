@@ -51,7 +51,7 @@ Token deserialize(const char *buffer) {
   }
   char name[256];
   int device_id;
-  int matched = sscanf(buffer, "{\"name\": \"%255[^\"]\", \"device_id\": %d}", name, &device_id);
+  int matched = sscanf(buffer, "{\"name\": \"%255[^\"]\", \"device_id\": \"%d\"}", name, &device_id);
   if (matched != 2) { // Check if both name and device_id were successfully parsed
     free(token);
     return NULL;
