@@ -32,7 +32,7 @@ object NativeProductApi extends ProductApi:
     ): DASPSimulation[CToken] = withLogging:
       val allRules = (rules: Seq[CRule]).pipe(r => r.map(toRule))
       val allNeighbors = (neighborhood: Seq[CNeighbor]).pipe(n => (n).map(toNeighbor))
-      interface.simulation(allRules, initialState, allNeighbors, serializer(_), deserializer(_), equalizer)
+      interface.simulation(allRules, initialState, allNeighbors, serializer(_), deserializer(_), equalizer(_, _))
 
     @exported("launch")
     def launchSimulation(simulation: DASPSimulation[CToken], port: Int, updateFn: CFuncPtr1[Ptr[CState], Unit]): Unit =
@@ -64,7 +64,7 @@ object NativeProductApi extends ProductApi:
     given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R] with
       inline def apply(f: IFunction1[T1, R]) = f.apply
 
-    override type IFunction2[T1, T2, R] = CFuncPtr2[T1, T2, R]
+    override type IFunction2[T1, T2, R] = (T1, T2) => R
 
     given f2c[T1, T2, R]: Conversion[IFunction2[T1, T2, R], (T1, T2) => R] with
       inline def apply(f: IFunction2[T1, T2, R]): (T1, T2) => R = f.apply
