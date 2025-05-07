@@ -11,9 +11,7 @@ import it.unibo.dap.utils.CUtils
 import scala.util.chaining.scalaUtilChainingOps
 import it.unibo.dap.utils.CUtils.withLogging
 import scala.reflect.ClassTag
-import scala.compiletime.summonFrom
-import scala.scalanative.unsigned.UnsignedRichInt
-import it.unibo.dap.utils.error
+import it.unibo.dap.utils.withRuntimeInfo
 
 /** Native implementation of the DAP API. */
 object NativeProductApi extends ProductApi:
@@ -57,29 +55,8 @@ object NativeProductApi extends ProductApi:
     override type ISeq[T] = Ptr[CSeq[T]]
 
     inline override given [T]: Iso[ISeq[T], Seq[T]] = Iso(
-      toFn = (xs: ISeq[T]) =>
-        summonFrom:
-          case _: Tag[T] =>
-            summonFrom:
-              case _: ClassTag[T] =>
-                val size = (!xs)._2.toInt
-                val data = (!xs)._1
-                (0 until size).map(data.apply)
-              case _ => error(s"A ClassTag is required to perform ISeq[T] => Seq[T] conversion but it wasn't found.")
-          case _ => error("An unsafe.Tag is required to perform ISeq[T] => Seq[T] conversion but it wasn't found.")
-      ,
-      fromFn = (x: Seq[T]) =>
-        summonFrom:
-          case _: Tag[T] =>
-            summonFrom:
-              case _: ClassTag[T] =>
-                val ptr = CUtils.freshPointer[CSeq[T]]()
-                (!ptr)._1 = CUtils.freshPointer[T](x.length)
-                (!ptr)._2 = x.length.toCSize
-                for i <- 0 until x.length do (!ptr)._1(i) = x(i)
-                ptr
-              case _ => error(s"A ClassTag is required to perform Seq[T] => ISeq[T] conversion but it wasn't found.")
-          case _ => error("An unsafe.Tag is required to perform Seq[T] => ISeq[T] conversion but it wasn't found."),
+      xs => withRuntimeInfo[T, ISeq, Seq](xs)(_.toSeq),
+      x => withRuntimeInfo[T, Seq, ISeq](x)(CSeq.fromSeq(_)),
     )
 
     override type IFunction1[T1, R] = T1 => R
