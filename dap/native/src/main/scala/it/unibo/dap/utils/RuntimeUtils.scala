@@ -12,5 +12,5 @@ inline def withRuntimeInfo[T, G[_], H[_]](h: G[T])(conversion: Tag[T] ?=> ClassT
     case _: ClassTag[T] =>
       summonFrom:
         case _: Tag[T] => conversion(h)
-        case _ => error(s"A ClassTag is required to perform G[T] => H[T] conversion but it wasn't found.")
-    case _ => error("An unsafe.Tag is required to perform G[T] => H[T] conversion but it wasn't found.")
+        case _ => error(s"A ClassTag is required to perform the conversion but it wasn't found.")
+    case _ => error("A `scalanative.unsafe.Tag` is required to perform the conversion but it wasn't found.")
