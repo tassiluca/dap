@@ -15,6 +15,7 @@ import scala.compiletime.summonFrom
 import scala.scalanative.unsigned.UnsignedRichInt
 import it.unibo.dap.utils.error
 
+/** Native implementation of the DAP API. */
 object NativeProductApi extends ProductApi:
 
   override val interface: NativeInterface.type = NativeInterface
@@ -27,9 +28,9 @@ object NativeProductApi extends ProductApi:
         rules: ISeq[CRule],
         initialState: Ptr[CState],
         neighborhood: ISeq[CNeighbor],
-        serializer: CFuncPtr1[CToken, CString],
-        deserializer: CFuncPtr1[CString, CToken],
-        equalizer: CFuncPtr2[CToken, CToken, CBool],
+        serializer: CFuncPtr1[CToken, IString],
+        deserializer: CFuncPtr1[IString, CToken],
+        equalizer: CFuncPtr2[CToken, CToken, Boolean],
     ): DASPSimulation[CToken] = withLogging:
       val allRules = (rules: Seq[CRule]).pipe(r => r.map(toRule))
       val allNeighbors = (neighborhood: Seq[CNeighbor]).pipe(n => (n).map(toNeighbor))
@@ -45,17 +46,10 @@ object NativeProductApi extends ProductApi:
 
   trait NativeADTs extends ADTs:
 
-    // Implementation of native-independent types
-    override type IString = CString
+    // Implementation of the platform-independent types for the native platform
 
-    override given Iso[IString, String] = Iso(
-      fromCString(_),
-      s =>
-        val ptr = CUtils.freshPointer[CChar](s.length() + 1)
-        for i <- 0 until s.length() do ptr(i) = s.charAt(i).toByte
-        ptr(s.length()) = 0.toByte
-        ptr,
-    )
+    override type IString = CString
+    override given Iso[IString, String] = Iso(fromCString(_), _.toCString)
 
     override type IOption[T] = T | Null
     override given [T] => Iso[IOption[T], Option[T]] = Iso(t => Option.when(t != null)(t.asInstanceOf[T]), _.orNull)
@@ -103,14 +97,16 @@ object NativeProductApi extends ProductApi:
     given toNeighbor: Conversion[CNeighbor, Neighbor] = n => Neighbor(address = n._1, port = n._2)
 
     given toRule: Conversion[CRule, Rule[CToken]] = r =>
-      Rule(pre = (r._1).pipe(pre => MSet(pre)), rate = r._2, eff = (r._3).pipe(eff => MSet(eff)), msg = r._4)
+      Rule(pre = (r._1).pipe(MSet(_)), rate = r._2, eff = (r._3).pipe(MSet(_)), msg = r._4)
 
-    given Conversion[Ptr[CState], State[CToken]] = s => State(tokens = MSet(!s.at1), msg = !s.at2)
+    given Iso[Ptr[CState], State[CToken]] = Iso(
+      cs => State(tokens = MSet(cs._1), msg = cs._2),
+      s =>
+        val ptr = CUtils.freshPointer[CState]()
+        (!ptr)._1 = s.tokens.elems
+        (!ptr)._2 = s.msg
+        ptr,
+    )
 
-    given Conversion[State[CToken], Ptr[CState]] = s =>
-      val ptr = CUtils.freshPointer[CState]()
-      (!ptr)._1 = s.tokens.elems
-      (!ptr)._2 = s.msg
-      ptr
   end NativeADTs
 end NativeProductApi
