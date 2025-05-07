@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
   launch(sim, port, &on_state_change);
   sleep(30);
   stop(sim);
-  sleep(3);
+  sleep(5);
   return 0;
 }
 

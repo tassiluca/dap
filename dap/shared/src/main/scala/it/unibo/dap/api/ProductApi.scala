@@ -21,8 +21,8 @@ trait ProductApi extends Api:
         equalizer: IFunction2[Token, Token, Boolean],
     ): DASPSimulation[Token] =
       given Equatable[Token] = equalizer(_, _)
-      given Serializable[Token] = Serializable.from(serializer(_).as.getBytes, b => deserializer(new String(b).back))
-      val allNeighbors = neighborhood.map(n => (n.address.as, n.port)).toSet
+      given Serializable[Token] = Serializable.from(serializer(_).getBytes, b => deserializer(new String(b)))
+      val allNeighbors = neighborhood.map(n => ((n.address: String), n.port)).toSet
       val allRules = rules.map(r => given_Conversion_Rule_Rule(r)).toSet
       DASPSimulation.withStaticNeighbors(initialState, allRules, allNeighbors)
 
@@ -41,7 +41,8 @@ trait ProductApi extends Api:
 
     object ProductADTsConversions:
 
-      export it.unibo.dap.utils.{ as, back, Iso }
+      export it.unibo.dap.utils.Iso
+      export it.unibo.dap.utils.Iso.{ *, given }
       import it.unibo.dap.model
 
       given from[T]: Conversion[MSet[T], model.MSet[T]] with
@@ -54,10 +55,10 @@ trait ProductApi extends Api:
       //   Iso(m => model.MSet.ofList(m.elems.toList), m => MSet(m.asList.toSeq))
 
       given fromT[Token]: Conversion[State[Token], model.DAP.State[Token]] with
-        inline def apply(s: State[Token]): model.DAP.State[Token] = model.DAP.State(s.tokens, s.msg.as)
+        inline def apply(s: State[Token]): model.DAP.State[Token] = model.DAP.State(s.tokens, s.msg)
 
       given toT[Token]: Conversion[model.DAP.State[Token], State[Token]] with
-        inline def apply(s: model.DAP.State[Token]): State[Token] = State(s.tokens, s.msg.back)
+        inline def apply(s: model.DAP.State[Token]): State[Token] = State(s.tokens, s.msg)
 
       given [Token]: Conversion[State[Token] => Unit, model.DAP.State[Token] => Unit] with
         inline def apply(f: State[Token] => Unit): model.DAP.State[Token] => Unit = s => f(s)
@@ -66,7 +67,7 @@ trait ProductApi extends Api:
       //   Iso(s => model.DAP.State(s.tokens, s.msg.as), s => State(s.tokens, s.msg.back))
 
       given [Token]: Conversion[Rule[Token], model.DAP.Rule[Token]] with
-        inline def apply(r: Rule[Token]): model.DAP.Rule[Token] = model.DAP.Rule(r.pre, _ => r.rate, r.eff, r.msg.as)
+        inline def apply(r: Rule[Token]): model.DAP.Rule[Token] = model.DAP.Rule(r.pre, _ => r.rate, r.eff, r.msg)
     end ProductADTsConversions
   end ProductInterface
 

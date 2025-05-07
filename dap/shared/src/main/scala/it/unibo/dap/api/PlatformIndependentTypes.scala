@@ -4,9 +4,10 @@ package it.unibo.dap.api
 trait PlatformIndependentAPI:
 
   export it.unibo.dap.utils.Iso
+  export it.unibo.dap.utils.Iso.{ *, given }
 
-  /** This trait defines the platform-independent types, named `IType`s, to be used in the
-    * agnostic API along with the required conversions to the Scala types.
+  /** This trait defines the platform-independent types, named `IType`s, that can be used,
+    * along with the Scala conversions, to build the agnostic API.
     * Actual platform-specific implementations of the API should incarnate these types with
     * the appropriate platform-specific types and provide, for each of them, the required
     * conversions.
@@ -20,8 +21,7 @@ trait PlatformIndependentAPI:
     given [T] => Iso[IOption[T], Option[T]] = compiletime.deferred
 
     type ISeq[T]
-    given iseqc[T]: Conversion[ISeq[T], Seq[T]]
-    given iseqcc[T]: Conversion[Seq[T], ISeq[T]]
+    given [T] => Iso[ISeq[T], Seq[T]] = compiletime.deferred
 
     type IFunction1[T1, R]
     given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R]

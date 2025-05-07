@@ -3,7 +3,7 @@ import argparse
 import json
 from datetime import datetime
 import time
-import sys
+import logging
 
 parser = argparse.ArgumentParser(description="Distributed Asynchronous Petri Nets simulation.")
 parser.add_argument("--port", type=int, required=True, help="Service port")
@@ -21,7 +21,6 @@ print(f"Port: {port}")
 print(f"Neighbors: [{', '.join([f'{n.name}:{n.port}' for n in neighbors])}]")
 print()
 
-print("Neighborhood:")
 neighborhood = Array_Neighbor_of(neighbors)
 
 class TokenImpl():
@@ -30,7 +29,7 @@ class TokenImpl():
         self.device_id = device_id
 
     def serialize(self) -> str:
-        return json.dumps({'name': self.name,'device_id': self.device_id})
+        return json.dumps({'name': self.name,'device_id': self.device_id}, separators=(',', ':'))
 
     @classmethod
     def deserialize(cls, data: str):
@@ -59,16 +58,13 @@ class PyEq(Equalizer):
         try:
             return isinstance(t1, TokenImpl) and isinstance(t2, TokenImpl) and t1.name == t2.name
         except Exception as e:
-            print(f"Exception in equals: {e}")
-            import traceback
-            traceback.print_exc()
+            logging.warning("PyEq.equals error: %s", e)
             return False
 
 class PyCodec(Codec):
-    
     def __init__(self):
         global _global_codec_instance
-        self._token_cache = [] # TODO: implement in swig instead of here
+        self._token_cache = []
         super().__init__()
         _global_codec_instance = self
 
@@ -84,9 +80,7 @@ class PyCodec(Codec):
             self._token_cache.append(token)
             return token
         except Exception as e:
-            print(f"[🐍] Exception in deserialization: {e}")
-            import traceback
-            traceback.print_exc()
+            logging.warning("PyCodec.deserialize error: %s", e)
             return None
 
 class PyStateChangeListener(StateChangeListener):
@@ -145,7 +139,6 @@ else:
     initial_tokens = Array_Token_of([])
 initial_state = DAPState()
 initial_state.tokens = initial_tokens
-#initial_state.msg = None
 
 # === Launch simulation ===
 sim = simulation(all_rules, initial_state, neighborhood, PyCodec() , PyEq())

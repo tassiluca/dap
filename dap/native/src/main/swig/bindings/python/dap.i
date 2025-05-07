@@ -73,11 +73,14 @@
             fprintf(stderr, "Equalizer is NULL\n");
             return 0;
         }
+        PyGILState_STATE gstate = PyGILState_Ensure();
         PyObject *token1 = (PyObject*)t1;
         Py_INCREF(token1);
         PyObject *token2 = (PyObject*)t2;
         Py_INCREF(token2);
-        return DirectorManager::current_equalizer->equals(token1, token2);
+        bool result = DirectorManager::current_equalizer->equals(token1, token2);
+        PyGILState_Release(gstate);
+        return result;
     }
 
     static const char* serialize_helper(Token token) {
@@ -85,9 +88,12 @@
             fprintf(stderr, "Codec is NULL\n");
             return nullptr;
         }
+        PyGILState_STATE gstate = PyGILState_Ensure();
         PyObject *py_token = (PyObject*)token;
         Py_INCREF(py_token);
-        return DirectorManager::current_codec->serialize(py_token);
+        const char* str = DirectorManager::current_codec->serialize(py_token);
+        PyGILState_Release(gstate);
+        return str;
     }
 
     static Token deserialize_helper(const char* str) {

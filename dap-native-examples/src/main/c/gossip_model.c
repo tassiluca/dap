@@ -27,7 +27,7 @@ const char *serialize(Token token) {
     return NULL;
   }
   TokenImpl *token_impl = (TokenImpl *)token;
-  const char *json_template = "{\"name\": \"%s\", \"device_id\": \"%d\"}";
+  const char *json_template = "{\"name\":\"%s\",\"device_id\":%d}";
   int json_length = snprintf(NULL, 0, json_template, token_impl->name, token_impl->device_id);
   if (json_length < 0) {
     return NULL;
@@ -51,7 +51,7 @@ Token deserialize(const char *buffer) {
   }
   char name[256];
   int device_id;
-  int matched = sscanf(buffer, "{\"name\": \"%255[^\"]\", \"device_id\": \"%d\"}", name, &device_id);
+  int matched = sscanf(buffer, "{\"name\":\"%255[^\"]\",\"device_id\":%d}", name, &device_id);
   if (matched != 2) { // Check if both name and device_id were successfully parsed
     free(token);
     return NULL;

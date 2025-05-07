@@ -21,8 +21,7 @@ object JSProductAPI extends ProductApi:
     override given [T] => Iso[IOption[T], Option[T]] = Iso(_.toOption, _.orUndefined)
 
     override type ISeq[T] = js.Array[T]
-    override given iseqc[T]: Conversion[ISeq[T], Seq[T]] = _.toSeq
-    override given iseqcc[T]: Conversion[Seq[T], ISeq[T]] = _.toJSArray
+    override given [T] => Iso[ISeq[T], Seq[T]] = Iso(_.toSeq, _.toJSArray)
 
     override type IFunction1[T1, R] = js.Function1[T1, R]
     override given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R] = _.apply

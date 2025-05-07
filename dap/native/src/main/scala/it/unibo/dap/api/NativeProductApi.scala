@@ -13,6 +13,7 @@ import it.unibo.dap.utils.CUtils.withLogging
 import scala.reflect.ClassTag
 import scala.compiletime.summonFrom
 import scala.scalanative.unsigned.UnsignedRichInt
+import it.unibo.dap.utils.error
 
 object NativeProductApi extends ProductApi:
 
@@ -30,8 +31,8 @@ object NativeProductApi extends ProductApi:
         deserializer: CFuncPtr1[CString, CToken],
         equalizer: CFuncPtr2[CToken, CToken, CBool],
     ): DASPSimulation[CToken] = withLogging:
-      val allRules = rules.pipe(_.map(toRule))
-      val allNeighbors = neighborhood.pipe(_.map(toNeighbor))
+      val allRules = (rules: Seq[CRule]).pipe(r => r.map(toRule))
+      val allNeighbors = (neighborhood: Seq[CNeighbor]).pipe(n => (n).map(toNeighbor))
       interface.simulation(allRules, initialState, allNeighbors, serializer(_), deserializer(_), equalizer)
 
     @exported("launch")
@@ -61,51 +62,32 @@ object NativeProductApi extends ProductApi:
 
     override type ISeq[T] = Ptr[CSeq[T]]
 
-    given iseqc[T]: Conversion[ISeq[T], Seq[T]] with
-
-      inline def apply(x: ISeq[T]): Seq[T] =
+    inline override given [T]: Iso[ISeq[T], Seq[T]] = Iso(
+      toFn = (xs: ISeq[T]) =>
         summonFrom:
           case _: Tag[T] =>
             summonFrom:
               case _: ClassTag[T] =>
-                val size = (!x)._2.toInt
-                val data = (!x)._1
+                val size = (!xs)._2.toInt
+                val data = (!xs)._1
                 (0 until size).map(data.apply)
-              case _ => scribe.error("[to] I don't have a class tag"); ???
-          case _ => scribe.error("[to] I don't have a tag"); ???
-
-    given iseqcc[T]: Conversion[Seq[T], ISeq[T]] with
-
-      inline def apply(s: Seq[T]): ISeq[T] =
+              case _ => error(s"A ClassTag is required to perform ISeq[T] => Seq[T] conversion but it wasn't found.")
+          case _ => error("An unsafe.Tag is required to perform ISeq[T] => Seq[T] conversion but it wasn't found.")
+      ,
+      fromFn = (x: Seq[T]) =>
         summonFrom:
           case _: Tag[T] =>
             summonFrom:
               case _: ClassTag[T] =>
                 val ptr = CUtils.freshPointer[CSeq[T]]()
-                (!ptr)._1 = CUtils.freshPointer[T](s.length)
-                (!ptr)._2 = s.length.toCSize
-                for i <- 0 until s.length do (!ptr)._1(i) = s(i)
+                (!ptr)._1 = CUtils.freshPointer[T](x.length)
+                (!ptr)._2 = x.length.toCSize
+                for i <- 0 until x.length do (!ptr)._1(i) = x(i)
                 ptr
-              case _ => scribe.error("[back] I don't have a class tag"); ???
-          case _ => scribe.error("[back] I don't have a tag!"); ???
+              case _ => error(s"A ClassTag is required to perform Seq[T] => ISeq[T] conversion but it wasn't found.")
+          case _ => error("An unsafe.Tag is required to perform Seq[T] => ISeq[T] conversion but it wasn't found."),
+    )
 
-    /* Currently, it is not possible to use `CFuncPtrN` as reification of agnostic function types
-     * because, since the C types are not automatically generated from the agnostic types,
-     * when we need to convert a Scala function using an agnostic type back to a C function
-     * we would need to perform a conversion of the input argument like this:
-     *
-     * {{
-     *    val updateFn: CFuncPtr1[Ptr[CState], Unit] = ??? // some C callback provided by the C client
-     *    val f = CFuncPtr1.fromScalaFunction[State[CToken], Unit]: s =>
-     *      updateFn(s /* using Conversion[State[CToken], Ptr[CState]] */)))
-     *              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     *    Closing over local state of parameter updateFn in function transformed to CFuncPtr
-     *    results in undefined behaviour
-     * }}
-     * 
-     * But this is actually forbidden! When Scala Native allows to support automatic conversion
-     * of agnostic types to C types, we should be able to use `CFuncPtrN`.
-     */
     override type IFunction1[T1, R] = T1 => R
 
     given f1c[T1, R]: Conversion[IFunction1[T1, R], T1 => R] with

@@ -6,3 +6,5 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
 extension [T](f: Future[T]) def unit(using ExecutionContext): Future[Unit] = f.map(_ => ())
+
+def error(msg: => String): Nothing = throw new IllegalStateException(msg)

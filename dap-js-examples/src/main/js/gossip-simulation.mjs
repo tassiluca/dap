@@ -1,7 +1,7 @@
 "use strict";
 
 import { Token } from "./gossip-model.js";
-import { DAP } from "../../../../dap/js/target/scala-3.6.4/dap-fastopt/main.mjs";
+import { DAP } from "../../../../dap/js/target/scala-3.7.0/dap-fastopt/main.mjs";
 
 const args = process.argv.slice(2); // Skip first 2 args: node and script name
 if (args.length < 2) {
