@@ -81,5 +81,5 @@ void print_token(Token t) {
   if (!token) {
     return;
   }
-  printf("Name: %s, Device ID: %d", token->name, token->device_id);
+  printf("  Token { name: %s, device ID: %d }", token->name, token->device_id);
 }

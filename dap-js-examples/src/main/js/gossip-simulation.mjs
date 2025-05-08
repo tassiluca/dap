@@ -24,9 +24,20 @@ const b = new Token("b", port);
 const rule1 = DAP.Rule(DAP.MSet([a, a]), 1_000.0, DAP.MSet([a]));
 // 2) a --1--> a|^a
 const rule2 = DAP.Rule(DAP.MSet([a]), 1.0, DAP.MSet([a]), a);
-const allRules = [rule1, rule2];
+// 3) a|b --2--> a|b|^b
+const rule3 = DAP.Rule(DAP.MSet([a, b]), 2.0, DAP.MSet([a, b]), b);
+// 4) b|b --1_000--> b
+const rule4 = DAP.Rule(DAP.MSet([b, b]), 1_000.0, DAP.MSet([b]));
+const allRules = [rule1, rule2, rule3, rule4];
 // Initial state
-const initialState = port === 2550 ? DAP.State(DAP.MSet([a])) : DAP.State(DAP.MSet([]));
+let initialState;
+if (port === 2550) {
+    initialState = DAP.State(DAP.MSet([a]));
+} else if (port == 2553) {
+    initialState = DAP.State(DAP.MSet([b]));
+} else {
+    initialState = DAP.State(DAP.MSet([]));
+}
 
 const simulation = DAP.simulation(
     allRules,
@@ -34,14 +45,13 @@ const simulation = DAP.simulation(
     neighborhood,
     token => token.serializeAsString(),
     stringified => Token.deserializeFromString(stringified),
-    (t1, t2) => t1.equals(t2),
+    (t1, t2) => t1 != null && t2 != null && t1.equals(t2),
 );
 DAP.launch(simulation, port, state => {
     console.log("[JS]", new Date().toLocaleString());
-    console.log("[JS] State:");
-    console.log("[JS]  Local:", state.tokens.elems);
-    console.log("[JS]  Message:", state.msg);
-    console.log("-".repeat(30));
+    console.log("[JS] Local:", state.tokens.elems);
+    console.log("[JS] Message:", state.msg);
+    console.log("-".repeat(50));
     console.log();
 });
 setTimeout(() => DAP.stop(simulation), 30_000);

@@ -28,25 +28,23 @@ def main(port: int, static_neighbors: list):
     rule2.preconditions = MSet_Token_of([a, a])
     rule2.rate = 1_000.0
     rule2.effects = MSet_Token_of([a])
-    # # 3) a|b --2--> a|b|^b
-    # rule3 = Rule()
-    # rule3.preconditions = MSet_Token_of([a, b])
-    # rule3.rate = 2.0
-    # rule3.effects = MSet_Token_of([a, b])
-    # rule3.msg = b
-    # # 4) b|b --1_000--> b
-    # rule4 = Rule()
-    # rule4.preconditions = MSet_Token_of([b, b])
-    # rule4.rate = 1000.0
-    # rule4.effects = MSet_Token_of([b])
-    # rule4.msg = None
-    all_rules = Array_Rule_of([rule, rule2])
-
+    # 3) a|b --2--> a|b|^b
+    rule3 = Rule()
+    rule3.preconditions = MSet_Token_of([a, b])
+    rule3.rate = 2.0
+    rule3.effects = MSet_Token_of([a, b])
+    rule3.msg = b
+    # 4) b|b --1_000--> b
+    rule4 = Rule()
+    rule4.preconditions = MSet_Token_of([b, b])
+    rule4.rate = 1000.0
+    rule4.effects = MSet_Token_of([b])
+    all_rules = Array_Rule_of([rule, rule2, rule3, rule4])
     # # === Initial state ===
     if port == 2550:
         initial_tokens = MSet_Token_of([a])
-    # elif port == 2553:
-    #     initial_tokens = MSet_Token_of([b])
+    elif port == 2553:
+        initial_tokens = MSet_Token_of([b])
     else:
         initial_tokens = MSet_Token_of([])
     initial_state = DAPState()
