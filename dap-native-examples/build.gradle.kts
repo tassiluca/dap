@@ -55,7 +55,7 @@ val pipInstall by tasks.registering(VenvTask::class) {
 tasks.register<VenvTask>("runPython") {
     workingDir = projectDir.resolve("src/main/python")
     val scriptArgs = project.findProperty("args") as String? ?: error("No args provided")
-    args = listOf("-u", "gossip.py") + scriptArgs.split("\\s+".toRegex())
+    args = listOf("-u", "gossip_simulation.py") + scriptArgs.split("\\s+".toRegex())
     dependsOn(pipInstall)
 }
 
