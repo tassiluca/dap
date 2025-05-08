@@ -270,3 +270,6 @@ pyrightconfig.json
 
 # Swig C TBA in a separate folder
 *_wrap.*
+
+# Backup files
+*.bkp
