@@ -31,9 +31,9 @@ int main(int argc, char *argv[]) {
   // Token b = createToken("b", port);
   /* 1) a|a --1_000--> a */
   Token in_tokens1[] = {a, a};
-  Array_Token *preconditions1 = Array_Token_of(in_tokens1, ARRAY_LEN(in_tokens1));
+  MSet_Token *preconditions1 = MSet_Token_of(in_tokens1, ARRAY_LEN(in_tokens1));
   Token out_places1[] = {a};
-  Array_Token *effects1 = Array_Token_of(out_places1, ARRAY_LEN(out_places1));
+  MSet_Token *effects1 = MSet_Token_of(out_places1, ARRAY_LEN(out_places1));
   Rule rule = {
     .preconditions = preconditions1,
     .rate = 1000,
@@ -42,9 +42,9 @@ int main(int argc, char *argv[]) {
   };
   /* 2) a --1--> a|^a */
   Token in_tokens2[] = {a};
-  Array_Token *preconditions2 = Array_Token_of(in_tokens2, ARRAY_LEN(in_tokens2));
+  MSet_Token *preconditions2 = MSet_Token_of(in_tokens2, ARRAY_LEN(in_tokens2));
   Token out_places2[] = {a};
-  Array_Token *effects2 = Array_Token_of(out_places2, ARRAY_LEN(out_places2));
+  MSet_Token *effects2 = MSet_Token_of(out_places2, ARRAY_LEN(out_places2));
   Rule rule2 = {
     .preconditions = preconditions2,
     .rate = 1,
@@ -58,14 +58,14 @@ int main(int argc, char *argv[]) {
   initial_state->msg = NULL;
   if (port == 2550) {
     Token initial_tokens_arr[] = {a};
-    Array_Token *initial_tokens = Array_Token_of(initial_tokens_arr, ARRAY_LEN(initial_tokens_arr));
+    MSet_Token *initial_tokens = MSet_Token_of(initial_tokens_arr, ARRAY_LEN(initial_tokens_arr));
     initial_state->tokens = initial_tokens;
   //   } else if (port == 2553) {
   //     Token initial_tokens[] = {b};
   //     initial_state = createDAPState(initial_tokens,
   //     ARRAY_LEN(initial_tokens));
   } else {
-    Array_Token *initial_tokens = Array_Token_of(NULL, 0);
+    MSet_Token *initial_tokens = MSet_Token_of(NULL, 0);
     initial_state->tokens = initial_tokens;
   }
   /* Neighborhood. */

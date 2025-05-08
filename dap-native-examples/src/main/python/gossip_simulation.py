@@ -19,15 +19,15 @@ def main(port: int, static_neighbors: list):
     # === Rules ===
     # 1) a --1--> a|^a
     rule = Rule()
-    rule.preconditions = Array_Token_of([a])
+    rule.preconditions = MSet_Token_of([a])
     rule.rate = 1.0
-    rule.effects = Array_Token_of([a])
+    rule.effects = MSet_Token_of([a])
     rule.msg = a
     # 2) a|a --1000--> a
     rule2 = Rule()
-    rule2.preconditions = Array_Token_of([a, a])
+    rule2.preconditions = MSet_Token_of([a, a])
     rule2.rate = 1_000.0
-    rule2.effects = Array_Token_of([a])
+    rule2.effects = MSet_Token_of([a])
     # # 3) a|b --2--> a|b|^b
     # rule3 = Rule()
     # rule3.preconditions = MSet_Token_of([a, b])
@@ -44,11 +44,11 @@ def main(port: int, static_neighbors: list):
 
     # # === Initial state ===
     if port == 2550:
-        initial_tokens = Array_Token_of([a])
+        initial_tokens = MSet_Token_of([a])
     # elif port == 2553:
     #     initial_tokens = MSet_Token_of([b])
     else:
-        initial_tokens = Array_Token_of([])
+        initial_tokens = MSet_Token_of([])
     initial_state = DAPState()
     initial_state.tokens = initial_tokens
 

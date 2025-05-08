@@ -46,17 +46,27 @@ extern "C" {
       return array->elements[index];                                             \
     }
 
+  #define DEFINE_MSET(Type)                                                       \
+    DEFINE_ARRAY(Type)                                                            \
+    typedef Array_##Type MSet_##Type;                                             \
+    static inline MSet_##Type *MSet_##Type##_of(Type *elements, size_t size) {    \
+      return Array_##Type##_of(elements, size);                                   \
+    }                                                                             \
+    static inline Type MSet_##Type##_get(MSet_##Type *mset, size_t index) {       \
+      return Array_##Type##_get((Array_##Type *)mset, index);                     \
+    }
+
   /**
    * A generic structure representing a token in the DAP model, i.e.,
    * the data exchanged between places (nodes) in the Distributed Petri Net.
    */
   typedef void *Token;
 
-  DEFINE_ARRAY(Token)
+  DEFINE_MSET(Token)
 
   /** A snapshot of the state of the current place (node) in the Distributed Petri Net. */
   struct DAPState {
-    const Array_Token *tokens;
+    const MSet_Token *tokens;
     Token msg;
   };
 
@@ -68,9 +78,9 @@ extern "C" {
    * its rate.
    */
   typedef struct {
-    const Array_Token *preconditions;
+    const MSet_Token *preconditions;
     double rate;
-    const Array_Token *effects;
+    const MSet_Token *effects;
     Token msg;
   } Rule;
 

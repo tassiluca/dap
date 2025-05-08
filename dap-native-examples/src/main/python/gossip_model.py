@@ -71,7 +71,7 @@ class PyStateChangeListener(StateChangeListener):
         print("-" * 50)
         print(f"[🐍] {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
         for i in range(tokens.size):
-            token = Array_Token_get(tokens, i)
+            token = MSet_Token_get(tokens, i)
             print(f"[🐍] {token}")
         if msg is not None:
             print(f"[🐍] Msg: {msg}")
