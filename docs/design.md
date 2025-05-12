@@ -105,6 +105,23 @@ The implemented architecture taking inspiration from the Basilisk pattern:
 
 ![refined architecture](./diagrams/architecture-refined-1.svg)
 
+- for targeting native platform, [Scala Native](https://scala-native.org/en/stable/) is used.
+
+  - ahead of time compiler + runtime;
+  - it provides scala bindings for C programming constructs, standard library and a core subset of POSIX libraries, making it interoperable with C code;
+  - leveraging sbt [cross-project plugin](https://github.com/portable-scala/sbt-crossproject) it is possible to compile for native platform and generate shared / static libraries;
+  - ! scala native do not generate header files for the C code (differently from Kotlin Native)
+    - A library that can help generating bindings for C libraries is [Scala Native Bindgen](https://sn-bindgen.indoorvivants.com) even if in our case we don't have an external C library to bind to but we want to expose a C API for our scala code
+  - ! still not mature. some limitations exists (see [limitations below](#limitations))
+
+- Python use FFI libraries to interact with Native code:
+
+  - `cffi` support [pyhton code embedding](https://cffi.readthedocs.io/en/stable/embedding.html)
+  - `swig` support different languages
+  - how to generate it?
+
+- for Js platform, [Scala.js](https://www.scala-js.org/) is used.
+
 ![refined architecture details](./diagrams/architecture-refined-2.svg)
 
 <!--
@@ -155,37 +172,45 @@ Limitations mostly occur when using Scala Native, which is less mature than Scal
 override type IFunction1[T1, R] = T1 => R
 ```
 
+### Capabilities
+
+One important aspect is how to make the Native API generic:
+
+- for generic types opaque pointers are used;
+- the scala code only knows the generic type is a pointer to an opaque structure, hence it can only pass it around without knowing its internals, while the C code knows the actual implementation of the structure and can properly interact with it
+- _side effect_: all the operations that need to work on the internals of the generic types must be implemented in C and make them available to the scala code
+  - this is also necessary, for example, to implement the distribution layer for (un)marshalling the data structures
+  - callbacks, reified in Scala as Type Tags or capabilities
+
+Goal: avoid creating ugly APIs passing _strategies_ like this:
+
+```scala
+    def simulation[Token](
+        rules: ISeq[Rule[Token]],
+        initialState: State[Token],
+        neighborhood: ISeq[Neighbor],
+        serializer: IFunction1[Token, IString], // <- strategy
+        deserializer: IFunction1[IString, Token], // <- strategy
+        equalizer: IFunction2[Token, Token, Boolean], // <- strategy
+    ): DASPSimulation[Token]
+```
+
+And, instead, replace them with standard-multiple-platoforms serialization libraries.
+
+|               | Protocol Buffers                    | Apache Thrift          | Avro                                  |
+| ------------- | ----------------------------------- | ---------------------- | ------------------------------------- |
+| Binary format | Yes                                 | Yes                    | Yes + json                            |
+| Generate code | C(++), Java, Python, Dart, Go, Ruby | + Js, Erlang, PHP, ... | Yes but for dynamic PL can be avoided |
+
 <!--
 
 ### 1 + 2) Multi-platform and native interoperable layer
-
-Key points:
-
-- for targeting native platform, [Scala Native](https://scala-native.org/en/stable/) is used.
-
-  - it provides scala bindings for C programming constructs, standard library and a core subset of POSIX libraries, making it interoperable with C code
-  - leveraging sbt [cross-project plugin](https://github.com/portable-scala/sbt-crossproject) it is possible to compile for native platform and generate shared / static libraries
-  - ! scala native do not generate header files for the C code (differently from Kotlin Native)
-    - A library that can help generating bindings for C libraries is [Scala Native Bindgen](https://sn-bindgen.indoorvivants.com) even if in our case we don't have an external C library to bind to but we want to expose a C API for our scala code
-  - ! still not mature
 
 - the data structures and methods that are part of the public API have been re-written using C programming constructs (e.g. `struct` and prototypes) so that from C it is possible to properly interact with them $\Rightarrow$ this incarnates the _native interoperability protocol_ [^2]
 
   - scala shared data structures are converted in their C counterparts back and forth using appropriate conversion methods
   - the C prototypes are implemented in scala native and linked to the C code during the compilation phase (through `@exported` methods in scala native)
   - _transpilation infrastructure_ will be in charge of generating this
-
-- one important aspect is how to make the C API generic:
-
-  - for generic types opaque pointers are used.
-  - the scala code only knows the generic type is a pointer to an opaque structure, hence it can only pass it around without knowing its internals, while the C code knows the actual implementation of the structure and can properly interact with it
-  - _side effect_: all the operations that need to work on the internals of the generic types must be implemented in C and make them available to the scala code
-    - this is also necessary, for example, to implement the distribution layer for (un)marshalling the data structures
-    - callbacks, reified in Scala as Type Tags or capabilities
-
-- Python examples uses [`cffi`](https://cffi.readthedocs.io/en) to interact with the C API
-  - `cffi` support [pyhton code embedding](https://cffi.readthedocs.io/en/stable/embedding.html)
-  - `swig` support different languages
 
 Open questions:
 
