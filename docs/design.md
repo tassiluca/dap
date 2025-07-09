@@ -172,7 +172,7 @@ Limitations mostly occur when using Scala Native, which is less mature than Scal
 override type IFunction1[T1, R] = T1 => R
 ```
 
-### Capabilities
+### Genericity + strategies
 
 One important aspect is how to make the Native API generic:
 
@@ -201,6 +201,34 @@ And, instead, replace them with standard-multiple-platoforms serialization libra
 | ------------- | ----------------------------------- | ---------------------- | ------------------------------------- |
 | Binary format | Yes                                 | Yes                    | Yes + json                            |
 | Generate code | C(++), Java, Python, Dart, Go, Ruby | + Js, Erlang, PHP, ... | Yes but for dynamic PL can be avoided |
+
+![serialization libraries](./diagrams/serialization.svg)
+
+## Scafi 3
+
+- unlike Scala, where the syntaxes are automatically synthesized by the compiler using implicit parameters, in JavaScript, to avoid having to pass the language as the first argument every time (as required by the underlying library implementation), an object-oriented (OO) style has been adopted.
+
+  ```scala
+  type Lang = AggregateFoundation & ExchangeSyntax & FieldBasedSharedData { type DeviceId = Int }
+  def aggregateProgram(using Lang) =
+    exchange(localId)(returnSending)
+  ```
+
+  on JS becomes:
+
+  ```javascript
+  function aggregateProgram(lang) {
+    lang.exchange(lang.Field.of(lang.localId), (n) => returnSending(n));
+  }
+  ```
+
+- In one of the next steps I will investigate the possibility to automatically generate the idiomatic libraries for the Scala API, like [this one](https://github.com/scafi/scafi3/blob/master/scafi-core/src/main/scala/it/unibo/scafi/libraries/ExchangeCalculusLibrary.scala), starting from the corresponding Portable ones. This would minimise the duplication of code that is now present;
+  - the trait-based libraries are very similar to the Scala-idiomatic libraries, that are simply objects to which having a `using` clause of the `Language` type, which delegates the actual logic.
+  - using macros...
+
+for the moment I left out the fact that the Fields have an Applicative given instance.
+
+![scafi-3-mp-api](./diagrams/scafi-3-mp-api.svg)
 
 <!--
 

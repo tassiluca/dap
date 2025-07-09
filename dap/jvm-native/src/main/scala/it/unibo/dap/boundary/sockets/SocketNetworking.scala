@@ -37,7 +37,7 @@ trait SocketNetworking[T: Serializable](using ExecutionContext) extends Networki
               onReceive(message)
           client.close()
         .recover { case e: Exception => scribe.error(e); if !client.isClosed then client.close() }
-        override def isOpen: Boolean = socketServer.isClosed
+        override def isOpen: Boolean = !socketServer.isClosed
         override def close(): Unit = socketServer.close()
     yield connListener
 end SocketNetworking
