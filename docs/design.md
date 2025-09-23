@@ -149,28 +149,118 @@ Limitations mostly occur when using Scala Native, which is less mature than Scal
 - `@exported` can only be used on `native` and not in `shared` code;
 - C interop doesn't allow to export classes and structs cannot be passed directly to C functions (a pointer to the struct must be passed instead);
   - https://github.com/scala-native/scala-native/issues/897
-- functions needs to be `inline`d becuase of compiler needs to generate type information at compile time (`Tag` type class);
+- functions needs to be `inline`d becuase of compiler needs to generate type information at compile time (`Tag` type class):
+
+  ```scala
+  /* Currently, it is not possible to use `CFuncPtrN` as reification of agnostic function types
+  * because, since the C types are not automatically generated from the agnostic types,
+  * when we need to convert a Scala function using an agnostic type back to a C function
+  * we would need to perform a conversion of the input argument like this:
+  *
+  * {{
+  *    val updateFn: CFuncPtr1[Ptr[CState], Unit] = ??? // some C callback provided by the C client
+  *    val f = CFuncPtr1.fromScalaFunction[State[CToken], Unit]: s =>
+  *      updateFn(s /* using Conversion[State[CToken], Ptr[CState]] */)))
+  *              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  *    Closing over local state of parameter updateFn in function transformed to CFuncPtr
+  *    results in undefined behaviour
+  * }}
+  *
+  * But this is actually forbidden! When Scala Native allows to support automatic conversion
+  * of agnostic types to C types, we should be able to use `CFuncPtrN`.
+  */
+  override type IFunction1[T1, R] = T1 => R
+  ```
+
+#### Scala Native generics: how they are handled?
+
+With generics
 
 ```scala
-/* Currently, it is not possible to use `CFuncPtrN` as reification of agnostic function types
-* because, since the C types are not automatically generated from the agnostic types,
-* when we need to convert a Scala function using an agnostic type back to a C function
-* we would need to perform a conversion of the input argument like this:
-*
-* {{
-*    val updateFn: CFuncPtr1[Ptr[CState], Unit] = ??? // some C callback provided by the C client
-*    val f = CFuncPtr1.fromScalaFunction[State[CToken], Unit]: s =>
-*      updateFn(s /* using Conversion[State[CToken], Ptr[CState]] */)))
-*              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*    Closing over local state of parameter updateFn in function transformed to CFuncPtr
-*    results in undefined behaviour
-* }}
-*
-* But this is actually forbidden! When Scala Native allows to support automatic conversion
-* of agnostic types to C types, we should be able to use `CFuncPtrN`.
-*/
-override type IFunction1[T1, R] = T1 => R
+object Api {
+
+  @exported("fancy_function")
+  def fancyFunction[T, R](x: T, y: R): Int =
+    42
+
+}
 ```
+
+the llvm IR is:
+
+```llvm
+define i32 @"fancy_function"(ptr %_1, ptr %_2) noinline personality ptr @scalanative_personality {
+_3000000.0:
+  %_3000002 = call i32 @"_SM4Api$D13fancyFunctionL16java.lang.ObjectL16java.lang.ObjectiEO"(
+    ptr nonnull dereferenceable(8) @"_SM4Api$G8instance",
+    ptr dereferenceable_or_null(8) %_1,
+    ptr dereferenceable_or_null(8) %_2
+  )
+  ret i32 %_3000002
+}
+
+define i32 @"_SM4Api$D13fancyFunctionL16java.lang.ObjectL16java.lang.ObjectiEO"(
+  ptr %_1,
+  ptr %_2,
+  ptr %_3
+) personality ptr @scalanative_personality {
+_4000000.0:
+  ret i32 42
+}
+```
+
+- Symbol name: fancy_function — exactly what you wrote in `@exported("fancy_function")`, so this is the ABI-visible function that a C caller would see.
+- Parameters: two ptrs (i.e. i8\* in LLVM-speak, untyped pointers). This confirms that generic type parameters are erased at this level — the arguments are boxed Scala objects.
+- Body: simply forwards to the Scala-implemented function `_SM4Api$D13fancyFunction`... (the "real" method) after passing the object singleton reference (@"\_SM4Api$G8instance").
+
+Important:
+
+- With generic (erased) parameters the exported wrapper simply forwards the incoming ptr arguments to the Scala method implementation (which expects `java.lang.Object` references). No conversion is done in the wrapper.
+- The incoming arguments `%_1` and `%_2` are passed unchanged into the Scala method implementation.
+- The callee method's signature encodes `java.lang.Object` for both args (erasure).
+- LLVM types are ptr and the attributes `dereferenceable_or_null(8)` reflect an 8-byte pointer-sized reference (typical object reference size).
+
+With `void*` (i.e. `Ptr[CVoid]`):
+
+```scala
+object Api {
+
+  @exported("fancy_function")
+  def fancyFunction(x: CVoidPtr, y: CVoidPtr): Int =
+    42
+
+}
+```
+
+is compiled to llvm IR:
+
+```llvm
+define i32 @"fancy_function"(ptr %_1, ptr %_2) noinline personality ptr @scalanative_personality {
+_3000000.0:
+  %_3000004 = call dereferenceable_or_null(16) ptr @"_SM32scala.scalanative.runtime.Boxes$D8boxToPtrR_L28scala.scalanative.unsafe.PtrEO"(ptr null, ptr %_1)
+  %_3000005 = call dereferenceable_or_null(16) ptr @"_SM32scala.scalanative.runtime.Boxes$D8boxToPtrR_L28scala.scalanative.unsafe.PtrEO"(ptr null, ptr %_2)
+
+  %_3000006 = call i32 @"_SM4Api$D13fancyFunctionL28scala.scalanative.unsafe.PtrL28scala.scalanative.unsafe.PtriEO"(
+    ptr nonnull dereferenceable(8) @"_SM4Api$G8instance",
+    ptr dereferenceable_or_null(16) %_3000004,
+    ptr dereferenceable_or_null(16) %_3000005
+  )
+  ret i32 %_3000006
+}
+
+define i32 @"_SM4Api$D13fancyFunctionL28scala.scalanative.unsafe.PtrL28scala.scalanative.unsafe.PtriEO"(
+  ptr %_1,
+  ptr %_2,
+  ptr %_3
+) personality ptr @scalanative_personality {
+_4000000.0:
+  ret i32 42
+}
+```
+
+Important:
+
+- With `CVoidPtr` (Scala Native Ptr-style type) the exported wrapper calls runtime boxing functions (`boxToPtrR`) to convert the raw incoming pointer into the Scala runtime representation of a `Ptr`, then calls the implementation (which expects those boxed `Ptr` objects).
 
 ### Genericity + strategies
 
@@ -185,14 +275,14 @@ One important aspect is how to make the Native API generic:
 Goal: avoid creating ugly APIs passing _strategies_ like this:
 
 ```scala
-    def simulation[Token](
-        rules: ISeq[Rule[Token]],
-        initialState: State[Token],
-        neighborhood: ISeq[Neighbor],
-        serializer: IFunction1[Token, IString], // <- strategy
-        deserializer: IFunction1[IString, Token], // <- strategy
-        equalizer: IFunction2[Token, Token, Boolean], // <- strategy
-    ): DASPSimulation[Token]
+def simulation[Token](
+    rules: ISeq[Rule[Token]],
+    initialState: State[Token],
+    neighborhood: ISeq[Neighbor],
+    serializer: IFunction1[Token, IString], // <- strategy
+    deserializer: IFunction1[IString, Token], // <- strategy
+    equalizer: IFunction2[Token, Token, Boolean], // <- strategy
+): DASPSimulation[Token]
 ```
 
 And, instead, replace them with standard-multiple-platoforms serialization libraries.
