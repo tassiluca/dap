@@ -6,4 +6,4 @@
 
 [plugins]
 c-application = "dev.guillermo.gradle.c-application:0.5.0"
-python-application = "com.pswidersk.python-plugin:2.10.0"
+python-application = "com.pswidersk.python-plugin:3.0.0"
