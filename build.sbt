@@ -5,7 +5,7 @@ import scala.scalanative.build.{ BuildTarget, GC, LTO, Mode }
 import scala.sys.process.Process
 import scala.util.chaining.scalaUtilChainingOps
 
-ThisBuild / scalaVersion := "3.8.0"
+ThisBuild / scalaVersion := "3.8.1"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / scalacOptions ++= Seq(
