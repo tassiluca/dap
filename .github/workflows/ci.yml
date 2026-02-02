@@ -40,7 +40,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: brew install bdw-gc
       - name: Setup sbt launcher
-        uses: sbt/setup-sbt@a627500d27445f8c5021755a439829b6e78e3358 # v1
+        uses: sbt/setup-sbt@ae54f7cfe46ec0d24ade661d77f007360ab48bda # v1
       - name: Build shared library
         run: sbt +test
       - name: QA
@@ -77,6 +77,6 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: brew install bdw-gc
       - name: Setup sbt launcher
-        uses: sbt/setup-sbt@a627500d27445f8c5021755a439829b6e78e3358 # v1
+        uses: sbt/setup-sbt@ae54f7cfe46ec0d24ade661d77f007360ab48bda # v1
       - name: Build native examples
         run: cd dap-native-examples && ./gradlew build
