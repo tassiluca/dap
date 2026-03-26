@@ -35,7 +35,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libgc-dev
       - name: Set up Homebrew
         if: startsWith(matrix.os, 'macos')
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@4ebd32341e5b59ae7e1581111aa99d5d34cef962 # master
       - name: Install Boehm GC on MacOS
         if: startsWith(matrix.os, 'macos')
         run: brew install bdw-gc
@@ -72,7 +72,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libgc-dev
       - name: Set up Homebrew
         if: startsWith(matrix.os, 'macos')
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@4ebd32341e5b59ae7e1581111aa99d5d34cef962 # master
       - name: Install Boehm GC on MacOS
         if: startsWith(matrix.os, 'macos')
         run: brew install bdw-gc
