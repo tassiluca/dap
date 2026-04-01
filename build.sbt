@@ -34,7 +34,7 @@ lazy val dap = crossProject(JVMPlatform, NativePlatform, JSPlatform)
     name := libraryName,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % "3.2.20",
-      "com.outr" %%% "scribe" % "3.18.0",
+      "com.outr" %%% "scribe" % "3.19.0",
       "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided",
     ),
   )
