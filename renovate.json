@@ -11,7 +11,7 @@
     ":separatePatchReleases",
     ":rebaseStalePrs",
     ":enableVulnerabilityAlerts",
-    "npm:unpublishSafe"
+    "security:minimumReleaseAgeNpm"
   ],
   "automerge": true,
   "assignees": [
